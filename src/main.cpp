@@ -32,13 +32,15 @@ void setup(){
 
   com_port_open(); //open the com port
   debug_port_begin(); // open the debug port
-  version_data();
+  delay(5000); // delay for a while to let the debug port initialize and print the version info before starting the main loop.
 
+  version_data();
+  
 }
 
 void loop() {
 
-  DEBUG_PORT.println("Running..."); // print some new lines for better readability of the debug output.
+  //DEBUG_PORT.println("Running..."); // print some new lines for better readability of the debug output.
   
   rx_status = read_data_frame();
   tx_status = send_data_frame();
