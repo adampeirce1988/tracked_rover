@@ -32,15 +32,18 @@
 #define ACK_OUT_OF_RANGE          3
 #define ACK_REQUESTED             4
 #define NACK_REQUESTED            5
-#define DLC_OVER_CAPACITY         6
-#define PAYLOAD_OVERFLOW          7
-#define MSG_TIMEOUT_ERROR         8
-#define ACK_MISSING               9
-#define CRC_ERROR                 10
-#define RECEIVING_DATA           11
-#define NO_DATA_AVAILABLE        12
-#define FRAME_READY              13
-#define DLC_RECEIVED             14
+#define NORMAL_FRAME_RECEIVED     6
+#define ID_RECEIVED               7
+#define DLC_OVER_CAPACITY         8
+#define PAYLOAD_OVERFLOW          9
+#define PAYLOAD_COMPLETE          10
+#define MSG_TIMEOUT_ERROR         11
+#define ACK_MISSING               12
+#define CRC_ERROR                 13
+#define RECEIVING_DATA            14
+#define NO_DATA_AVAILABLE         15
+#define FRAME_READY               16
+#define DLC_RECEIVED              17
 
 // ================= TX RETURN CODES =================
 #define TX_IDLE_STATE      0
@@ -49,6 +52,7 @@
 #define RESENDING_MSG      3
 #define TX_SUCCESS         5
 #define TX_ERROR           6
+
 
 // ================= STRUCT =================
 struct frame {
