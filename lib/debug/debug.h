@@ -77,6 +77,32 @@ extern void debug_port_begin();
       DEBUG_PORT.println(frame.CRC, HEX);\
     }\
   } while (0)
+
+  #define DEBUG_PRINT_DATA_PTR_FRAME(file, level, frame_type, start_byte, frame_name, frame)\
+  do{\
+    if((DEBUG_FILE_MASK & (file)) &&  (DEBUG_LEVEL_MASK & (level)) && (DEBUG_FRAME_MASK & (frame_type))) {\
+      PRINT_RUNTIME(millis());\
+      PRINT_FILE_NAME(file);\
+      PRINT_LEVEL(level);\
+      DEBUG_PORT.print(frame_name);\
+      DEBUG_PORT.print("]");\
+      DEBUG_PORT.print(start_byte, HEX);\
+      DEBUG_PORT.print(", ");\
+      DEBUG_PORT.print(frame->TYPE, HEX);\
+      DEBUG_PORT.print(", ");\
+      DEBUG_PORT.print(frame->ACK, HEX);\
+      DEBUG_PORT.print(", ");\
+      DEBUG_PORT.print(frame->ID, HEX);\
+      DEBUG_PORT.print(", ");\
+      DEBUG_PORT.print(frame->DLC, HEX);\
+      DEBUG_PORT.print(", ");\
+      for(uint8_t i = 0; i < frame->DLC; i ++){\
+        DEBUG_PORT.print(frame->payload[i], HEX);\
+        DEBUG_PORT.print(", ");\
+      }\
+      DEBUG_PORT.println(frame->CRC, HEX);\
+    }\
+  } while (0)
  
 
 #define DEBUG_STREAM_START(file, level, msg, byte)\

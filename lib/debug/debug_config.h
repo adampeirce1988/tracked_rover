@@ -36,5 +36,6 @@
 #define RX_FRAME        (1UL << 1)
 #define ACK_FRAME       (1UL << 2)
 #define TX_PACK_MSG     (1UL << 3)
+#define TX_ACK_MSG      (1UL << 4)
 
 #endif // DEBUG_CONFIG_H

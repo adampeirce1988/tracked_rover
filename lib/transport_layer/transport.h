@@ -1,23 +1,16 @@
-#ifndef TRANSPORT_LAYER_H
-#define TRANSPORT_LAYER_H
+#ifndef TRANSPORT_H
+#define TRANSPORT_H
 
 #include <Arduino.h>
 #include <stdint.h>
 
 // ================= CONFIG =================
 #define START_BYTE        0xFF
-#define WDT_TIMEOUT_MS    4
+#define WDT_TIMEOUT_MS    10
 #define MAX_PAYLOAD_LEN   6
 #define PACKET_INCREMENT  1
 #define TX_MAX_RETRIES    3
-#define ACK_WDT           10
-
-// // move the to global config file later
-// #define SERIAL_0_BAUD     115200
-// #define SERIAL_1_BAUD     115200
-
-// #define DEBUG_PORT        Serial
-// #define COMS_PORT         Serial1
+#define ACK_WDT           25
 
 // ================= ACK TYPES =================
 #define NORMAL_FRAME      0x00
@@ -28,30 +21,34 @@
 // ================= RX RETURN CODES =================
 #define NO_ERROR                  0
 #define START_RECEIVED            1
-#define INVALID_TYPE              2
-#define ACK_OUT_OF_RANGE          3
-#define ACK_REQUESTED             4
-#define NACK_REQUESTED            5
-#define NORMAL_FRAME_RECEIVED     6
-#define ID_RECEIVED               7
-#define DLC_OVER_CAPACITY         8
-#define PAYLOAD_OVERFLOW          9
-#define PAYLOAD_COMPLETE          10
-#define MSG_TIMEOUT_ERROR         11
-#define ACK_MISSING               12
-#define CRC_ERROR                 13
-#define RECEIVING_DATA            14
-#define NO_DATA_AVAILABLE         15
-#define FRAME_READY               16
-#define DLC_RECEIVED              17
+#define WAITING_FOR_START         2
+#define INVALID_TYPE              3
+#define ACK_OUT_OF_RANGE          4
+#define ACK_REQUESTED             5
+#define NACK_REQUESTED            6
+#define NORMAL_FRAME_RECEIVED     7
+#define ID_RECEIVED               8
+#define DLC_OVER_CAPACITY         9
+#define PAYLOAD_OVERFLOW          10
+#define PAYLOAD_COMPLETE          11
+#define MSG_TIMEOUT_ERROR         12
+#define ACK_MISSING               13
+#define CRC_ERROR                 14
+#define RECEIVING_DATA            15
+#define NO_DATA_AVAILABLE         16
+#define FRAME_READY               17
+#define DLC_RECEIVED              18
 
 // ================= TX RETURN CODES =================
-#define TX_IDLE_STATE      0
-#define TRANSMITTING       1
-#define AWAITING_ACK       2
-#define RESENDING_MSG      3
-#define TX_SUCCESS         5
-#define TX_ERROR           6
+#define TX_IDLE_STATE             0
+#define TRANSMITTING              1
+#define AWAITING_ACK              2
+#define TYPE_MISMATCH             3
+#define ACK_WDT_TIMEOUT           4
+#define TX_RETRIES_FAILED         5
+#define RESENDING_MSG             6
+#define TX_SUCCESS                7
+#define TX_ERROR                  8
 
 
 // ================= STRUCT =================
@@ -66,9 +63,8 @@ struct frame {
 
 // ================= API =================
 void send_packet(uint8_t type, uint8_t ack, uint8_t dlc, uint8_t *data);
-bool get_received_frame(struct frame *out);
+void get_received_frame(struct frame *out);
 void com_port_open();
-void debug_port_open();
 uint8_t read_data_frame();
 uint8_t send_data_frame();
 void print_frame(struct frame *f);
