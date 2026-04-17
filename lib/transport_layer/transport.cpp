@@ -1,7 +1,15 @@
+
+//////////////////////////////////////////////////////////////////////////////
+//-------------------- BRANCH -self test implimnetation --------------------//
+//////////////////////////////////////////////////////////////////////////////
+
 #include "transport.h"
+#include "transport_uart.h"
+#include "transport_fifo.h"
 #include "global_config.h"
 #include "debug.h"
 #include "debug_config.h"
+
 
 
 // defines the name od the debug macro for this file
@@ -12,7 +20,6 @@
 
 
 // ===== PRIVATE PROTOTYPES =====
-// BUILT IN SELF TEST BRANCH
 static void copy_data_frame(struct frame *source, struct frame *destination);
 static uint8_t inline_crc_calc(uint8_t CRC, uint8_t byte);
 static bool msg_wdt_check();
@@ -34,7 +41,6 @@ uint32_t tx_timestamp = 0;
 uint8_t tx_retries = 0;
 bool send_ack_flag = false;
 uint8_t packet_id = 0x00; 
-
 
 
  enum TX_STATE{
@@ -60,6 +66,17 @@ struct frame rx_frame;   // frame for receiving data
 struct frame tx_frame;   // frame for transmitting data
 struct frame ack_tx_frame;  // frame for transmitting ack
 struct frame ack_rx_frame;  // frame for receiving ack
+
+Transport_IO *current_transport = NULL; // communication port struct defined in transport.h and initialized in main.cpp
+
+bool transport_set(Transport_IO *io){
+  if(io == NULL){
+    DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "PORT", "Invalid transport IO provided. Transport IO: NULL.");
+    return false; 
+  }
+  current_transport = io;
+  return true;
+}
 
 static void copy_data_frame(struct frame *source, struct frame *destination){
   destination->TYPE = source->TYPE;
@@ -131,17 +148,17 @@ void reset_tx_values(){
 
 static void transmit_packet(struct frame *f){
   
-  COMS_PORT.write(START_BYTE); 
-  COMS_PORT.write(f->TYPE);
-  COMS_PORT.write(f->ACK);
-  COMS_PORT.write(f->ID);
-  COMS_PORT.write(f->DLC);
+  current_transport->write(START_BYTE); 
+  current_transport->write(f->TYPE);
+  current_transport->write(f->ACK);
+  current_transport->write(f->ID);
+  current_transport->write(f->DLC);
 
   for(uint8_t i = 0; i < f->DLC; i++){
-    COMS_PORT.write(f->payload[i]);
+    current_transport->write(f->payload[i]);
   }
 
-  COMS_PORT.write(f->CRC);
+  current_transport->write(f->CRC);
 }
 
 void send_packet(uint8_t type, uint8_t ack, uint8_t dlc, uint8_t *data){
@@ -220,11 +237,11 @@ void get_received_frame(struct frame *out){
   *out = rx_frame;
   DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "MSG", "receive frame returned to protocal layer");
 }
-
-void com_port_open(){
-  COMS_PORT.begin(COMS_PORT_BAUD); 
-  DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "PORT", "communication port stated at: ", COMS_PORT_BAUD);
-}
+// moved to uart_begin as this will not work with fifo unit
+// void com_port_open(){
+//   current_transport->begin(COMS_PORT_BAUD); 
+//   DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "PORT", "communication port stated at: ", COMS_PORT_BAUD);
+// }
 
 
 ///////////////// RECEIVE DATA FRAME ////////////////////
@@ -383,9 +400,10 @@ uint8_t send_data_frame(){
     case TX_IDLE:
     return TX_IDLE_STATE;
     break; 
+    
 
     case TX_SENDING: 
-    
+    {
       // select which frame will be trnasmitte
       struct frame *active = send_ack_flag ? &ack_tx_frame : &tx_frame;
 
@@ -400,7 +418,9 @@ uint8_t send_data_frame(){
           tx_state = TX_STATE_SUCCESS;
       }
       return TRANSMITTING;
+    }
     break; 
+    
 
     case TX_AWAITING_ACK:
       if(ack_received == true){
@@ -431,6 +451,7 @@ uint8_t send_data_frame(){
       }
       return AWAITING_ACK;
     break;
+    
 
     case TX_RETRY: 
       DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_DEBUG, "TX_RETRY", "Attempting to resend message.");
@@ -439,7 +460,7 @@ uint8_t send_data_frame(){
       tx_timestamp = millis();
       tx_state = TX_AWAITING_ACK; 
       return RESENDING_MSG;
-    break; 
+    break;
 
     case TX_STATE_SUCCESS:
       DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "TX", "TX transmission successful.");
@@ -450,6 +471,7 @@ uint8_t send_data_frame(){
       tx_state = TX_IDLE;
       return TX_SUCCESS;
     break;
+    
 
     case TX_FAILED:
       // HAndle error reporting / logging here before returniing the state. loging to be handles with debug functiond and passes to a writing buffer.
@@ -460,7 +482,8 @@ uint8_t send_data_frame(){
       reset_tx_values(); // reset all values to defualt and flush the tx and ack frames.
       tx_state = TX_IDLE;
       return TX_ERROR;
-    break; 
+    break;
+      
   };
   return TX_IDLE_STATE; // default return value should never be reached.
 }

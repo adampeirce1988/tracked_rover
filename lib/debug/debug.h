@@ -155,22 +155,23 @@ extern void debug_port_begin();
 
 #define PRINT_FILE_NAME(file_name)\
   do{\
-    if((file_name) & DBG_MEGA_MAIN)       {DEBUG_PORT.print("[MEGA]");}\
-    else if ((file_name) & DBG_ESP_MAIN)  {DEBUG_PORT.print("[ESP]");}\
-    else if ((file_name) & DBG_TRANSPORT) {DEBUG_PORT.print("[TRAN]");}\
-    else if ((file_name) & DBG_PROTOCOL)  {DEBUG_PORT.print("[PROT]");}\
-    else if ((file_name) & DBG_ESP_OTA)  {DEBUG_PORT.print("[OTA]");}\
+    if((file_name) & DBG_MEGA_MAIN)             {DEBUG_PORT.print("[MEGA]");}\
+    else if ((file_name) & DBG_ESP_MAIN)        {DEBUG_PORT.print("[ESP]");}\
+    else if ((file_name) & DBG_TRANSPORT)       {DEBUG_PORT.print("[TRAN]");}\
+    else if ((file_name) & DBG_PROTOCOL)        {DEBUG_PORT.print("[PROT]");}\
+    else if ((file_name) & DBG_ESP_OTA)         {DEBUG_PORT.print("[OTA]");}\
+    else if ((file_name) & DBG_TRANSPORT_UART)  {DEBUG_PORT.print("[UART]");}\
     else{DEBUG_PORT.print("[----]");}\
   } while(0)
 
-#define PRINT_LEVEL(dbg_level) \
+#define PRINT_LEVEL(dbg_level)\
   do{\
-    if((dbg_level) & DEBUG_ERROR)          {DEBUG_PORT.print("[MSG]");}\
-    else if((dbg_level) & DEBUG_WARN)      {DEBUG_PORT.print("[STREAM]");}\
-    else if((dbg_level) & DEBUG_INFO)      {DEBUG_PORT.print("[ERROR]");}\
-    else if((dbg_level) & DEBUG_DEBUG)     {DEBUG_PORT.print("[WARN]");}\
-    else if((dbg_level) & DEBUG_MSG)       {DEBUG_PORT.print("[INFO]");}\
-    else if ((dbg_level) & DEBUG_NONE)     {DEBUG_PORT.print("[DEBUG]");}\
+    if((dbg_level) & DEBUG_ERROR)          {DEBUG_PORT.print("[ERROR]");}\
+    else if((dbg_level) & DEBUG_WARN)      {DEBUG_PORT.print("[WARN]");}\
+    else if((dbg_level) & DEBUG_INFO)      {DEBUG_PORT.print("[INFO]");}\
+    else if((dbg_level) & DEBUG_DEBUG)     {DEBUG_PORT.print("[DEBUG]");}\
+    else if((dbg_level) & DEBUG_MSG)       {DEBUG_PORT.print("[MSG]");}\
+    else if ((dbg_level) & DEBUG_NONE)     {DEBUG_PORT.print("[NONE]");}\
     else{DEBUG_PORT.print("[----]");}\
   } while(0)
 

@@ -1,3 +1,8 @@
+//////////////////////////////////////////////////////////////////////////////
+//-------------------- BRANCH -self test implimnetation --------------------//
+//////////////////////////////////////////////////////////////////////////////
+
+
 #ifndef TRANSPORT_H
 #define TRANSPORT_H
 
@@ -5,18 +10,21 @@
 #include <stdint.h>
 
 // ================= CONFIG =================
-#define START_BYTE        0xFF
-#define WDT_TIMEOUT_MS    10
-#define MAX_PAYLOAD_LEN   6
-#define PACKET_INCREMENT  1
-#define TX_MAX_RETRIES    3
-#define ACK_WDT           25
+#define START_BYTE                0xFF
+#define WDT_TIMEOUT_MS            10
+#define MAX_PAYLOAD_LEN           6
+#define PACKET_INCREMENT          1
+#define TX_MAX_RETRIES            3
+#define ACK_WDT                   25
+
+// ================= FIFO =================
+
 
 // ================= ACK TYPES =================
-#define NORMAL_FRAME      0x00
-#define ACK_REQUEST       0x01
-#define ACK_RESPONSE      0x02
-#define NACK              0x03
+#define NORMAL_FRAME              0x00
+#define ACK_REQUEST               0x01
+#define ACK_RESPONSE              0x02
+#define NACK                      0x03
 
 // ================= RX RETURN CODES =================
 #define NO_ERROR                  0
@@ -52,6 +60,8 @@
 
 
 // ================= STRUCT =================
+
+//data frame structure
 struct frame {
   uint8_t TYPE;
   uint8_t ACK;
@@ -61,9 +71,24 @@ struct frame {
   uint8_t CRC;
 };
 
-// ================= API =================
-void send_packet(uint8_t type, uint8_t ack, uint8_t dlc, uint8_t *data);
-void get_received_frame(struct frame *out);
+// port structure
+struct Transport_IO {
+  void (*write)( uint8_t );
+  uint8_t (*available)();
+  uint8_t (*read)();
+  void (*begin)(uint32_t);
+};
+
+// ================= API function calls =================
+
+// transport_uart function calls
+void uart_begin(uint32_t baud_rate); 
+void fifo_begin(uint32_t baud_rate);
+
+//transport function calls 
+bool transport_set(Transport_IO *io);
+void transport_send_packet(uint8_t type, uint8_t ack, uint8_t dlc, uint8_t *data);
+void transport_get_frame(struct frame *out);
 void com_port_open();
 uint8_t read_data_frame();
 uint8_t send_data_frame();

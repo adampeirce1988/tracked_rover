@@ -30,42 +30,43 @@ void version_data();
 
 void setup(){
 
-  com_port_open(); //open the com port
   debug_port_begin(); // open the debug port
+  
   delay(5000); // delay for a while to let the debug port initialize and print the version info before starting the main loop.
-
+  //uart_begin(COMS_PORT_BAUD); // open the uart port for communication with the other board.
+  fifo_begin(COMS_PORT_BAUD);
   version_data();
   
 }
 
 void loop() {
 
-  //DEBUG_PORT.println("Running..."); // print some new lines for better readability of the debug output.
+  // //DEBUG_PORT.println("Running..."); // print some new lines for better readability of the debug output.
   
-  rx_status = read_data_frame();
-  tx_status = send_data_frame();
+  // rx_status = read_data_frame();
+  // tx_status = send_data_frame();
 
-  // Serial.println(tx_status);
+  // // Serial.println(tx_status);
   
 
-  if(rand_data == true){
-    // get random data for testing
-    for(int i = 0; i < dlc; i++){
-      data[i] =random(0,255);
-    }
-  }
+  // if(rand_data == true){
+  //   // get random data for testing
+  //   for(int i = 0; i < dlc; i++){
+  //     data[i] =random(0,255);
+  //   }
+  // }
 
-  //check for frame ready
-  if(rx_status == FRAME_READY){
-    get_received_frame(&protocol_frame);
-  }
+  // //check for frame ready
+  // if(rx_status == FRAME_READY){
+  //   get_received_frame(&protocol_frame);
+  // }
   
-  if(tx_status == 5){
-    delay(PACKET_DELAY);
-  }
-  if(tx_status == TX_IDLE_STATE){
-    send_packet(type, ack, dlc, data);
-  }
+  // if(tx_status == 5){
+  //   delay(PACKET_DELAY);
+  // }
+  // if(tx_status == TX_IDLE_STATE){
+  //   send_packet(type, ack, dlc, data);
+  // }
 
 }
 
