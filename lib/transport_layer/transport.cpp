@@ -12,6 +12,7 @@
 
 
 // ===== PRIVATE PROTOTYPES =====
+// BUILT IN SELF TEST BRANCH
 static void copy_data_frame(struct frame *source, struct frame *destination);
 static uint8_t inline_crc_calc(uint8_t CRC, uint8_t byte);
 static bool msg_wdt_check();
