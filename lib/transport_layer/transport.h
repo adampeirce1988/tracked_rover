@@ -1,8 +1,3 @@
-//////////////////////////////////////////////////////////////////////////////
-//-------------------- BRANCH -self test implimnetation --------------------//
-//////////////////////////////////////////////////////////////////////////////
-
-
 #ifndef TRANSPORT_H
 #define TRANSPORT_H
 
@@ -81,11 +76,11 @@ struct Transport_IO {
 
 // ================= API function calls =================
 
-// transport_uart function calls
-void uart_begin(uint32_t baud_rate); 
-void fifo_begin(uint32_t baud_rate);
+// franinstine debug 
+uint8_t get_ava();
 
 //transport function calls 
+void coms_port_begin(uint32_t baud_rate);
 bool transport_set(Transport_IO *io);
 void transport_send_packet(uint8_t type, uint8_t ack, uint8_t dlc, uint8_t *data);
 void transport_get_frame(struct frame *out);

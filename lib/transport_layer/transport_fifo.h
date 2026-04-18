@@ -11,13 +11,8 @@
 void fifo_write(uint8_t byte);
 uint8_t fifo_read();
 uint8_t fifo_available();
+void fifo_begin(uint32_t baud_rate);
 
-//uart struct instance
-Transport_IO fifo_io = {
-    fifo_write,
-    fifo_available,
-    fifo_read,
-    fifo_begin
-};
+extern Transport_IO fifo_io; 
 
 #endif

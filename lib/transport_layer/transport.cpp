@@ -3,6 +3,7 @@
 //-------------------- BRANCH -self test implimnetation --------------------//
 //////////////////////////////////////////////////////////////////////////////
 
+#include <Arduino.h>
 #include "transport.h"
 #include "transport_uart.h"
 #include "transport_fifo.h"
@@ -67,15 +68,25 @@ struct frame tx_frame;   // frame for transmitting data
 struct frame ack_tx_frame;  // frame for transmitting ack
 struct frame ack_rx_frame;  // frame for receiving ack
 
-Transport_IO *current_transport = NULL; // communication port struct defined in transport.h and initialized in main.cpp
+Transport_IO *current_transport = DEFAULT_TRANSPORT; // communication port struct defined in transport.h and initialized in main.cpp
+ 
+// frankenstine debug 
+uint8_t get_ava(){
+   return current_transport->available();
+}  
 
 bool transport_set(Transport_IO *io){
   if(io == NULL){
-    DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "PORT", "Invalid transport IO provided. Transport IO: NULL.");
+    
+    //DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "PORT", "Invalid transport IO provided; current_transport: ", DEFAULT_TRANSPORT);
     return false; 
   }
   current_transport = io;
   return true;
+}
+
+void coms_port_begin(uint32_t baud_rate){
+  current_transport->begin(baud_rate);
 }
 
 static void copy_data_frame(struct frame *source, struct frame *destination){
@@ -161,7 +172,7 @@ static void transmit_packet(struct frame *f){
   current_transport->write(f->CRC);
 }
 
-void send_packet(uint8_t type, uint8_t ack, uint8_t dlc, uint8_t *data){
+void transport_send_packet(uint8_t type, uint8_t ack, uint8_t dlc, uint8_t *data){
 
   ack_received = false; // clear the ack received flag before sending a new message.  
   
@@ -233,7 +244,7 @@ static void pack_ack(uint8_t type, uint8_t id, struct frame *f){
   f->CRC = inline_crc_calc(f->CRC, f->DLC);  
 }
 
-void get_received_frame(struct frame *out){
+void transport_get_frame(struct frame *out){
   *out = rx_frame;
   DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "MSG", "receive frame returned to protocal layer");
 }
@@ -365,7 +376,7 @@ uint8_t read_data_frame(){
           if(rx_frame.ACK == ACK_REQUEST){
             DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "ACK", "responding to ACK request.");
             copy_data_frame(&rx_frame, &ack_tx_frame);
-            send_packet(ack_tx_frame.TYPE, ACK_RESPONSE, ack_tx_frame.DLC, ack_tx_frame.payload); 
+            transport_send_packet(ack_tx_frame.TYPE, ACK_RESPONSE, ack_tx_frame.DLC, ack_tx_frame.payload); 
           }
           else if(rx_frame.ACK == ACK_RESPONSE && rx_frame.ID == tx_frame.ID){
             ack_received = true;

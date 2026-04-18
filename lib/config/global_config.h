@@ -1,6 +1,10 @@
 #ifndef GLOBAL_CONFIG_H
 #define GLOBAL_CONFIG_H
 
+// Ddefault transport type 
+//#define DEFAULT_TRANSPORT &uart_io
+#define DEFAULT_TRANSPORT &fifo_io  // used for simualting a link this will delive the tx to the rx port
+
 // define the target platform here
 #define TARGET_PLATFORM ESP32
 //#define TARGET_PLATFORM MEGA2650

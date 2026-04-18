@@ -7,10 +7,6 @@
 
 #define DEBUG_FILE DBG_ESP_MAIN
 
-#if TARGET_PLATFORM == ESP32
-  // Use the existing Serial1 object from the ESP32 core.
-#endif
-
 // will be removed in after testing.
 #define PACKET_DELAY 500
 
@@ -33,40 +29,43 @@ void setup(){
   debug_port_begin(); // open the debug port
   
   delay(5000); // delay for a while to let the debug port initialize and print the version info before starting the main loop.
-  //uart_begin(COMS_PORT_BAUD); // open the uart port for communication with the other board.
-  fifo_begin(COMS_PORT_BAUD);
+  coms_port_begin(COMS_PORT_BAUD);
   version_data();
   
 }
 
 void loop() {
 
-  // //DEBUG_PORT.println("Running..."); // print some new lines for better readability of the debug output.
   
-  // rx_status = read_data_frame();
-  // tx_status = send_data_frame();
+  rx_status = read_data_frame();
+  tx_status = send_data_frame();
+  
+  delay(1000);
+  DEBUG_PORT.println("");
+  PRINT_RUNTIME(millis());
+  DEBUG_PORT.print(get_ava());
 
-  // // Serial.println(tx_status);
+  Serial.println(tx_status);
   
 
-  // if(rand_data == true){
-  //   // get random data for testing
-  //   for(int i = 0; i < dlc; i++){
-  //     data[i] =random(0,255);
-  //   }
-  // }
+  if(rand_data == true){
+    // get random data for testing
+    for(int i = 0; i < dlc; i++){
+      data[i] =random(0,255);
+    }
+  }
 
-  // //check for frame ready
-  // if(rx_status == FRAME_READY){
-  //   get_received_frame(&protocol_frame);
-  // }
+  //check for frame ready
+  if(rx_status == FRAME_READY){
+    transport_get_frame(&protocol_frame);
+  }
   
-  // if(tx_status == 5){
-  //   delay(PACKET_DELAY);
-  // }
-  // if(tx_status == TX_IDLE_STATE){
-  //   send_packet(type, ack, dlc, data);
-  // }
+  if(tx_status == TX_SUCCESS){
+    delay(PACKET_DELAY);
+  }
+  if(tx_status == TX_IDLE_STATE){
+    //transport_send_packet(type, ack, dlc, data);
+  }
 
 }
 
