@@ -9,6 +9,7 @@
 
 // will be removed in after testing.
 #define PACKET_DELAY 500
+#define MSG_RATE     250
 
 bool rand_data = true;
 
@@ -19,6 +20,7 @@ uint8_t data[6] ={0x04, 0x05, 0x06, 0x07, 0x08, 0x09};
 
 uint8_t tx_status = 0; 
 uint8_t rx_status = 0; 
+uint32_t last_msg = 0; 
 
 struct frame protocol_frame;
 
@@ -40,12 +42,15 @@ void loop() {
   rx_status = read_data_frame();
   tx_status = send_data_frame();
   
-  delay(1000);
-  DEBUG_PORT.println("");
-  PRINT_RUNTIME(millis());
-  DEBUG_PORT.print(get_ava());
 
-  Serial.println(tx_status);
+  //DEBUG_PORT.println("");
+  //PRINT_RUNTIME(millis());
+  //DEBUG_PORT.print(get_ava());
+
+  //Serial.print("tx_status: ");  Serial.println(tx_status);
+  //Serial.print("rx_status: ");  Serial.println(rx_status);
+  //Serial.print("fifo ava: ");  Serial.println(get_ava());
+  
   
 
   if(rand_data == true){
@@ -63,8 +68,11 @@ void loop() {
   if(tx_status == TX_SUCCESS){
     delay(PACKET_DELAY);
   }
-  if(tx_status == TX_IDLE_STATE){
-    //transport_send_packet(type, ack, dlc, data);
+  if(tx_status == TX_IDLE_STATE && (millis() - last_msg) > MSG_RATE){
+    Serial1.print("msg_sent");
+    transport_send_packet(type, ack, dlc, data);
+    last_msg = millis();
+  
   }
 
 }

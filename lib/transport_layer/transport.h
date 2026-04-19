@@ -4,6 +4,9 @@
 #include <Arduino.h>
 #include <stdint.h>
 
+// ================= MACROS =================
+#define FRAME_SIZE(f) (sizeof(struct frame) - MAX_PAYLOAD_LEN + (f).DLC)
+
 // ================= CONFIG =================
 #define START_BYTE                0xFF
 #define WDT_TIMEOUT_MS            10
@@ -41,6 +44,7 @@
 #define NO_DATA_AVAILABLE         16
 #define FRAME_READY               17
 #define DLC_RECEIVED              18
+#define FIFO_DELAY_SUCSESSFUL     19
 
 // ================= TX RETURN CODES =================
 #define TX_IDLE_STATE             0
@@ -52,6 +56,7 @@
 #define RESENDING_MSG             6
 #define TX_SUCCESS                7
 #define TX_ERROR                  8
+#define TX_FIFO_WAIT              9
 
 
 // ================= STRUCT =================

@@ -171,17 +171,21 @@
       else if((dbg_level) & DEBUG_INFO)      {DEBUG_PORT.print("[INFO]");}\
       else if((dbg_level) & DEBUG_DEBUG)     {DEBUG_PORT.print("[DEBUG]");}\
       else if((dbg_level) & DEBUG_MSG)       {DEBUG_PORT.print("[MSG]");}\
+      else if((dbg_level) & DEBUG_STREAM)       {DEBUG_PORT.print("[STREAM]");}\
       else if ((dbg_level) & DEBUG_NONE)     {DEBUG_PORT.print("[NONE]");}\
       else{DEBUG_PORT.print("[----]");}\
     } while(0)
 
-
-    #define DEBUG_PRINT_FIFO_VAR(var1, var2, var3, var4)\
+    // not currnetly used
+    #define DEBUG_PRINT_FIFO_VAR(var1, var2, var3, var4, var5)\
     do{\
       DEBUG_PORT.print(" head: "); DEBUG_PORT.print(var1);\
       DEBUG_PORT.print(", tail: "); DEBUG_PORT.print(var2);\
-      DEBUG_PORT.print(", tx_delay "); DEBUG_PORT.print(var3);\
-      DEBUG_PORT.print(" ,last_rx_read; "); DEBUG_PORT.print(var4);\
-      DEBUG_PORT.print (" , internal_avaliable: ");\
+      DEBUG_PORT.print(", tx_delay: "); DEBUG_PORT.print(var3);\
+      DEBUG_PORT.print(" ,last_rx_read: "); DEBUG_PORT.print(var4);\
+      DEBUG_PORT.print(" ,micros: "); DEBUG_PORT.print(var5);\
+      DEBUG_PORT.print(" ,micros - last_read: "); DEBUG_PORT.print(var4 - var5);\
+      DEBUG_PORT.print(" , internal_avaliable: ");\
     } while(0)
+
 #endif

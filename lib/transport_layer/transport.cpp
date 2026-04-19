@@ -19,6 +19,10 @@
 // macro to calculate the size of an array
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 
+#define TX_TIME (10 *1000000UL) / COMS_PORT_BAUD
+
+#define SIZE_OF_FRAME sizeof(active) - sizeof(active->payload) + active->DLC
+
 
 // ===== PRIVATE PROTOTYPES =====
 static void copy_data_frame(struct frame *source, struct frame *destination);
@@ -45,12 +49,13 @@ uint8_t packet_id = 0x00;
 
 
  enum TX_STATE{
-  TX_IDLE,
-  TX_SENDING,
-  TX_AWAITING_ACK,
-  TX_RETRY,
+  TX_STATE_IDLE,
+  TX_STATE_SENDING,
+  TX_STATE_AWAITING_ACK,
+  TX_STATE_RETRY,
+  TX_STATE_FIFO_DELAY,  // only used during self test 
   TX_STATE_SUCCESS,
-  TX_FAILED // handle errors here log files ect. 
+  TX_STATE_FAILED // handle errors here log files ect. 
  } tx_state; 
 
 enum RX_STATE{
@@ -67,6 +72,7 @@ struct frame rx_frame;   // frame for receiving data
 struct frame tx_frame;   // frame for transmitting data
 struct frame ack_tx_frame;  // frame for transmitting ack
 struct frame ack_rx_frame;  // frame for receiving ack
+struct frame *active;       // active frame for sending data 
 
 Transport_IO *current_transport = DEFAULT_TRANSPORT; // communication port struct defined in transport.h and initialized in main.cpp
  
@@ -74,6 +80,7 @@ Transport_IO *current_transport = DEFAULT_TRANSPORT; // communication port struc
 uint8_t get_ava(){
    return current_transport->available();
 }  
+//////////////////
 
 bool transport_set(Transport_IO *io){
   if(io == NULL){
@@ -180,18 +187,18 @@ void transport_send_packet(uint8_t type, uint8_t ack, uint8_t dlc, uint8_t *data
   if(ack == ACK_RESPONSE){
     pack_ack(type, rx_frame.ID, &ack_tx_frame);
     DEBUG_PRINT_DATA_FRAME(DEBUG_FILE, DEBUG_MSG, TX_ACK_MSG, START_BYTE, "ACK_PAC", ack_tx_frame);
-    tx_state = TX_SENDING;
+    tx_state = TX_STATE_SENDING;
   }
   // send all other frames
   else{
     if(pack_message(type, ack, packet_id, dlc, data, &tx_frame) == false){
       DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "TX", "Failed to pack message. Message not sent.");
-      tx_state = TX_FAILED;
+      tx_state = TX_STATE_FAILED;
       return;
     }
     else{
       DEBUG_PRINT_DATA_FRAME(DEBUG_FILE, DEBUG_MSG, TX_PACK_MSG, START_BYTE, "TX_PAC", tx_frame);
-      tx_state = TX_SENDING;
+      tx_state = TX_STATE_SENDING;
     }
   }
 }
@@ -259,9 +266,9 @@ void transport_get_frame(struct frame *out){
 
 uint8_t read_data_frame(){
 
-  if (COMS_PORT.available() > 0) {
+  if (current_transport->available() > 0) {
     last_read_byte = millis();
-    uint8_t incoming = COMS_PORT.read();
+    uint8_t incoming = current_transport->read();
     
     switch(rx_state){
 
@@ -408,22 +415,25 @@ uint8_t send_data_frame(){
 
   switch(tx_state){
 
-    case TX_IDLE:
+    case TX_STATE_IDLE:
     return TX_IDLE_STATE;
     break; 
     
 
-    case TX_SENDING: 
+    case TX_STATE_SENDING: 
     {
       // select which frame will be trnasmitte
-      struct frame *active = send_ack_flag ? &ack_tx_frame : &tx_frame;
-
+      active = send_ack_flag ? &ack_tx_frame : &tx_frame;
+ 
       transmit_packet(active);
       DEBUG_PRINT_DATA_PTR_FRAME(DEBUG_FILE, DEBUG_MSG, TX_FRAME, START_BYTE, "TX_PTR", active);
-
+      /// this will not function correctly ///
       if(active->ACK == ACK_REQUEST){
         tx_timestamp = millis();
-        tx_state = TX_AWAITING_ACK; 
+        tx_state = TX_STATE_AWAITING_ACK; 
+      }
+      else if(current_transport == &fifo_io){
+        tx_state = TX_STATE_FIFO_DELAY;
       }
       else{
           tx_state = TX_STATE_SUCCESS;
@@ -433,7 +443,7 @@ uint8_t send_data_frame(){
     break; 
     
 
-    case TX_AWAITING_ACK:
+    case TX_STATE_AWAITING_ACK:
       if(ack_received == true){
         DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "ACK",  "ACK received for packet_id: ", tx_frame.ID); 
         if((ack_rx_frame.TYPE == tx_frame.TYPE) && (ack_rx_frame.ID == tx_frame.ID)){
@@ -443,7 +453,7 @@ uint8_t send_data_frame(){
         }
         else{
           DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "ACK", "ACK received but type mismatch. TYPE: ", ack_rx_frame.TYPE);
-          tx_state = TX_FAILED;
+          tx_state = TX_STATE_FAILED;
           return TYPE_MISMATCH;
         }
       }
@@ -452,11 +462,11 @@ uint8_t send_data_frame(){
         DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_DEBUG,"WDT", "ACK_WDT timeed out elapses time: ", millis() - tx_timestamp);
         if(tx_retries < TX_MAX_RETRIES){
           tx_retries ++;
-          tx_state = TX_RETRY;
+          tx_state = TX_STATE_RETRY;
           return ACK_WDT_TIMEOUT;
         }
         else{
-          tx_state = TX_FAILED; 
+          tx_state = TX_STATE_FAILED; 
           return TX_RETRIES_FAILED;
         }
       }
@@ -464,13 +474,21 @@ uint8_t send_data_frame(){
     break;
     
 
-    case TX_RETRY: 
+    case TX_STATE_RETRY: 
       DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_DEBUG, "TX_RETRY", "Attempting to resend message.");
 
       transmit_packet(&tx_frame);
       tx_timestamp = millis();
-      tx_state = TX_AWAITING_ACK; 
+      tx_state = TX_STATE_AWAITING_ACK; 
       return RESENDING_MSG;
+    break;
+
+    case TX_STATE_FIFO_DELAY:
+    if (micros() - SIZE_OF_FRAME > TX_TIME){ // change to dynamcic baud calc 
+      tx_state = TX_STATE_SUCCESS;
+      return FIFO_DELAY_SUCSESSFUL;
+    }
+    
     break;
 
     case TX_STATE_SUCCESS:
@@ -479,19 +497,19 @@ uint8_t send_data_frame(){
       packet_id += PACKET_INCREMENT; // *** chenge to ++ after testing ***
 
       reset_tx_values(); // reset all values to default and flush the tx and ack frames.
-      tx_state = TX_IDLE;
+      tx_state = TX_STATE_IDLE;
       return TX_SUCCESS;
     break;
     
 
-    case TX_FAILED:
+    case TX_STATE_FAILED:
       // HAndle error reporting / logging here before returniing the state. loging to be handles with debug functiond and passes to a writing buffer.
       DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "ACK", "ACK not received. no of retries: ", tx_retries);
 
       packet_id += PACKET_INCREMENT; // *** chenge to ++ after testing ***
 
       reset_tx_values(); // reset all values to defualt and flush the tx and ack frames.
-      tx_state = TX_IDLE;
+      tx_state = TX_STATE_IDLE;
       return TX_ERROR;
     break;
       
