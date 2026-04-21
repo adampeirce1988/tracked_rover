@@ -3,17 +3,17 @@
 
 
 // define the files that you would like to debug here
-  #define DEBUG_FILE_MASK   (DBG_TRANSPORT) // use with arduino uno only
+  #define DEBUG_FILE_MASK   (DBG_ESP_MAIN | DBG_TRANSPORT | DBG_TRANSPORT_FIFO)
 
 // define the levels of debuging required here
-  //#define DEBUG_LEVEL_MASK  (DEBUG_MSG | DEBUG_INFO | DEBUG_ERROR | DEBUG_DEBUG)
+  #define DEBUG_LEVEL_MASK  ( DEBUG_META | DEBUG_ERROR | DEBUG_MSG)
   //#define DEBUG_LEVEL_MASK  (DEBUG_MSG)
-  #define DEBUG_LEVEL_MASK  (DEBUG_STREAM)
+  //#define DEBUG_LEVEL_MASK  (DEBUG_STREAM | DEBUG_INFO | DBG_DEBUG)
   //#define DEBUG_LEVEL_MASK (DEBUG_NONE)  // use with arduino uno only
 
 
 // defines which messages should be printed in full form DEBUG_PRINT_DATA_FRAME()
-  #define DEBUG_FRAME_MASK (TX_FRAME | RX_FRAME | TX_PACK_MSG)
+  #define DEBUG_FRAME_MASK (RETURNED_FRAME | TX_FRAME | RX_FRAME | ACK_FRAME)
 
 //------------ file bit mask ------------//
 #define DBG_TRANSPORT            (1UL << 0)
@@ -28,19 +28,22 @@
 
 //------------ debug level bitmask------------ //
 
-#define DEBUG_NONE    (1UL << 0)
-#define DEBUG_MSG     (1UL << 1)
-#define DEBUG_STREAM  (1UL << 2)
-#define DEBUG_ERROR   (1UL << 3)
-#define DEBUG_WARN    (1UL << 4)
-#define DEBUG_INFO    (1UL << 5)
-#define DEBUG_DEBUG   (1UL << 6)
+#define DEBUG_NONE               (1UL << 0)
+#define DEBUG_META               (1UL << 1)
+#define DEBUG_MSG                (1UL << 2)
+#define DEBUG_STREAM             (1UL << 3)
+#define DEBUG_ERROR              (1UL << 4)
+#define DEBUG_WARN               (1UL << 5)
+#define DEBUG_INFO               (1UL << 6)
+#define DEBUG_DEBUG              (1UL << 7)
+// change to uint16 if more bits. are required
 
 //------------ debug print frame bitmask------------ //
-#define TX_FRAME        (1UL << 0)
-#define RX_FRAME        (1UL << 1)
-#define ACK_FRAME       (1UL << 2)
-#define TX_PACK_MSG     (1UL << 3)
-#define TX_ACK_MSG      (1UL << 4)
+#define TX_FRAME                 (1UL << 0)
+#define RX_FRAME                 (1UL << 1)
+#define ACK_FRAME                (1UL << 2)
+#define TX_PACK_MSG              (1UL << 3)
+#define TX_ACK_MSG               (1UL << 4)
+#define RETURNED_FRAME           (1UL << 5)
 
 #endif // DEBUG_CONFIG_H

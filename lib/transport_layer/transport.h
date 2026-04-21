@@ -3,19 +3,24 @@
 
 #include <Arduino.h>
 #include <stdint.h>
+#include "global_config.h"
 
 // ================= MACROS =================
+//transport macros 
 #define FRAME_SIZE(f) (sizeof(struct frame) - MAX_PAYLOAD_LEN + (f).DLC)
 
-// ================= CONFIG =================
-#define START_BYTE                0xFF
-#define WDT_TIMEOUT_MS            10
-#define MAX_PAYLOAD_LEN           6
-#define PACKET_INCREMENT          1
-#define TX_MAX_RETRIES            3
-#define ACK_WDT                   25
+// fifo macros 
+#define MAX_FRAME_SIZE(f) (sizeof (struct frame))
+#define DYNAMIC_FRAME_SIZE(f) (sizeof(struct frame) - MAX_PAYLOAD_LEN + (f).DLC)
 
-// ================= FIFO =================
+// ================= CONFIG ================= // moved to global config 
+// #define START_BYTE                0xFF
+// #define WDT_TIMEOUT_US            100
+// #define MAX_PAYLOAD_LEN           6
+// #define PACKET_INCREMENT          1
+// #define TX_MAX_RETRIES            3
+// #define ACK_WDT                   25
+
 
 
 // ================= ACK TYPES =================
@@ -55,6 +60,7 @@
 #define TX_RETRIES_FAILED         5
 #define RESENDING_MSG             6
 #define TX_SUCCESS                7
+
 #define TX_ERROR                  8
 #define TX_FIFO_WAIT              9
 
@@ -76,10 +82,15 @@ struct Transport_IO {
   void (*write)( uint8_t );
   uint8_t (*available)();
   uint8_t (*read)();
-  void (*begin)(uint32_t);
+  uint8_t (*begin)(uint32_t);
+  void (*update)(void);
 };
 
+extern Transport_IO fifo_io; 
+extern Transport_IO uart_io; 
+
 // ================= API function calls =================
+
 
 // franinstine debug 
 uint8_t get_ava();
@@ -87,11 +98,14 @@ uint8_t get_ava();
 //transport function calls 
 void coms_port_begin(uint32_t baud_rate);
 bool transport_set(Transport_IO *io);
-void transport_send_packet(uint8_t type, uint8_t ack, uint8_t dlc, uint8_t *data);
+void transport_pack_and_send_packet(uint8_t type, uint8_t ack, uint8_t dlc, uint8_t *data);
 void transport_get_frame(struct frame *out);
 void com_port_open();
 uint8_t read_data_frame();
 uint8_t send_data_frame();
 void print_frame(struct frame *f);
+void fifo_io_uart_engine_update(); 
+
+
 
 #endif

@@ -7,6 +7,13 @@
 
   extern void debug_port_begin();
 
+  #define PRINT_VERSION_DATA(sw_version, hardware_version, release_notes)\
+  do{\
+    DEBUG_PORT.println(sw_version);\
+    DEBUG_PORT.println(hardware_version);\
+    DEBUG_PORT.println(release_notes);\
+  } while(0)
+
   #define DEBUG_PRINT_MSG(file, level, type, msg) \
     do {\
       if ((DEBUG_FILE_MASK & (file)) &&  (DEBUG_LEVEL_MASK & (level))) {\
@@ -18,8 +25,7 @@
         DEBUG_PORT.print("]");\
         DEBUG_PORT.println(msg);\
       }\
-    }\
-    while(0)
+    } while(0)
 
   #define DEBUG_PRINT_MSG_VAL(file, level, type, msg, val)\
     do {\
@@ -35,6 +41,22 @@
       }\
     } while(0)
 
+
+  #define DEBUG_PRINT_MSG_VAL_MSG(file, level, type, msg1, val, msg2)\
+    do {\
+      if ((DEBUG_FILE_MASK & (file)) &&  (DEBUG_LEVEL_MASK & (level))) {\
+        PRINT_RUNTIME(millis());\
+        PRINT_FILE_NAME(file);\
+        PRINT_LEVEL(level);\
+        DEBUG_PORT.print("[");\
+        DEBUG_PORT.print(type);\
+        DEBUG_PORT.print("]");\
+        DEBUG_PORT.print(msg1);\
+        DEBUG_PORT.print(val);\
+        DEBUG_PORT.println(msg2);\
+      }\
+    } while(0)
+
     #define DEBUG_PRINT_MSG_VAL_HEX(file, level, type, msg, val) \
     do {\
       if ((DEBUG_FILE_MASK & (file)) &&  (DEBUG_LEVEL_MASK & (level))) {\
@@ -42,7 +64,6 @@
         PRINT_FILE_NAME(file);\
         PRINT_LEVEL(level);\
         DEBUG_PORT.print("[");\
-        DEBUG_PORT.print("][");\
         DEBUG_PORT.print(type);\
         DEBUG_PORT.print("]");\
         DEBUG_PORT.print(msg);\
@@ -161,6 +182,7 @@
       else if ((file_name) & DBG_PROTOCOL)        {DEBUG_PORT.print("[PROT]");}\
       else if ((file_name) & DBG_ESP_OTA)         {DEBUG_PORT.print("[OTA]");}\
       else if ((file_name) & DBG_TRANSPORT_UART)  {DEBUG_PORT.print("[UART]");}\
+      else if ((file_name) & DBG_TRANSPORT_FIFO)  {DEBUG_PORT.print("[FIFO]");}\
       else{DEBUG_PORT.print("[----]");}\
     } while(0)
 
@@ -171,8 +193,9 @@
       else if((dbg_level) & DEBUG_INFO)      {DEBUG_PORT.print("[INFO]");}\
       else if((dbg_level) & DEBUG_DEBUG)     {DEBUG_PORT.print("[DEBUG]");}\
       else if((dbg_level) & DEBUG_MSG)       {DEBUG_PORT.print("[MSG]");}\
-      else if((dbg_level) & DEBUG_STREAM)       {DEBUG_PORT.print("[STREAM]");}\
+      else if((dbg_level) & DEBUG_STREAM)    {DEBUG_PORT.print("[STREAM]");}\
       else if ((dbg_level) & DEBUG_NONE)     {DEBUG_PORT.print("[NONE]");}\
+      else if ((dbg_level) & DEBUG_META)     {DEBUG_PORT.print("[META]");}\
       else{DEBUG_PORT.print("[----]");}\
     } while(0)
 
