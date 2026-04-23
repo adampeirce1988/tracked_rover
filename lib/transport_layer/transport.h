@@ -35,34 +35,36 @@
 #define WAITING_FOR_START         2
 #define INVALID_TYPE              3
 #define ACK_OUT_OF_RANGE          4
-#define ACK_REQUESTED             5
-#define NACK_REQUESTED            6
-#define NORMAL_FRAME_RECEIVED     7
-#define ID_RECEIVED               8
-#define DLC_OVER_CAPACITY         9
-#define PAYLOAD_OVERFLOW          10
-#define PAYLOAD_COMPLETE          11
-#define MSG_TIMEOUT_ERROR         12
-#define ACK_MISSING               13
-#define CRC_ERROR                 14
-#define RECEIVING_DATA            15
-#define NO_DATA_AVAILABLE         16
-#define FRAME_READY               17
-#define DLC_RECEIVED              18
-#define FIFO_DELAY_SUCSESSFUL     19
+#define ACK_REQUEST_RECEIVED      5
+#define ACK_RESPONSE_RECEIVED     6
+#define NACK_REQUEST_RECEIVED     7
+#define NORMAL_FRAME_RECEIVED     8
+#define ACK_RESPONSE_SENT         9
+#define ID_RECEIVED               10
+#define DLC_OVER_CAPACITY         11
+#define PAYLOAD_OVERFLOW          12
+#define PAYLOAD_COMPLETE          13
+#define MSG_TIMEOUT_ERROR         14
+#define ACK_MISSING               15
+#define CRC_ERROR                 16
+#define RECEIVING_DATA            17
+#define NO_DATA_AVAILABLE         18
+#define FRAME_READY               19
+#define DLC_RECEIVED              20
+#define RX_RECEIVED_ACK_OK        21
 
 // ================= TX RETURN CODES =================
 #define TX_IDLE_STATE             0
 #define TRANSMITTING              1
 #define AWAITING_ACK              2
-#define TYPE_MISMATCH             3
-#define ACK_WDT_TIMEOUT           4
-#define TX_RETRIES_FAILED         5
-#define RESENDING_MSG             6
-#define TX_SUCCESS                7
-
-#define TX_ERROR                  8
-#define TX_FIFO_WAIT              9
+#define RECEIVED_ACK              3
+#define TYPE_MISMATCH             4
+#define ACK_WDT_TIMEOUT           5
+#define TX_RETRIES_FAILED         6
+#define RESENDING_MSG             7
+#define TX_SUCCESS                8
+#define TX_ERROR                  9
+#define TX_FIFO_WAIT              10
 
 
 // ================= STRUCT =================

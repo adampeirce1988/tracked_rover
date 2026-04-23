@@ -10,16 +10,16 @@
 
 // Ddefault transport type 
 //#define DEFAULT_TRANSPORT &uart_io
-#define DEFAULT_TRANSPORT          &uart_io             // used for simualting a link this will delive the tx to the rx port
-#define DEFAULT_TRANSPORT_STR      uart_io              // naming convention used for debug should match the default transport
-#define FIFO_BUFFER_SIZE           64                   // recomended 64 to match the arduino hardware buffer 
+#define DEFAULT_TRANSPORT          &uart_io              // used for simualting a link this will delive the tx to the rx port
+#define DEFAULT_TRANSPORT_STR      uart_io               // naming convention used for debug should match the default transport
+#define FIFO_BUFFER_SIZE           64                    // recomended 64 to match the arduino hardware buffer 
 
 #define START_BYTE                 0xFF                  // default start byte 0xFF
-#define WDT_TIMEOUT_US             500                 // message watchdog time for bytes received updated after evey read in RX (us)  
+#define WDT_TIMEOUT_US             100000                 // message watchdog time for bytes received updated after evey read in RX (us)  
 #define MAX_PAYLOAD_LEN            6                     // maximum payload of message frame 
 #define PACKET_INCREMENT           1                     // used for debug only
 #define TX_MAX_RETRIES             3                     // number of message send retries before reproting a failure
-#define ACK_WDT_VAL                1000000                 // watch dog timer for ack (us)
+#define ACK_WDT_VAL                1000000               // watch dog timer for ack (us)
 
 //=====================================================
 

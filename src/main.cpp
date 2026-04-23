@@ -31,7 +31,6 @@ struct frame protocol_frame;
 
 
 void setup(){
-
   debug_port_begin(); // open the debug port
   delay(500);
   PRINT_VERSION_DATA(SW_VERSION, HARDWARE_VERSION, RELEASE_NOTES); 
@@ -77,11 +76,11 @@ void loop() {
     }
     
     if(tx_status == TX_SUCCESS){
-      delay(PACKET_DELAY);
+      //delay(PACKET_DELAY);  
     }
     if(tx_status == TX_IDLE_STATE && (millis() - last_msg) > MSG_RATE){
       
-      //DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "MAIN", "Packet sent" );
+      DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "MAIN", "Packet sent" );
       transport_pack_and_send_packet(type, ack, dlc, data); // normal frame. 
       last_msg = millis();
     }

@@ -43,5 +43,5 @@ uint8_t uart_begin(uint32_t baud_rate){
 }
 
 void uart_update(){
-    DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "UART", "function call to uart_update();");
+    //DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "UART", "function call to uart_update();");
 }

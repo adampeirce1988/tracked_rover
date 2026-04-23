@@ -14,11 +14,14 @@
 
 
 
+
+
 // defines the name od the debug macro for this file
 #define DEBUG_FILE DBG_TRANSPORT 
 
 // macro to calculate the size of an array
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+#define CONVERT_US_TO_MS(us) ((us) / 1000)
 
 
 #define UART_BITS_PER_BYTE 10
@@ -41,6 +44,8 @@ static uint16_t frame_size(struct frame *f);
 
 
 
+
+
 // read variables
 uint8_t current_payload = 0; 
 uint32_t last_read_byte = 0x00; 
@@ -60,7 +65,6 @@ uint32_t fifo_delay_timer = 0;
   TX_STATE_SENDING,
   TX_STATE_AWAITING_ACK,
   TX_STATE_RETRY,
-  TX_STATE_FIFO_DELAY,  // only used during self test 
   TX_STATE_SUCCESS,
   TX_STATE_FAILED // handle errors here log files ect. 
  } tx_state; 
@@ -85,15 +89,9 @@ struct frame *active;       // active frame for sending data
 Transport_IO *current_transport = DEFAULT_TRANSPORT; 
 
 
-// frankenstine debug /////////////
-uint8_t get_ava(){
-   return current_transport->available();
-}  
-///////////////////////////////////
-
 bool transport_set(Transport_IO *io){
   if(io == NULL){
-    DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "PORT", "Invalid transport IO provided; current_transport: ", "uart_io");
+    //DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "PORT", "Invalid transport IO provided; current_transport: ", "uart_io");
     current_transport = DEFAULT_TRANSPORT;
     return false; 
   }
@@ -111,7 +109,6 @@ void coms_port_begin(uint32_t baud_rate){
 
 
 static uint8_t inline_crc_calc(uint8_t CRC, uint8_t byte){
-
   CRC ^= byte;
 
   for (uint8_t i = 0; i < 8; i++) {
@@ -125,18 +122,19 @@ static uint8_t inline_crc_calc(uint8_t CRC, uint8_t byte){
   return CRC;
 }
 
-static bool msg_wdt_check(){
-  if(rx_state > WAIT_START && (micros() - last_read_byte) > WDT_TIMEOUT_US ){
-    //handle time out error here
-    DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "WDT", "over 10ms between byte transmission in satate: ", rx_state);
-    reset_rx_values();
-    return true;
-  }
-  else{
-    return false; 
-  }
-  return false; // should not be reached
-}
+// static bool msg_wdt_check(){
+//   if(rx_state != WAIT_START && (micros() - last_read_byte) > WDT_TIMEOUT_US){
+//     //handle time out error here
+//     //DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_ERROR, "WDT", "over ", CONVERT_US_TO_MS(WDT_TIMEOUT_US), "ms between byte transmission in satate:");
+//     //DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "WDT", "watch dog timer timour occoured in rx_state: ", rx_state);
+//     reset_rx_values();
+//     return true;
+//   }
+//   else{
+//     return false; 
+//   }
+//   return false; // should not be reached
+// }
 
 void flush_struct(struct frame *f){  // repalce tx / rx flush wth this make public!
   f->TYPE = 0x00;
@@ -199,7 +197,7 @@ void transport_pack_and_send_packet(uint8_t type, uint8_t ack, uint8_t dlc, uint
   }
   // report an error with pack fuction
   else{
-    DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "TX", "Failed to pack message. Message not sent.");
+    //DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "TX", "Failed to pack message. Message not sent.");
     tx_state = TX_STATE_FAILED;
     return;
   }
@@ -208,7 +206,7 @@ void transport_pack_and_send_packet(uint8_t type, uint8_t ack, uint8_t dlc, uint
 static bool pack_message(uint8_t type, uint8_t ack, uint8_t id, uint8_t dlc, uint8_t *data, struct frame *f){
 
   if(dlc > MAX_PAYLOAD_LEN){
-    DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "DLC", "DLC exceeds maximum payload length: ", dlc);
+    //DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "DLC", "DLC exceeds maximum payload length: ", dlc);
     return false; 
   }
 
@@ -255,26 +253,47 @@ static void pack_ack(uint8_t type, uint8_t id, struct frame *f){
 
 void transport_get_frame(struct frame *out){
   *out = rx_frame;
-  DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "MSG", "receive frame returned to protocal layer");
+  //DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "MSG", "receive frame returned to protocal layer");
 }
 
-static inline uint16_t frame_size(struct frame *f) {
+static inline uint16_t frame_size(struct frame *f){
     if (f == NULL) return 0;
     return SIZE_OF_HEAD + f->DLC + SIZE_OF_TAIL;
+}
+
+static bool msg_wdt_check(){
+  if(rx_state != WAIT_START && (micros() - last_read_byte) > WDT_TIMEOUT_US){
+    //handle time out error here
+    //DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_ERROR, "WDT", "over ", CONVERT_US_TO_MS(WDT_TIMEOUT_US), "ms between byte transmission in satate:");
+    //DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "WDT", "watch dog timer timour occoured in rx_state: ", rx_state);
+    reset_rx_values();
+    return true;
+  }
+  else{
+    return false; 
+  }
 }
 
 ///////////////// RECEIVE DATA FRAME ////////////////////
 
 uint8_t read_data_frame(){
 
-  if (current_transport->available() > 0) {
+    // cehcek the message WTD for timeout error rest
+  if (msg_wdt_check() == true && rx_state != WAIT_START){
+    //DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_ERROR, "RX", "RX watch dog timer trigered elapsed time: ", CONVERT_US_TO_MS((micros() - last_read_byte)), "ms");
+    return MSG_TIMEOUT_ERROR; 
+  }
+
+  if (current_transport->available() > 0){
+
     last_read_byte = micros();
     uint8_t incoming = current_transport->read();
-    
+
     switch(rx_state){
 
       case WAIT_START: 
       if(incoming == START_BYTE){
+      // reset all values on start received to remove the need to reset at error 
         rx_crc_check = 0; 
         rx_state = READ_TYPE;
         DEBUG_PRINT_MSG_VAL_HEX(DEBUG_FILE, DEBUG_DEBUG, "RX", "start byte received: ", incoming);
@@ -301,36 +320,40 @@ uint8_t read_data_frame(){
         
 
         if(rx_frame.ACK == ACK_REQUEST){
-          send_ack_flag = true;
           DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "ACK", "ACK request received.");
           rx_state = READ_ID;
-          return ACK_REQUESTED;
+          return ACK_REQUEST_RECEIVED;
+        }
+        else if(rx_frame.ACK == ACK_RESPONSE){
+          DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "ACK", "ACK response received.");
+          rx_state = READ_ID;
+          return ACK_RESPONSE_RECEIVED;
         }
         else if(rx_frame.ACK == NACK){
-          send_ack_flag = false;
+          DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "ACK", "NACK request received.");
           rx_state = READ_ID;
-          return NACK_REQUESTED;
+          return NACK_REQUEST_RECEIVED;
         }
         else if(rx_frame.ACK == NORMAL_FRAME){
-          send_ack_flag = false; 
+          DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "ACK", "normal frame received.");
           rx_state = READ_ID;
           return NORMAL_FRAME_RECEIVED;
         }
         else{
-          DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "ACK", "ACK out of range ACK: ", rx_frame.ACK);
+          DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "ACK", "out of range ACK: ", rx_frame.ACK);
           reset_rx_values(); // reset message valvues to 0x00.
           return ACK_OUT_OF_RANGE;
         }
       break;
 
-      case READ_ID: 
+      case READ_ID:
         rx_frame.ID = incoming;
         rx_crc_check = inline_crc_calc(rx_crc_check, incoming);
         DEBUG_STREAM_DATA(DEBUG_FILE, DEBUG_STREAM, incoming);
         rx_state = READ_DLC;
         return ID_RECEIVED; 
       break;
-
+      
       case READ_DLC: 
         if(incoming > ARRAY_SIZE(rx_frame.payload)){
           DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "RX", "DLC greater that payload capacity: ", ARRAY_SIZE(rx_frame.payload));
@@ -365,6 +388,7 @@ uint8_t read_data_frame(){
           reset_rx_values(); // reset message valvues to 0x00.
           return PAYLOAD_OVERFLOW; 
         }
+        
         return RECEIVING_DATA;
       break;
 
@@ -377,6 +401,7 @@ uint8_t read_data_frame(){
           DEBUG_STREAM_END(DEBUG_FILE, DEBUG_STREAM, incoming);
           DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "CRC", "CRC check NOK. calculated CRC: ", rx_crc_check);
           reset_rx_values(); // reset message valvues to 0x00 and read paramters 
+          rx_state = WAIT_START;
           return CRC_ERROR; 
         }
         // action any frame that is confirmed good. 
@@ -384,17 +409,15 @@ uint8_t read_data_frame(){
           DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "CRC", "CRC check OK.");
 
           if(rx_frame.ACK == ACK_REQUEST){
-            DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "ACK", "responding to ACK request.");
+            DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "RX", "responding to ACK request.");
             pack_ack(rx_frame.TYPE, rx_frame.ID, &ack_tx_frame);
             transmit_packet(&ack_tx_frame);
-
-            //transport_pack_and_send_packet(rx_frame.TYPE, rx_frame.ACK, rx_frame.DLC, rx_frame.payload);
           }
-          else if(rx_frame.ACK == ACK_RESPONSE && rx_frame.ID == tx_frame.ID){
-            DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "ACK", "received ACK response.");
-            ack_received = true;
+          else if(rx_frame.ACK == ACK_RESPONSE && rx_frame.ID == tx_frame.ID){ // no type check implimented
+            DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "ACK", "received ack response. ");
+            ack_received = true; 
           } 
-          
+
           rx_state = WAIT_START;
           DEBUG_STREAM_END(DEBUG_FILE, DEBUG_STREAM, incoming);
           DEBUG_PRINT_DATA_FRAME(DEBUG_FILE, DEBUG_MSG, RX_FRAME, START_BYTE, "[RX]", rx_frame);
@@ -403,15 +426,7 @@ uint8_t read_data_frame(){
       break;
     }
   }
-
-  // cehcek the message WTD for timeout error rest
-  if (msg_wdt_check() == true){
-    DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "WDT", "message watch dog timer timed out. Elapsed time: ", (micros() - last_read_byte));
-    return MSG_TIMEOUT_ERROR; 
-  }
-  else{
-    return NO_DATA_AVAILABLE;
-  }
+  return NO_DATA_AVAILABLE;
 }
 
 
@@ -422,123 +437,100 @@ uint8_t send_data_frame(){
   switch(tx_state){
 
     case TX_STATE_IDLE:
-    return TX_IDLE_STATE;
-    break; 
+      return TX_IDLE_STATE; 
     
 
-    case TX_STATE_SENDING: 
-    {
-      // frame selection moveted to pack_message() which frame will be trnasmitte
-
-      //test active is not NULL before sending data
-      if (active == NULL) {
-      DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "PTR", "atcive transport pointer NULL active: NULL");
-      tx_state = TX_STATE_FAILED;
-      return TX_ERROR;
-      }
- 
-      transmit_packet(active);
-      DEBUG_PRINT_DATA_PTR_FRAME(DEBUG_FILE, DEBUG_MSG, TX_FRAME, START_BYTE, "TX_PTR", active);
-      // check for fifo_io and switch to TX_FIFO_DELAY / 
-      //this state then switches to TX_STATE_AWAITING_ACK ack or TX_STATE_SUCCESS
-      if(current_transport == &fifo_io){
-        fifo_delay_timer = micros();
-        DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_DEBUG, "TX", "time stamp starting TX_STATE_FIFO_DELAY: ", micros());
-        tx_state = TX_STATE_FIFO_DELAY;
-        return TRANSMITTING;
-      }
-
-      if(active->ACK == ACK_REQUEST){ // function sent to awating ack before thedelay for fifo is ran.
-        tx_wdt_timestamp = micros();
-        tx_state = TX_STATE_AWAITING_ACK;
-      }
-      else{
-          tx_state = TX_STATE_SUCCESS;
-      }
-      return TRANSMITTING;
-    }
-    break; 
-    
-
-    case TX_STATE_AWAITING_ACK:
-      if(ack_received == true){
-  
-        ack_received = false; 
-        DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "ACK",  "ACK received & validated for packet_id: ", rx_frame.ID); 
-
-      }
+    case TX_STATE_SENDING:{ 
       
+        // frame selection moveed to pack_message() which frame will be trnasmitte
 
-      // handles time out and retries
-      if((micros() - tx_wdt_timestamp) > ACK_WDT_VAL){
-        DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR,"WDT", "ACK_WDT_VAL timeed out elapses time(us): ", micros() - tx_wdt_timestamp);
-        if(tx_retries < TX_MAX_RETRIES){
-          tx_retries ++;
-          tx_state = TX_STATE_RETRY;
-          return ACK_WDT_TIMEOUT;
+        //test active is not NULL before sending data
+        if (active == NULL) {
+          //DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "PTR", "atcive transport pointer NULL active: NULL");
+          tx_state = TX_STATE_FAILED;
+          return TX_ERROR;
         }
-    
+
+        //transmit data packet rx_packet is not currently used
+        transmit_packet(active);
+        DEBUG_PRINT_DATA_PTR_FRAME(DEBUG_FILE, DEBUG_MSG, TX_FRAME, START_BYTE, "TX_PTR", active);
+
+        if(active->ACK == ACK_REQUEST){ // function sent to awating ack before thedelay for fifo is ran.
+          tx_wdt_timestamp = micros();
+          tx_state = TX_STATE_AWAITING_ACK;
+        }
         else{
-          DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_ERROR, "ACK", "ack not received after" ,(tx_retries - 1), "retries");
+          tx_state = TX_STATE_SUCCESS;
+        }
+        return TRANSMITTING;
+      break; 
+    }
+
+    case TX_STATE_AWAITING_ACK:{
+      uint32_t elapsed_time =  micros() - tx_wdt_timestamp;
+
+        if(ack_received == true){
+          ack_received = false; 
+          //DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "ACK",  "ACK received & validated for packet_id: ", rx_frame.ID); 
+          return RECEIVED_ACK;
+        }
+      
+        // handles time out, retries and errors
+        if(elapsed_time > ACK_WDT_VAL){
+          //DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_ERROR,"TX", "ACK_WDT time out trigered elapses time: ", CONVERT_US_TO_MS(micros() - tx_wdt_timestamp), "ms" );
+          if(tx_retries < TX_MAX_RETRIES){
+
+            tx_retries ++;
+            tx_state = TX_STATE_RETRY;
+            return ACK_WDT_TIMEOUT;
+          }
+        }
+        else if(elapsed_time  < ACK_WDT_VAL){
+          return AWAITING_ACK; 
+        }
+        else{
+          //DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_ERROR, "ACK", "ack not received after " ,(tx_retries), " retries");
           tx_state = TX_STATE_FAILED; 
           return TX_RETRIES_FAILED;
         }
-      }
-      return AWAITING_ACK;
-    break;
+      break;
+    }
+  
     
 
-    case TX_STATE_RETRY: 
-      DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "TX", "ACK watchdog timer timed out. retries: ", tx_retries);
-      transmit_packet(active);
-      tx_wdt_timestamp = micros();
-      tx_state = TX_STATE_AWAITING_ACK; 
-      return RESENDING_MSG;
-    break;
-
-    case TX_STATE_FIFO_DELAY:
-    if (micros() - fifo_delay_timer > (frame_size(active) * TX_BYTE_TRANSMISSION_TIME)){ // change to dynamcic baud calc 
-      tx_state = TX_STATE_SUCCESS;
-      DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_DEBUG, "TX", "time stamp exiting TX_STATE_FIFO_DELAY: ", micros());
-      
-      if(active->ACK == ACK_REQUEST){ 
+    case TX_STATE_RETRY:{
+        //DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "TX", "resending ack frame");
+        transmit_packet(active);
         tx_wdt_timestamp = micros();
+        DEBUG_PORT.println();
+        DEBUG_PORT.print("tx_wdt_timestamp: ");
+        DEBUG_PORT.println(tx_wdt_timestamp);
         tx_state = TX_STATE_AWAITING_ACK; 
-        return FIFO_DELAY_SUCSESSFUL;
-      }
-      else{
-          tx_state = TX_STATE_SUCCESS;
-          return FIFO_DELAY_SUCSESSFUL;
-      }
+        return RESENDING_MSG;
+      break;
     }
-    else{
-      DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_DEBUG, "FIFO", "fifo delay inpregress remaining time:", (micros() - fifo_delay_timer) - (frame_size(active) * TX_BYTE_TRANSMISSION_TIME));
-      return TX_FIFO_WAIT; 
+
+    case TX_STATE_SUCCESS:{
+        //DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "TX", "TX transmission successful.");
+
+        packet_id += PACKET_INCREMENT; // *** chenge to ++ after testing ***
+
+        reset_tx_values(); // reset all values to default and flush the tx and ack frames.
+        tx_state = TX_STATE_IDLE; // this is line 527
+        return TX_SUCCESS;
+      break;
     }
-    break;
 
-    case TX_STATE_SUCCESS:
-      DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "TX", "TX transmission successful.");
+    case TX_STATE_FAILED:{
+        // HAndle error reporting / logging here before returniing the state. loging to be handles with debug functiond and passes to a writing buffer.
+        //DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "TX", "packet failed to send");
 
-      packet_id += PACKET_INCREMENT; // *** chenge to ++ after testing ***
-
-      reset_tx_values(); // reset all values to default and flush the tx and ack frames.
-      tx_state = TX_STATE_IDLE;
-      return TX_SUCCESS;
-    break;
-    
-
-    case TX_STATE_FAILED:
-      // HAndle error reporting / logging here before returniing the state. loging to be handles with debug functiond and passes to a writing buffer.
-      DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "ACK", "TX_PACKET failed to send");
-
-      packet_id += PACKET_INCREMENT; // *** chenge to ++ after testing ***
-
-      reset_tx_values(); // reset all values to defualt and flush the tx and ack frames.
-      tx_state = TX_STATE_IDLE;
-      return TX_ERROR;
-    break;
-      
-  };
-  return TX_IDLE_STATE; // default return value should never be reached.
+        packet_id += PACKET_INCREMENT; // *** chenge to ++ after testing ***
+        reset_tx_values(); // reset all values to defualt and flush the tx and ack frames.
+        tx_state = TX_STATE_IDLE;
+        return TX_ERROR;
+      break;  
+    }
+  }
+  return 1;
 }

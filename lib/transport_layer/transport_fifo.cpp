@@ -41,7 +41,7 @@ uint8_t rx_ring_buffer[FIFO_BUFFER_SIZE];     // rx ring buffer
 uint8_t rx_head = 0;                          // Ring buffer head
 uint8_t rx_tail = 0;                          // Ring buffer tail 
     
- 
+
 // functions 
 void fifo_write(uint8_t byte){ 
     if(((tx_head + 1) % BUFFER_SIZE) == tx_tail){
@@ -56,7 +56,7 @@ void fifo_write(uint8_t byte){
 
 uint8_t fifo_available(){
   uint8_t available = (rx_head + BUFFER_SIZE - rx_tail) % BUFFER_SIZE;
-  DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "FIFO", "data avalaibel to read. avaliable: ", available);
+  DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "FIFO", "data available to read. avaliable: ", available);
   return available; 
 }
 
@@ -76,7 +76,7 @@ uint8_t fifo_read(){
 
 uint8_t fifo_begin(uint32_t baud_rate){
     outgoing_transmission_timer = (uint32_t)(((BITS_PER_FRAME * MICORS_PER_SECOND) / baud_rate) + 0.5f);
-    DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_INFO, "FIFO", "outgoing_transmission_timer set to" , outgoing_transmission_timer, " us.");
+    DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_INFO, "FIFO", "outgoing_transmission_timer set to " , outgoing_transmission_timer, " us.");
     return 1; 
 }
 

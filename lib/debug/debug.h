@@ -8,13 +8,14 @@
   extern void debug_port_begin();
 
   #define PRINT_VERSION_DATA(sw_version, hardware_version, release_notes)\
-  do{\
-    DEBUG_PORT.println(sw_version);\
-    DEBUG_PORT.println(hardware_version);\
-    DEBUG_PORT.println(release_notes);\
-  } while(0)
+    do{\
+      DEBUG_PORT.println(sw_version);\
+      DEBUG_PORT.println(hardware_version);\
+      DEBUG_PORT.println(release_notes);\
+    } while(0)
+  
 
-  #define DEBUG_PRINT_MSG(file, level, type, msg) \
+  #define DEBUG_PRINT_MSG(file, level, type, msg)\
     do {\
       if ((DEBUG_FILE_MASK & (file)) &&  (DEBUG_LEVEL_MASK & (level))) {\
         PRINT_RUNTIME(millis());\
@@ -99,7 +100,7 @@
       }\
     } while (0)
 
-    #define DEBUG_PRINT_DATA_PTR_FRAME(file, level, frame_type, start_byte, frame_name, frame)\
+  #define DEBUG_PRINT_DATA_PTR_FRAME(file, level, frame_type, start_byte, frame_name, frame)\
     do{\
       if((DEBUG_FILE_MASK & (file)) &&  (DEBUG_LEVEL_MASK & (level)) && (DEBUG_FRAME_MASK & (frame_type))) {\
         PRINT_RUNTIME(millis());\
@@ -109,19 +110,19 @@
         DEBUG_PORT.print("]");\
         DEBUG_PORT.print(start_byte, HEX);\
         DEBUG_PORT.print(", ");\
-        DEBUG_PORT.print(frame->TYPE, HEX);\
+        DEBUG_PORT.print((frame)->TYPE, HEX);\
         DEBUG_PORT.print(", ");\
-        DEBUG_PORT.print(frame->ACK, HEX);\
+        DEBUG_PORT.print((frame)->ACK, HEX);\
         DEBUG_PORT.print(", ");\
-        DEBUG_PORT.print(frame->ID, HEX);\
+        DEBUG_PORT.print((frame)->ID, HEX);\
         DEBUG_PORT.print(", ");\
-        DEBUG_PORT.print(frame->DLC, HEX);\
+        DEBUG_PORT.print((frame)->DLC, HEX);\
         DEBUG_PORT.print(", ");\
-        for(uint8_t i = 0; i < frame->DLC; i ++){\
-          DEBUG_PORT.print(frame->payload[i], HEX);\
+        for(uint8_t i = 0; i < (frame)->DLC; i ++){\
+          DEBUG_PORT.print((frame)->payload[i], HEX);\
           DEBUG_PORT.print(", ");\
         }\
-        DEBUG_PORT.println(frame->CRC, HEX);\
+        DEBUG_PORT.println((frame)->CRC, HEX);\
       }\
     } while (0)
   
@@ -133,7 +134,7 @@
         PRINT_RUNTIME(millis());\
         PRINT_FILE_NAME(file);\
         PRINT_LEVEL(level);\
-        DEBUG_PORT.print("msg");\
+        DEBUG_PORT.print(msg);\
         DEBUG_PORT.print(byte ,HEX);\
       }\
     } while(0)
@@ -211,4 +212,6 @@
       DEBUG_PORT.print(" , internal_avaliable: ");\
     } while(0)
 
+
 #endif
+
