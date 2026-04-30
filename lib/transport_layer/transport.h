@@ -30,41 +30,45 @@
 #define NACK                      0x03
 
 // ================= RX RETURN CODES =================
-#define NO_ERROR                  0
-#define START_RECEIVED            1
-#define WAITING_FOR_START         2
-#define INVALID_TYPE              3
-#define ACK_OUT_OF_RANGE          4
-#define ACK_REQUEST_RECEIVED      5
-#define ACK_RESPONSE_RECEIVED     6
-#define NACK_REQUEST_RECEIVED     7
-#define NORMAL_FRAME_RECEIVED     8
-#define ACK_RESPONSE_SENT         9
-#define ID_RECEIVED               10
-#define DLC_OVER_CAPACITY         11
-#define PAYLOAD_OVERFLOW          12
-#define PAYLOAD_COMPLETE          13
-#define MSG_TIMEOUT_ERROR         14
-#define ACK_MISSING               15
-#define CRC_ERROR                 16
-#define RECEIVING_DATA            17
-#define NO_DATA_AVAILABLE         18
-#define FRAME_READY               19
-#define DLC_RECEIVED              20
-#define RX_RECEIVED_ACK_OK        21
+#define RX_STATE_IDLE             0
+#define WAITING_FOR_START         1
+#define START_RECEIVED            2
+#define TYPE_RECEIVED             3
+#define ACK_REQUEST_RECEIVED      4
+#define ACK_RESPONSE_RECEIVED     5
+#define NACK_REQUEST_RECEIVED     6
+#define NORMAL_FRAME_RECEIVED     7
+#define ACK_RESPONSE_SENT         8
+#define ID_RECEIVED               9
+#define DLC_RECEIVED              10
+#define RECEIVING_DATA            11
+#define PAYLOAD_COMPLETE          12
+#define FRAME_READY               13
+#define ACK_READY                 14
+#define INVALID_TYPE              15
+#define ACK_OUT_OF_RANGE          16
+#define DLC_OVER_CAPACITY         17
+#define PAYLOAD_OVERFLOW          18
+#define CRC_ERROR                 19
+#define MSG_TIMEOUT_ERROR         20
+
 
 // ================= TX RETURN CODES =================
 #define TX_IDLE_STATE             0
-#define TRANSMITTING              1
-#define AWAITING_ACK              2
-#define RECEIVED_ACK              3
-#define TYPE_MISMATCH             4
+#define TX_PENDING_ACK            2
+#define TX_TRANSMITING            1
+//#define TYPE_MISMATCH           4
 #define ACK_WDT_TIMEOUT           5
-#define TX_RETRIES_FAILED         6
+//#define TX_RETRIES_FAILED       6
 #define RESENDING_MSG             7
 #define TX_SUCCESS                8
 #define TX_ERROR                  9
-#define TX_FIFO_WAIT              10
+#define ACK_NOT_RECEVIED          10
+#define ACK_MISMATCHED            11 
+#define ACK_WDT_TIMEOUT           5
+#define TX_BUFFER_OVERFLOW        12
+
+
 
 
 // ================= STRUCT =================
@@ -78,6 +82,7 @@ struct frame {
   uint8_t payload[MAX_PAYLOAD_LEN];
   uint8_t CRC;
 };
+
 
 // port structure
 struct Transport_IO {

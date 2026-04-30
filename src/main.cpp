@@ -25,7 +25,7 @@ uint8_t rx_status = 0;
 uint32_t last_msg = 0; 
 
 uint8_t packets = 0; 
-uint8_t no_of_tests = 5;
+uint8_t no_of_tests = 1;
 
 struct frame protocol_frame;
 
@@ -65,7 +65,7 @@ void loop() {
     if(rx_status == FRAME_READY){
       DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "MAIN", "Packet received" );
       transport_get_frame(&protocol_frame);
-      DEBUG_PRINT_DATA_FRAME(DEBUG_FILE, DEBUG_MSG, RETURNED_FRAME, START_BYTE, "MAIN", protocol_frame);
+      //DEBUG_PRINT_DATA_FRAME(DEBUG_FILE, DEBUG_MSG, RETURNED_FRAME, "068", START_BYTE, "complete frame rceived fromt transport:", protocol_frame);
       DEBUG_PORT.println("***************** NEW MSG ********************");
       packets ++; //increment to only send 5 packes this will reduce the amount od data to debug
 
@@ -75,9 +75,7 @@ void loop() {
       }
     }
     
-    if(tx_status == TX_SUCCESS){
-      //delay(PACKET_DELAY);  
-    }
+
     if(tx_status == TX_IDLE_STATE && (millis() - last_msg) > MSG_RATE){
       
       DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "MAIN", "Packet sent" );
