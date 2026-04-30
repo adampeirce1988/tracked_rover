@@ -19,8 +19,8 @@
 //////////////////////////////////////
 
 #define START_BYTE                 0xFF                  // default start byte 0xFF
-#define MSG_WDT_TIMEOUT_US         5000                 // message watchdog time for bytes received updated after evey read in RX (us)  
-#define ACK_WDT_TIMEOUT_US         1000                  // watch dog timer for ack (us)
+#define MSG_WDT_TIMEOUT_US         35000                 // message watchdog time for bytes received updated after evey read in RX (us)  
+#define ACK_WDT_TIMEOUT_US         65000                 // watch dog timer for ack (us)
 #define MAX_PAYLOAD_LEN            6                     // maximum payload of message frame 
 #define PACKET_INCREMENT           1                     // used for debug only
 #define TX_MAX_RETRIES             3                     // number of message send retries before reproting a failure

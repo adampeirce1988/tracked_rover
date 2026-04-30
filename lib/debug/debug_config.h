@@ -6,14 +6,14 @@
   #define DEBUG_FILE_MASK   (DBG_ESP_MAIN | DBG_TRANSPORT | DBG_TRANSPORT_FIFO)
 
 // define the levels of debuging required here
-  #define DEBUG_LEVEL_MASK  ( DEBUG_META | DEBUG_ERROR | DEBUG_MSG )
-  //#define DEBUG_LEVEL_MASK  (DEBUG_MSG)
+  //#define DEBUG_LEVEL_MASK  ( DEBUG_META | DEBUG_ERROR | DEBUG_MSG )
+  #define DEBUG_LEVEL_MASK  (DEBUG_META | DEBUG_ERROR | DEBUG_INFO)
   //#define DEBUG_LEVEL_MASK  (DEBUG_STREAM | DEBUG_INFO | DBG_DEBUG)
   //#define DEBUG_LEVEL_MASK (DEBUG_NONE)  // use with arduino uno only
 
 
 // defines which messages should be printed in full form DEBUG_PRINT_DATA_FRAME()
-  #define DEBUG_FRAME_MASK (RETURNED_FRAME | TX_FRAME | RX_FRAME | TX_PACK_MSG | ACK_FRAME | COPIED_FRAME)
+  #define DEBUG_FRAME_MASK (RETURNED_FRAME | TX_FRAME | RX_FRAME | TX_PACK_MSG | ACK_FRAME | COPIED_FRAME | TX_PRIORITY)
 
 //------------ file bit mask ------------//
 #define DBG_TRANSPORT            (1UL << 0)
@@ -46,5 +46,6 @@
 #define TX_ACK_MSG               (1UL << 4)
 #define RETURNED_FRAME           (1UL << 5)
 #define COPIED_FRAME             (1UL << 6)
+#define TX_PRIORITY              (1UL << 7)
 
 #endif // DEBUG_CONFIG_H

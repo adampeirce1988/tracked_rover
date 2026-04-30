@@ -13,15 +13,6 @@
 #define MAX_FRAME_SIZE(f) (sizeof (struct frame))
 #define DYNAMIC_FRAME_SIZE(f) (sizeof(struct frame) - MAX_PAYLOAD_LEN + (f).DLC)
 
-// ================= CONFIG ================= // moved to global config 
-// #define START_BYTE                0xFF
-// #define WDT_TIMEOUT_US            100
-// #define MAX_PAYLOAD_LEN           6
-// #define PACKET_INCREMENT          1
-// #define TX_MAX_RETRIES            3
-// #define ACK_WDT                   25
-
-
 
 // ================= ACK TYPES =================
 #define NORMAL_FRAME              0x00

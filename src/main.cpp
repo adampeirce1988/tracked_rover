@@ -8,10 +8,10 @@
 #define DEBUG_FILE DBG_ESP_MAIN
 
 // will be removed in after testing.
-#define PACKET_DELAY 500
-#define MSG_RATE     250
 
-bool rand_data = false;
+#define MSG_RATE     500
+
+bool rand_data = true;
 
 bool uart_type = 0; // used to control the update funtion of the fifo_io simulated uart. 
 
@@ -25,7 +25,7 @@ uint8_t rx_status = 0;
 uint32_t last_msg = 0; 
 
 uint8_t packets = 0; 
-uint8_t no_of_tests = 1;
+uint8_t no_of_tests = 10;
 
 struct frame protocol_frame;
 
@@ -63,22 +63,26 @@ void loop() {
 
     //check for frame ready
     if(rx_status == FRAME_READY){
-      DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "MAIN", "Packet received" );
+      DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "MAIN", "Packet received" );
       transport_get_frame(&protocol_frame);
-      //DEBUG_PRINT_DATA_FRAME(DEBUG_FILE, DEBUG_MSG, RETURNED_FRAME, "068", START_BYTE, "complete frame rceived fromt transport:", protocol_frame);
-      DEBUG_PORT.println("***************** NEW MSG ********************");
+      DEBUG_PRINT_DATA_FRAME(DEBUG_FILE, DEBUG_MSG, RETURNED_FRAME, "068", START_BYTE, "complete frame rceived fromt transport:", protocol_frame);
+
       packets ++; //increment to only send 5 packes this will reduce the amount od data to debug
 
       // if true stop the program. 
       if(packets == no_of_tests){
-        while(1){}
+        while(1){
+          DEBUG_PORT.println("TRUE");
+          rx_status = read_data_frame();
+          tx_status = send_data_frame(); 
+          fifo_io_uart_engine_update();
+        }
       }
     }
     
 
     if(tx_status == TX_IDLE_STATE && (millis() - last_msg) > MSG_RATE){
-      
-      DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "MAIN", "Packet sent" );
+      DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "MAIN", "Packet sent" );
       transport_pack_and_send_packet(type, ack, dlc, data); // normal frame. 
       last_msg = millis();
     }
