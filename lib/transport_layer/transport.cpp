@@ -6,11 +6,11 @@
 #include <Arduino.h>
 #include <string.h>
 #include "transport.h"
-#include "transport_uart.h"
-#include "transport_fifo.h"
 #include "global_config.h"
-//#include "debug.h"
-//#include "debug_config.h"
+#include "self_test.h"
+#include "log.h"
+#include "debug.h"
+#include "messages.h"
 
 
 // defines the name od the debug macro for this file
@@ -29,13 +29,13 @@
 
 
 // ===== PRIVATE PROTOTYPES =====
-
+static uint8_t calculate_crc(struct frame *f);
 static uint8_t inline_crc_calc(uint8_t CRC, uint8_t byte);
 static bool rx_msg_wdt_check();
 static void transmit_packet(struct frame *f);
 static bool pack_message(uint8_t type, uint8_t ack, uint8_t id, uint8_t dlc, uint8_t *data, struct frame *ptr);
 static void pack_ack(uint8_t type, uint8_t id, struct frame *f);
-static void  copy_frame(struct frame *source, struct frame *destination);
+static void copy_frame(struct frame *source, struct frame *destination);
 
 //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
@@ -62,13 +62,13 @@ enum RX_STATE{
 //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
 
-struct tx_packet{
+struct transmit_packet{
   struct frame f;  
   bool waiting = false;
   uint8_t error_code = 0;
 };
 
-struct tx_ack_packet{
+struct transmit_ack_packet{
   struct frame f;
   bool waiting = false; 
   bool retry = false; 
@@ -79,7 +79,7 @@ struct tx_ack_packet{
   uint8_t error_code = 0; 
 };
 
-struct rx_packet{
+struct receive_packet{
   struct frame f; 
   uint8_t crc_check = 0; 
   uint8_t payload_position = 0; 
@@ -88,35 +88,47 @@ struct rx_packet{
   bool frame_ready = false; 
 };
 
-struct rx_ack{
+struct receive_ack{
   uint8_t TYPE = 0x00; 
   uint8_t ID = 0x00;
   bool ack_valid = false; 
-
 };
 
-//////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////
 
 // structure to send a priority frame. 
-struct tx_packet tx_priority_packet;
-struct tx_packet tx_normal_packet; 
-struct tx_ack_packet tx_pending_ack ;
-struct rx_packet rx_packet; 
-struct rx_ack rx_ack;
+struct transmit_packet tx_priority_packet;
+struct transmit_packet tx_normal_packet; 
+struct transmit_ack_packet tx_pending_ack;
+struct receive_packet rx_packet; 
+struct receive_ack rx_ack;
 
 struct frame *active;                                  // active frame for sending data 
 Transport_IO *current_transport = DEFAULT_TRANSPORT;   // communication port struct defined in transport.h and initialized in main.cpp
 
 // global variables
-uint32_t last_read_byte = 0x00; 
-uint32_t tx_wdt_timestamp = 0; 
-uint32_t rx_wdt_timestamp = 0; 
-uint8_t packet_id = 0x01; 
+static uint32_t last_read_byte = 0x00; 
+static uint32_t rx_wdt_timestamp = 0; 
+static uint8_t packet_id = 0x01; 
+
+// test variabls. 
+            uint32_t tx_start_timestamp = 0; 
+            uint32_t tx_end_timestamp = 0;
+            uint32_t longest_tx_time = 0; 
+
+            uint32_t rx_start_timestamp = 0;
+            uint32_t rx_end_timestamp = 0;
+            uint32_t longest_rx_time = 0;
+
+struct error_log_struct {
+  uint8_t tx_failures = 0;
+  uint8_t ack_missmatched = 0; 
+  uint8_t ack_not_received = 0;
+};
+
+struct error_log_struct error_log; 
 
 
-//////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool transport_set(Transport_IO *io){
   if(io == NULL){
@@ -150,9 +162,24 @@ static uint8_t inline_crc_calc(uint8_t CRC, uint8_t byte){
   return CRC;
 }
 
+static uint8_t calculate_crc(struct frame *f){
 
+  uint8_t crc = 0; 
 
-void flush_struct(struct frame *f){  // repalce tx / rx flush wth this make public!
+  crc = inline_crc_calc(crc, f->TYPE);
+  crc = inline_crc_calc(crc, f->ACK);
+  crc = inline_crc_calc(crc, f->ID);
+  crc = inline_crc_calc(crc, f->DLC);
+
+  if(f->DLC > 0){
+    for(uint8_t i = 0; i < f->DLC; i++){
+      crc = inline_crc_calc(crc, f->payload[i]);
+    }
+  }
+  return crc;
+}
+
+static void flush_struct(struct frame *f){ 
   f->TYPE = 0x00;
   f->ACK = 0x00;
   f->ID = 0x00;
@@ -163,14 +190,11 @@ void flush_struct(struct frame *f){  // repalce tx / rx flush wth this make publ
   f->CRC = 0x00;
 }
 
-
-void transport_pack_and_send_packet(uint8_t type, uint8_t ack, uint8_t dlc, uint8_t *data){
-
+void transport_queue_message(uint8_t type, uint8_t ack, uint8_t dlc, uint8_t *data){
   // send ack frame
   if(ack == ACK_RESPONSE){
     pack_ack(type, rx_packet.f.ID, &tx_priority_packet.f);
     tx_priority_packet.waiting = true;
-    
     DEBUG_PRINT_DATA_FRAME(DEBUG_FILE, DEBUG_MSG, TX_ACK_MSG, "199", START_BYTE, "ACK_PAC", tx_priority_packet.f);
   }
   else if(pack_message(type, ack, packet_id, dlc, data, &tx_normal_packet.f) == true){
@@ -180,6 +204,7 @@ void transport_pack_and_send_packet(uint8_t type, uint8_t ack, uint8_t dlc, uint
   // report an error with pack fuction
   else{
     DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "TX", "Failed to pack message. Message not sent.");
+   
     tx_state = TX_STATE_FAILED;
     return;
   }
@@ -202,17 +227,8 @@ static bool pack_message(uint8_t type, uint8_t ack, uint8_t id, uint8_t dlc, uin
   for(uint8_t i = 0; i < f->DLC; i++){
     f->payload[i] = data[i];
   }
-  f->CRC = 0; 
+  f->CRC = calculate_crc(f); 
 
-  // calculate CRC for data frame
-  f->CRC = inline_crc_calc(f->CRC, f->TYPE);
-  f->CRC = inline_crc_calc(f->CRC, f->ACK);
-  f->CRC = inline_crc_calc(f->CRC, f->ID);
-  f->CRC = inline_crc_calc(f->CRC, f->DLC);
-  for(uint8_t i = 0; i < dlc; i++){ 
-    f->CRC = inline_crc_calc(f->CRC, f->payload[i]);
-  }  
-  
   // debug print the packed frame before sendingg the frame.
   DEBUG_PRINT_DATA_PTR_FRAME(DEBUG_FILE, DEBUG_MSG, TX_PACK_MSG, "244", START_BYTE, "PAC_PTR", f);
   return true;
@@ -227,14 +243,7 @@ static void pack_ack(uint8_t type, uint8_t id, struct frame *f){
   f->ACK = ACK_RESPONSE;
   f->ID = id;
   f->DLC = 0x00; // no data to sent in ACK.
-  f->CRC = 0; 
-
-  // calculate CRC for ACK frame 
-  f->CRC = inline_crc_calc(f->CRC, f->TYPE);
-  f->CRC = inline_crc_calc(f->CRC, f->ACK);
-  f->CRC = inline_crc_calc(f->CRC, f->ID);
-  f->CRC = inline_crc_calc(f->CRC, f->DLC);
-
+  f->CRC = calculate_crc(f); 
 }
 
 void transport_get_frame(struct frame *out){
@@ -242,8 +251,8 @@ void transport_get_frame(struct frame *out){
   DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "MSG", "receive frame returned to protocal layer");
 }
 
-
 static bool rx_msg_wdt_check(){
+
   if(rx_state != RX_STATE_WAIT_START && (micros() - last_read_byte) > MSG_WDT_TIMEOUT_US){
     DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_ERROR, "WDT", "rx incoming data watchdog timer timeout. elapsed time: ", (micros() - last_read_byte), "us");
     DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "WDT", "watchdog timer timout occoured in rx_state: ", rx_state);
@@ -266,18 +275,18 @@ static void transmit_packet(struct frame *f){
   current_transport->write(f->CRC);
 }
 
-void copy_frame(struct frame *source, struct frame *destination){
-  *destination = *source; 
+void copy_frame(struct frame *scr, struct frame *dst){
+  *dst = *scr; 
 
-  DEBUG_PRINT_DATA_PTR_FRAME(DEBUG_FILE, DEBUG_INFO, COPIED_FRAME, "318", START_BYTE, " copy from frame passed to copy. FROM: ", source);
-  DEBUG_PRINT_DATA_PTR_FRAME(DEBUG_FILE, DEBUG_INFO, COPIED_FRAME, "319",START_BYTE, "copy to frame returned after copy opperation. TO:", destination);
+  DEBUG_PRINT_DATA_PTR_FRAME(DEBUG_FILE, DEBUG_INFO, COPIED_FRAME, "318", START_BYTE, " copy from frame passed to copy. FROM: ", scr);
+  DEBUG_PRINT_DATA_PTR_FRAME(DEBUG_FILE, DEBUG_INFO, COPIED_FRAME, "319",START_BYTE, "copy to frame returned after copy opperation. TO:", dst);
   
   return;
 }
 
 ///////////////// RECEIVE DATA FRAME ////////////////////
 
-uint8_t read_data_frame(){
+uint8_t update_rx_fsm(){
   
   uint8_t rx_return_status = RX_STATE_IDLE; //initiates the return value
   
@@ -291,6 +300,8 @@ uint8_t read_data_frame(){
       case RX_STATE_WAIT_START: 
 
       if(incoming == START_BYTE){
+        //log start of read
+        rx_start_timestamp = micros();
 
         flush_struct(&rx_packet.f);
 
@@ -369,11 +380,10 @@ uint8_t read_data_frame(){
       
       case RX_STATE_READ_DLC: 
         if(incoming > ARRAY_SIZE(rx_packet.f.payload)){
-          
           rx_return_status = DLC_OVER_CAPACITY;
           rx_packet.error_code = DLC_OVER_CAPACITY;
           rx_state = RX_STATE_ERROR;
-        }
+        } 
         else{
           rx_packet.f.DLC = incoming;
           rx_packet.crc_check = inline_crc_calc(rx_packet.crc_check, incoming);
@@ -420,9 +430,13 @@ uint8_t read_data_frame(){
           rx_state = RX_STATE_ERROR;
           rx_return_status = CRC_ERROR; 
           rx_packet.error_code = CRC_ERROR;
+
+          // log an error for the self test 
+          SELFTEST_LOG_EVENT(EVENT_CRC_ERROR);
         }
         else{ 
           DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "CRC", "CRC check OK.");
+          
 
           if(rx_packet.f.ACK == ACK_REQUEST){
             DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "RX", "responding to ACK request.");
@@ -430,6 +444,7 @@ uint8_t read_data_frame(){
             tx_priority_packet.waiting = true;
           }
           else if(rx_packet.f.ACK == ACK_RESPONSE){ 
+            SELFTEST_LOG_EVENT(EVENT_ACK_RECEIVED);
             DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "ACK", "received ack response. ");
             rx_ack.TYPE = rx_packet.f.TYPE;
             rx_ack.ID = rx_packet.f.ID;
@@ -437,10 +452,15 @@ uint8_t read_data_frame(){
             rx_return_status = ACK_READY;
           } 
           else{
+            SELFTEST_LOG_EVENT(EVENT_PACKET_RECEIVED);
             rx_packet.frame_ready = true; 
             rx_return_status = FRAME_READY; 
           }
-
+          // log end time and update the logest time if greater than the longest. 
+          rx_end_timestamp = micros();
+          if(rx_end_timestamp - rx_start_timestamp > longest_rx_time){
+            longest_rx_time = rx_end_timestamp - rx_start_timestamp;
+          }
           rx_state = RX_STATE_WAIT_START;
 
           DEBUG_STREAM_END(DEBUG_FILE, DEBUG_STREAM, incoming);
@@ -450,19 +470,36 @@ uint8_t read_data_frame(){
     
 
       case RX_STATE_ERROR: 
-        if(rx_packet.error_code == INVALID_TYPE)             { /*report type error here*/ }
-        else if(rx_packet.error_code == ACK_OUT_OF_RANGE )   {DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "ACK", "out of range ACK: ", rx_packet.f.ACK);}
-        else if(rx_packet.error_code == DLC_OVER_CAPACITY)   {DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "RX", "DLC greater that payload capacity: ", ARRAY_SIZE(rx_packet.f.payload));}
-        else if(rx_packet.error_code == PAYLOAD_OVERFLOW)    {DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "DLC", "Payload exceded DLC: ", rx_packet.payload_position);}
-        else if(rx_packet.error_code == MSG_TIMEOUT_ERROR)   {DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_ERROR, "RX", "RX watch dog timer trigered elapsed time: ", CONVERT_US_TO_MS((rx_wdt_timestamp - last_read_byte)), "ms");}
-        else if(rx_packet.error_code == CRC_ERROR)           {DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "CRC", "CRC check NOK. calculated CRC: ", rx_packet.crc_check);}
+        if(rx_packet.error_code == INVALID_TYPE){
+           /*report type error here*/
+        }
+        else if(rx_packet.error_code == ACK_OUT_OF_RANGE ){
+          DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "ACK", "out of range ACK: ", rx_packet.f.ACK);
+          SELFTEST_LOG_EVENT(EVENT_ACK_OUT_OF_RANGE);
+        }
+        else if(rx_packet.error_code == DLC_OVER_CAPACITY){
+          DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "RX", "DLC greater that payload capacity: ", ARRAY_SIZE(rx_packet.f.payload));
+          SELFTEST_LOG_EVENT(EVENT_DLC_EXCEDED_MAX);
+        }
+        else if(rx_packet.error_code == PAYLOAD_OVERFLOW){
+          DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "DLC", "Payload exceded DLC: ", rx_packet.payload_position);
+          SELFTEST_LOG_EVENT(EVENT_PAYLOAD_OVERFLOW);
+        }
+        else if(rx_packet.error_code == MSG_TIMEOUT_ERROR){
+          DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_ERROR, "RX", "RX watch dog timer trigered elapsed time: ", CONVERT_US_TO_MS((rx_wdt_timestamp - last_read_byte)), "ms");
+          SELFTEST_LOG_EVENT(EVENT_RX_TIMEOUT);
+        }
+        else if(rx_packet.error_code == CRC_ERROR){
+          DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "CRC", "CRC check NOK. calculated CRC: ", rx_packet.crc_check);
+          SELFTEST_LOG_EVENT(EVENT_CRC_ERROR);
+        }
         
         rx_state = RX_STATE_WAIT_START;
       break;
     }
   }
-  // cehcek the message WTD for timeout error rest only if the state is idle nad rx is in progress
-  if(rx_msg_wdt_check() == true && rx_state != RX_STATE_WAIT_START && rx_return_status == RX_STATE_IDLE ){
+  // cehcek the message WTD for timeout error rest only if the state is idle nad rx is in progress(removed wdt check ignotrd if RX_STATE_IDLE)
+  if(rx_msg_wdt_check() == true && rx_state != RX_STATE_WAIT_START){
     rx_wdt_timestamp = micros();
     rx_state = RX_STATE_ERROR;
     rx_return_status =  MSG_TIMEOUT_ERROR; 
@@ -475,15 +512,17 @@ uint8_t read_data_frame(){
 
 ///////////////// SEND DATA FRAME ////////////////////
  
-uint8_t send_data_frame(){
+uint8_t update_tx_fsm(){
 
   uint8_t tx_return_status = 0; 
+
   // priorities the message based on the type. (ACK, RESEND, NORMAL)
   if((tx_state == TX_STATE_IDLE) && (tx_priority_packet.waiting == true)){
     active = &tx_priority_packet.f;
     DEBUG_PRINT_DATA_FRAME(DEBUG_FILE, DEBUG_MSG, TX_PRIORITY, "487", START_BYTE, "PRIORITY", tx_priority_packet.f);
     tx_priority_packet.waiting = false; 
     tx_state = TX_STATE_SENDING;
+    SELFTEST_LOG_EVENT(EVENT_ACK_SENT);  //log sent acks
   }
   else if((tx_state == TX_STATE_IDLE) && (tx_pending_ack.retry == true)){
     active = &tx_pending_ack.f;
@@ -491,9 +530,10 @@ uint8_t send_data_frame(){
     tx_pending_ack.retry = false; 
   }
   else if((tx_state == TX_STATE_IDLE) && tx_normal_packet.waiting == true){
-      active = &tx_normal_packet.f;
-      tx_normal_packet.waiting = false; 
-      tx_state = TX_STATE_SENDING;  
+    active = &tx_normal_packet.f;
+    tx_normal_packet.waiting = false; 
+    tx_state = TX_STATE_SENDING; 
+    SELFTEST_LOG_EVENT(EVENT_PACKET_SENT);  // log sent packets 
   }
 
   switch(tx_state){
@@ -504,17 +544,13 @@ uint8_t send_data_frame(){
     
 
     case TX_STATE_SENDING:{ 
-        //transmit data packet rx_packet is not currently used
-        //if(current_transport->available()){
-          transmit_packet(active);
-          DEBUG_PRINT_DATA_PTR_FRAME(DEBUG_FILE, DEBUG_MSG, TX_FRAME, "533", START_BYTE, "TX_PTR", active);
-        ///}
-        // else{
-        //   DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_ERROR, "TX", "tx serail buffer full. peding: ", (MAX_SERIAL_BUFFER_SIZE - sizeof(tx_normal_packet.f)), " bytes");
-        //   tx_state = TX_STATE_FAILED;
-        //   tx_return_status = TX_BUFFER_OVERFLOW;
 
-        // }
+        // calculate time taken to send 
+        tx_start_timestamp = micros();
+
+        //transmit data packet rx_packet is not currently used
+        transmit_packet(active);
+        DEBUG_PRINT_DATA_PTR_FRAME(DEBUG_FILE, DEBUG_MSG, TX_FRAME, "533", START_BYTE, "TX_PTR", active);
 
         if(active->ACK == ACK_REQUEST){
           copy_frame(active, &tx_pending_ack.f);
@@ -548,6 +584,8 @@ uint8_t send_data_frame(){
           
           tx_state = TX_STATE_IDLE;
           tx_return_status = RESENDING_MSG;
+          SELFTEST_LOG_EVENT(EVENT_TX_MAX_RETIRES);
+          
         }
         else{
           // report ack not received
@@ -556,6 +594,7 @@ uint8_t send_data_frame(){
           tx_pending_ack .error_code = ACK_NOT_RECEVIED; 
           tx_state = TX_STATE_FAILED;
           tx_return_status = TX_ERROR;
+
         }
       break;
     }
@@ -563,13 +602,15 @@ uint8_t send_data_frame(){
     case TX_STATE_SUCCESS:{
         DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "TX", "TX transmission successful.");
 
-        packet_id ++; // only incremt on sucsesfull transmition never set to 0. 
-        if(packet_id == 0){
-          packet_id = 1; 
-        }
+        packet_id  = packet_id + 1;
 
         tx_state = TX_STATE_IDLE; // this is line 527
         tx_return_status = TX_SUCCESS;
+
+        tx_end_timestamp = micros();
+        if(tx_end_timestamp - tx_start_timestamp > longest_tx_time){
+          longest_tx_time = tx_end_timestamp - tx_start_timestamp;
+        }
       break;
     }
 
@@ -578,14 +619,20 @@ uint8_t send_data_frame(){
         if(tx_pending_ack.error_code == ACK_NOT_RECEVIED){
           DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_ERROR, "TX", "No ACK receeived after ", tx_pending_ack .retry_counter, " attemps.");
           DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "TX", "packet failed to send");
+          SELFTEST_LOG_EVENT(EVENT_ACK_TIMEOUT);
         }
         else if(tx_pending_ack.error_code == ACK_MISMATCHED){
           DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "TX", "ACK mismatched received ack ID: ", rx_packet.f.ID);
           DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "TX", "ACK mismatched received TYPE: ", rx_packet.f.TYPE);
+          SELFTEST_LOG_EVENT(EVENT_ACK_MISMATCH);
         }
         else if(tx_pending_ack.error_code == TX_BUFFER_OVERFLOW || tx_priority_packet.error_code == TX_BUFFER_OVERFLOW || tx_normal_packet.error_code == TX_BUFFER_OVERFLOW){
           DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "TX", "failed to send packet due to serial bufer overflow. ");
+          SELFTEST_LOG_EVENT(EVENT_TX_BUFF_OVERFLOW);
         }
+
+        // increment total failures 
+        error_log.tx_failures ++;
 
         tx_state = TX_STATE_IDLE;
         tx_return_status = TX_ERROR;
@@ -601,8 +648,8 @@ uint8_t send_data_frame(){
 
   // check for ack confirmation here!
   if(rx_ack.ack_valid == true){ 
-    if(rx_packet.f.TYPE == rx_ack.TYPE && rx_ack.ID == tx_pending_ack.f.ID){
-        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "TX", "ack received cheked OK.");
+    if(tx_pending_ack.f.TYPE == rx_ack.TYPE && tx_pending_ack.f.ID == rx_ack.ID){
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "TX", "ack received cheked OK.");
     
         tx_pending_ack.waiting  = false;
 

@@ -46,18 +46,15 @@
 
 // ================= TX RETURN CODES =================
 #define TX_IDLE_STATE             0
-#define TX_PENDING_ACK            2
-#define TX_TRANSMITING            1
-//#define TYPE_MISMATCH           4
-#define ACK_WDT_TIMEOUT           5
-//#define TX_RETRIES_FAILED       6
-#define RESENDING_MSG             7
-#define TX_SUCCESS                8
-#define TX_ERROR                  9
-#define ACK_NOT_RECEVIED          10
-#define ACK_MISMATCHED            11 
-#define ACK_WDT_TIMEOUT           5
-#define TX_BUFFER_OVERFLOW        12
+#define TX_PENDING_ACK            1
+#define TX_TRANSMITING            2
+#define RESENDING_MSG             3
+#define TX_SUCCESS                4
+#define TX_ERROR                  5
+#define ACK_NOT_RECEVIED          6
+#define ACK_MISMATCHED            7 
+#define ACK_WDT_TIMEOUT           8
+#define TX_BUFFER_OVERFLOW        9
 
 
 
@@ -88,21 +85,23 @@ extern Transport_IO fifo_io;
 extern Transport_IO uart_io; 
 
 // ================= API function calls =================
-
-
-// franinstine debug 
-uint8_t get_ava();
-
 //transport function calls 
+// fifo uart io
 void coms_port_begin(uint32_t baud_rate);
-bool transport_set(Transport_IO *io);
-void transport_pack_and_send_packet(uint8_t type, uint8_t ack, uint8_t dlc, uint8_t *data);
-void transport_get_frame(struct frame *out);
-void com_port_open();
-uint8_t read_data_frame();
-uint8_t send_data_frame();
-void print_frame(struct frame *f);
 void fifo_io_uart_engine_update(); 
+
+// transport 
+void com_port_open();
+bool transport_set(Transport_IO *io);
+void transport_queue_message(uint8_t type, uint8_t ack, uint8_t dlc, uint8_t *data);
+void transport_get_frame(struct frame *out);
+
+// update state machines must be called in order each loop 
+uint8_t update_rx_fsm();
+uint8_t update_tx_fsm();
+
+
+
 
 
 

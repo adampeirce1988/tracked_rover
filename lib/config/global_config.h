@@ -6,6 +6,13 @@
 #define TARGET_PLATFORM ESP32
 //#define TARGET_PLATFORM MEGA2650
 
+//=================== main config ====================
+
+#define DIAGNOSTIC_WT_TIMEOUT_MS  3000
+
+//===================================================
+
+
 //================= transport config =================
 
 // Ddefault transport type 
@@ -18,7 +25,7 @@
 #define PENDING_ACK_QUEUE_SOZE     2
 //////////////////////////////////////
 
-#define START_BYTE                 0xFF                  // default start byte 0xFF
+//#define START_BYTE                 0xFF                  // default start byte 0xFF
 #define MSG_WDT_TIMEOUT_US         35000                 // message watchdog time for bytes received updated after evey read in RX (us)  
 #define ACK_WDT_TIMEOUT_US         65000                 // watch dog timer for ack (us)
 #define MAX_PAYLOAD_LEN            6                     // maximum payload of message frame 

@@ -1,6 +1,5 @@
 
 #include <Arduino.h>
-#include "transport_fifo.h"
 #include "transport.h"
 #include "global_config.h"
 #include "debug.h"
