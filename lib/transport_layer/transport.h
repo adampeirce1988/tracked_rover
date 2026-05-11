@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include "global_config.h"
 
+
 // ================= MACROS =================
 //transport macros 
 #define FRAME_SIZE(f) (sizeof(struct frame) - MAX_PAYLOAD_LEN + (f).DLC)
@@ -13,6 +14,7 @@
 #define MAX_FRAME_SIZE(f) (sizeof (struct frame))
 #define DYNAMIC_FRAME_SIZE(f) (sizeof(struct frame) - MAX_PAYLOAD_LEN + (f).DLC)
 
+#define START_BYTE                0xFF
 
 // ================= ACK TYPES =================
 #define NORMAL_FRAME              0x00

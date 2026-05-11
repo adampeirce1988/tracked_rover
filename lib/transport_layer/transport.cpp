@@ -7,6 +7,7 @@
 #include <string.h>
 #include "transport.h"
 #include "global_config.h"
+#include "global.h"
 #include "self_test.h"
 #include "log.h"
 #include "debug.h"
@@ -224,9 +225,11 @@ static bool pack_message(uint8_t type, uint8_t ack, uint8_t id, uint8_t dlc, uin
   f->ACK = ack;
   f->ID = id;
   f->DLC = dlc;
-  for(uint8_t i = 0; i < f->DLC; i++){
-    f->payload[i] = data[i];
-  }
+  if(data != NULL){ // added this line to handle no data calls (remove comment once tested.)
+    for(uint8_t i = 0; i < f->DLC; i++){
+      f->payload[i] = data[i];
+    }
+  }  
   f->CRC = calculate_crc(f); 
 
   // debug print the packed frame before sendingg the frame.
@@ -652,6 +655,9 @@ uint8_t update_tx_fsm(){
         DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "TX", "ack received cheked OK.");
     
         tx_pending_ack.waiting  = false;
+        
+        // update system watchdog for the last vaid comms.
+        update_last_valid_comms();
 
         rx_ack.TYPE = 0x00;
         rx_ack.ID = 0x00;

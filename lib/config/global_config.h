@@ -9,6 +9,7 @@
 //=================== main config ====================
 
 #define DIAGNOSTIC_WT_TIMEOUT_MS  3000
+#define SYSTEM_NOT_ALIVE_TIMEOUT  500                   // start with 500ms (tune value once tested)
 
 //===================================================
 
