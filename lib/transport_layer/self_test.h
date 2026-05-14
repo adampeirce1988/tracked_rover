@@ -5,7 +5,7 @@
 #include "global_config.h"
 #include "debug.h"
 
-//=============== test status cdes ================ 
+//=============== test status codes ================ 
 #define SELFTEST_RUNNING             1
 #define SELFTEST_PASSED              2
 #define SELFTEST_FAILED              3 
