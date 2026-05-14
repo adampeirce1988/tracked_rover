@@ -7,7 +7,7 @@
 #define DEBUG_FILE_MASK   (DBG_ESP_MAIN)
 // define the levels of debuging required here
   //#define DEBUG_LEVEL_MASK  ( DEBUG_META | DEBUG_ERROR | DEBUG_MSG )
-  #define DEBUG_LEVEL_MASK  (DEBUG_META | DEBUG_ERROR | DEBUG_INFO)
+  #define DEBUG_LEVEL_MASK  (DEBUG_META | DEBUG_ERROR | DEBUG_WARN)
   //#define DEBUG_LEVEL_MASK  (DEBUG_STREAM | DEBUG_INFO | DBG_DEBUG)
   //#define DEBUG_LEVEL_MASK (DEBUG_NONE)  // use with arduino uno only
 
@@ -51,4 +51,5 @@
 #define COPIED_FRAME             (1UL << 6)
 #define TX_PRIORITY              (1UL << 7)
 
-#endif // DEBUG_CONFIG_H
+
+#endif 

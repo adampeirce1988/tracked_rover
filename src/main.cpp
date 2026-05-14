@@ -33,11 +33,11 @@ bool selftest_state = false;
 
 uint32_t diagnostics_WDT = 0; 
 
-// set starting vehicle state. 
+//decalir variables and set starting vehicle state. 
 VEHICLE_STATE vehicle_state = VEHICLE_STATE::SAFE_STATE;               // set vehicle to safe state on boot.
 VEHICLE_STATE return_state = VEHICLE_STATE::SAFE_STATE;                // store the state to return to once diagnostics is complete.     
 
-struct frame protocol_frame; 
+
 uint8_t tx_status = 0; 
 uint8_t rx_status = 0; 
 
@@ -78,11 +78,13 @@ void run_vehicle_state(){
     case VEHICLE_STATE::SAFE_STATE:
 
       //send out a request for confirmation of receiving node
-      if(!sys::connection_established && millis() - sys::last_connection_attempt > 1000){
+      if(!sys::bus_connectivity_status && millis() - sys::last_connection_attempt > 1000){
         update_last_connection_attempt(); 
         establish_coms();
       }
-      else if(sys::connection_established == true){ // I2C check not needed for ESP. Arduino will return an error if the bus is offline.
+      
+      // check all system flags move to idle
+      if(check_system_health_flags()){ // I2C check not needed for ESP. Arduino will return an error if the bus is offline.
         request_vehicle_state_change(VEHICLE_STATE::IDLE);
       } 
       else{
@@ -95,6 +97,11 @@ void run_vehicle_state(){
 
     case VEHICLE_STATE::IDLE:
 
+      // on request for diagnostics a test case must be requested 
+      request_vehicle_state_change(VEHICLE_STATE::DIAGNOSTICS);
+
+
+
       // comunication established and all buses live.
       // heartbeat monitored and upated. 
       // able to select: 
@@ -103,31 +110,31 @@ void run_vehicle_state(){
       //    Diagnostic self tests. 
       //    retrieve error & data logs
 
-      //check and action timeout error
-      if(check_system_heartbeat_timeout()){request_vehicle_state_change(VEHICLE_STATE::SAFE_STATE);}
+      //
+      if(!check_system_health_flags()){request_vehicle_state_change(VEHICLE_STATE::SAFE_STATE);}
       break;
       case VEHICLE_STATE::MANUAL: 
 
       // operational commands accepted and vehicle drivable
     break;
 
-    case VEHICLE_STATE::DIAGNOSTICS:
+                        case VEHICLE_STATE::DIAGNOSTICS:
+                        
+                        selftest_state = run_test_case();
 
-    selftest_state = run_test_case();
+                        if(selftest_state == true ){ // this line has an error changd from SELFTEST_ENDED to true as a temp solution. 
+                          DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "MAIN", "self-test completed.");
+                        }
 
-    if(selftest_state == true ){ // this line has an error changd from SELFTEST_ENDED to true as a temp solution. 
-      DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "MAIN", "self-test completed.");
-    }
+                        // WDT timer check for diagnostics runs for total test time ensure this id longer than the longest test of calibration. 
+                        if(millis() - diagnostics_WDT > DIAGNOSTIC_WT_TIMEOUT_MS){
+                          DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "MAIN", "VEHICLE_STATE::DIAGNOSTICS Watchdog timer triggered.");
+                          request_vehicle_state_change(VEHICLE_STATE::SAFE_STATE);
+                        }
 
-    // WDT timer check for diagnostics runs for total test time ensure this id longer than the longest test of calibration. 
-    if(millis() - diagnostics_WDT > DIAGNOSTIC_WT_TIMEOUT_MS){
-      DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "MAIN", "VEHICLE_STATE::DIAGNOSTICS Watchdog timer triggered.");
-      request_vehicle_state_change(VEHICLE_STATE::SAFE_STATE);
-    }
-
-    //self-tests and calibrations can be run in ths requested
-    // heartbeat is not monitored but checked & confirmed before switching back to pre running. 
-    break;
+                        //self-tests and calibrations can be run in ths requested
+                        // heartbeat is not monitored but checked & confirmed before switching back to pre running. 
+                        break;
 
     case VEHICLE_STATE::EXIT_DIAGNOSTICS: 
       DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "MAIN", "None usable state called VEHICLE_STATE::EXIT_DIAGNOSTICS.");
@@ -228,7 +235,7 @@ bool request_vehicle_state_change(VEHICLE_STATE requested){
       break; 
 
       case VEHICLE_STATE::EXIT_DIAGNOSTICS: 
-        vehicle_state = VEHICLE_STATE::SAFE_STATE;
+        vehicle_state = return_state;
       break; 
 
       case VEHICLE_STATE::FAIL_SAFE:

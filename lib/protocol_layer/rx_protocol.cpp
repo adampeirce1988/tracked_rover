@@ -6,14 +6,26 @@
 #include "messages.h"
 #include "global_config.h"
 
+struct frame protocol_frame; 
 
-// if(data_available){
-//     // get the type and run the state machine look up function
-// }
 
-void rx_message_dispatcher(uint8_t type){ 
+void rx_message_dispatcher(struct frame *f){ 
+
+    uint8_t type; 
+
+    if(frame_avaliable() > 0){
+        transport_get_frame(&protocol_frame);
+        type = f->TYPE; 
+    }
+    else{
+        type = MSG_RESERVED_00;
+    }
 
     switch(type){
+
+        case MSG_RESERVED_00: 
+           return; // default reserved type 
+        break;  
     
         case MSG_ESTABLISH_COMMUNICATION:
             transport_queue_message(MSG_CONFIRM_COMMUNICATION, NORMAL_FRAME, 0, NULL);
@@ -21,7 +33,6 @@ void rx_message_dispatcher(uint8_t type){
 
         case MSG_CONFIRM_COMMUNICATION: 
             //uart_connection_established == true; 
-
             // update confirmed comunicatiob move the var to global.
         break; 
 
@@ -29,9 +40,6 @@ void rx_message_dispatcher(uint8_t type){
             // communication error
         break;
 
-
-
-    
     }
 
 

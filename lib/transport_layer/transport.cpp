@@ -113,12 +113,12 @@ static uint8_t packet_id = 0x01;
 
 // test variabls. 
             uint32_t tx_start_timestamp = 0; 
-            uint32_t tx_end_timestamp = 0;
             uint32_t longest_tx_time = 0; 
+            uint32_t shortest_tx_time = UINT32_MAX;
 
             uint32_t rx_start_timestamp = 0;
-            uint32_t rx_end_timestamp = 0;
             uint32_t longest_rx_time = 0;
+            uint32_t shortest_rx_time = UINT32_MAX;
 
 struct error_log_struct {
   uint8_t tx_failures = 0;
@@ -147,6 +147,15 @@ void fifo_io_uart_engine_update(){
 
 void coms_port_begin(uint32_t baud_rate){
   current_transport->begin(baud_rate);
+}
+
+uint8_t frame_avaliable(){
+  if(rx_packet.frame_ready == true){
+    return 1; 
+  }
+  else{
+    return 0; 
+  }
 }
 
 static uint8_t inline_crc_calc(uint8_t CRC, uint8_t byte){
@@ -460,10 +469,18 @@ uint8_t update_rx_fsm(){
             rx_return_status = FRAME_READY; 
           }
           // log end time and update the logest time if greater than the longest. 
-          rx_end_timestamp = micros();
-          if(rx_end_timestamp - rx_start_timestamp > longest_rx_time){
-            longest_rx_time = rx_end_timestamp - rx_start_timestamp;
+          uint32_t total_rx_frame_time = millis() - tx_start_timestamp;
+          
+          // log the selftest event
+          ST_LOG_EVENT(EVENT_RX_LATANCY, total_rx_frame_time);
+
+          if(total_rx_frame_time > longest_rx_time){
+            longest_rx_time = total_rx_frame_time;
           }
+          else if(total_rx_frame_time < shortest_rx_time){
+            shortest_rx_time = total_rx_frame_time; 
+          }
+
           rx_state = RX_STATE_WAIT_START;
 
           DEBUG_STREAM_END(DEBUG_FILE, DEBUG_STREAM, incoming);
@@ -610,9 +627,17 @@ uint8_t update_tx_fsm(){
         tx_state = TX_STATE_IDLE; // this is line 527
         tx_return_status = TX_SUCCESS;
 
-        tx_end_timestamp = micros();
-        if(tx_end_timestamp - tx_start_timestamp > longest_tx_time){
-          longest_tx_time = tx_end_timestamp - tx_start_timestamp;
+        // store thelongest and shotest tx transmission times add to non_self test metrics later. 
+        uint32_t total_tx_frame_time = micros() - rx_start_timestamp;
+
+        // log the selftest event 
+        ST_LOG_EVENT(EVENT_TX_LATANCY, total_tx_frame_time);
+
+        if(total_tx_frame_time > longest_tx_time){
+          longest_tx_time = total_tx_frame_time;
+        }
+        else if(total_tx_frame_time < shortest_tx_time){
+          shortest_tx_time = total_tx_frame_time; 
         }
       break;
     }

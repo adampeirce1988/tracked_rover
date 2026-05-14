@@ -78,8 +78,8 @@ extern selftest_metrics_t transport_test_log;
 // -----------------------------
 void ST_LOG_EVENT(LOG_EVENT event, uint32_t value = 0);
 void transpoert_log_clear();
-void set_transport_selftest_active();
-void set_transport_selftest_inactive();
+void set_transport_selftest_loging_active();
+void set_transport_selftest_loging_inactive();
 
 // -----------------------------
 // Logging macros

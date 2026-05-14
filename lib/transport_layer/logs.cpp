@@ -139,10 +139,10 @@ void ST_LOG_EVENT(LOG_EVENT event, uint32_t value) {
 // -----------------------------
 // Optional API
 // -----------------------------
-void set_transport_selftest_active() {
+void set_transport_selftest_loging_active() {
     transport_test_log.diagnostics_active = true;
 }
 
-void set_transport_selftest_inactive() {
+void set_transport_selftest_loging_inactive() {
     transport_test_log.diagnostics_active = false;
 }
