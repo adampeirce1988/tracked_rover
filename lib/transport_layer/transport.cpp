@@ -20,9 +20,7 @@
 // macro to calculate the size of an array
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 #define CONVERT_US_TO_MS(us) ((us) / 1000)
-
-
-#define UART_BITS_PER_BYTE 10
+#define UART_BITS_PER_BYTE 10.    // 8N1 byte type
 #define TX_BYTE_TRANSMISSION_TIME ((UART_BITS_PER_BYTE *1000000UL) / COMS_PORT_BAUD)
 
 #define SIZE_OF_HEAD 5 //START + TYPE + ACK + ID + DLC 
@@ -111,22 +109,9 @@ static uint32_t last_read_byte = 0x00;
 static uint32_t rx_wdt_timestamp = 0; 
 static uint8_t packet_id = 0x01; 
 
-// test variabls. 
-            uint32_t tx_start_timestamp = 0; 
-            uint32_t longest_tx_time = 0; 
-            uint32_t shortest_tx_time = UINT32_MAX;
-
-            uint32_t rx_start_timestamp = 0;
-            uint32_t longest_rx_time = 0;
-            uint32_t shortest_rx_time = UINT32_MAX;
-
-struct error_log_struct {
-  uint8_t tx_failures = 0;
-  uint8_t ack_missmatched = 0; 
-  uint8_t ack_not_received = 0;
-};
-
-struct error_log_struct error_log; 
+// Timestamps(us) 
+  uint32_t tx_start_timestamp = 0; 
+  uint32_t rx_start_timestamp = 0;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -443,8 +428,6 @@ uint8_t update_rx_fsm(){
           rx_return_status = CRC_ERROR; 
           rx_packet.error_code = CRC_ERROR;
 
-          // log an error for the self test 
-          SELFTEST_LOG_EVENT(EVENT_CRC_ERROR);
         }
         else{ 
           DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "CRC", "CRC check OK.");
@@ -464,22 +447,17 @@ uint8_t update_rx_fsm(){
             rx_return_status = ACK_READY;
           } 
           else{
-            SELFTEST_LOG_EVENT(EVENT_PACKET_RECEIVED);
+            SELFTEST_LOG_EVENT_VAL(EVENT_PACKET_RECEIVED, 0);
+            DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "NORM", "normal packet received ");
             rx_packet.frame_ready = true; 
             rx_return_status = FRAME_READY; 
           }
-          // log end time and update the logest time if greater than the longest. 
-          uint32_t total_rx_frame_time = millis() - tx_start_timestamp;
-          
-          // log the selftest event
-          ST_LOG_EVENT(EVENT_RX_LATANCY, total_rx_frame_time);
 
-          if(total_rx_frame_time > longest_rx_time){
-            longest_rx_time = total_rx_frame_time;
-          }
-          else if(total_rx_frame_time < shortest_rx_time){
-            shortest_rx_time = total_rx_frame_time; 
-          }
+          // log end time and update the logest time if greater than the longest. 
+          uint32_t total_rx_frame_time = micros() - rx_start_timestamp;
+
+          // log the selftest event
+          SELFTEST_LOG_EVENT_VAL(EVENT_RX_LATANCY, total_rx_frame_time);
 
           rx_state = RX_STATE_WAIT_START;
 
@@ -600,7 +578,7 @@ uint8_t update_tx_fsm(){
           tx_pending_ack.retry_counter ++; 
           tx_pending_ack.ack_timestamp = micros();
 
-          DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "TX", " ACK not receeived atteming to resend message. retry: ", tx_pending_ack .retry_counter);
+          DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "TX", " ACK not receeived atteming to resend message. retry: ", tx_pending_ack.retry_counter);
           
           tx_state = TX_STATE_IDLE;
           tx_return_status = RESENDING_MSG;
@@ -631,14 +609,8 @@ uint8_t update_tx_fsm(){
         uint32_t total_tx_frame_time = micros() - rx_start_timestamp;
 
         // log the selftest event 
-        ST_LOG_EVENT(EVENT_TX_LATANCY, total_tx_frame_time);
+        SELFTEST_LOG_EVENT_VAL(EVENT_TX_LATANCY, total_tx_frame_time);
 
-        if(total_tx_frame_time > longest_tx_time){
-          longest_tx_time = total_tx_frame_time;
-        }
-        else if(total_tx_frame_time < shortest_tx_time){
-          shortest_tx_time = total_tx_frame_time; 
-        }
       break;
     }
 
@@ -658,9 +630,6 @@ uint8_t update_tx_fsm(){
           DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "TX", "failed to send packet due to serial bufer overflow. ");
           SELFTEST_LOG_EVENT(EVENT_TX_BUFF_OVERFLOW);
         }
-
-        // increment total failures 
-        error_log.tx_failures ++;
 
         tx_state = TX_STATE_IDLE;
         tx_return_status = TX_ERROR;

@@ -25,6 +25,8 @@ extern uint32_t last_connection_attempt;
 extern bool bus_connectivity_status; 
 extern bool i2c_connectivity_status;
 
+extern bool diagnostics_active;
+
 // system alive flags.
 extern bool I2C_bus_alive;
 extern bool tranport_alive; 

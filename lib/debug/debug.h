@@ -188,6 +188,9 @@
       else if ((file_name) & DBG_ESP_OTA)         {DEBUG_PORT.print("[OTA]");}\
       else if ((file_name) & DBG_TRANSPORT_UART)  {DEBUG_PORT.print("[UART]");}\
       else if ((file_name) & DBG_TRANSPORT_FIFO)  {DEBUG_PORT.print("[FIFO]");}\
+      else if ((file_name) & DBG_SELF_TEST)       {DEBUG_PORT.print("[TEST]");}\
+      else if ((file_name) & DBG_SYSTEM)          {DEBUG_PORT.print("[SYS]");}\
+      else if ((file_name) & DBG_LOGS)            {DEBUG_PORT.print("[LOGS]");}\
       else{DEBUG_PORT.print("[----]");}\
     } while(0)
 

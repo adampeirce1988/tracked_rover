@@ -4,7 +4,7 @@
 
 // define the files that you would like to debug here
 // #define DEBUG_FILE_MASK   (DBG_ESP_MAIN | DBG_TRANSPORT | DBG_TRANSPORT_FIFO | DBG_SELF_TEST | DBG_LOGS | DBG_SYSTEM)
-#define DEBUG_FILE_MASK   (DBG_ESP_MAIN)
+#define DEBUG_FILE_MASK   (DBG_ESP_MAIN | DBG_SELF_TEST | DBG_TRANSPORT | DBG_LOGS)
 // define the levels of debuging required here
   //#define DEBUG_LEVEL_MASK  ( DEBUG_META | DEBUG_ERROR | DEBUG_MSG )
   #define DEBUG_LEVEL_MASK  (DEBUG_META | DEBUG_ERROR | DEBUG_WARN)
@@ -27,7 +27,7 @@
 #define DBG_SELF_TEST            (1UL << 8)
 #define DBG_LOGS                 (1UL << 9)
 #define DBG_SYSTEM               (1UL << 10)
-// shift to 16bit mask for expansion
+
 
 //------------ debug level bitmask------------ //
 

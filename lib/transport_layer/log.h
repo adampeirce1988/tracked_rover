@@ -68,6 +68,9 @@ typedef struct selftest_metrics {
     uint8_t crc_error;
     uint8_t rx_timeouts;
 
+    //total errors
+    uint8_t total_errors; 
+
 } selftest_metrics_t;
 
 // Global instance (defined in log.cpp)
@@ -77,7 +80,7 @@ extern selftest_metrics_t transport_test_log;
 // Logging API
 // -----------------------------
 void ST_LOG_EVENT(LOG_EVENT event, uint32_t value = 0);
-void transpoert_log_clear();
+void transport_selftest_log_clear();
 void set_transport_selftest_loging_active();
 void set_transport_selftest_loging_inactive();
 
@@ -87,7 +90,7 @@ void set_transport_selftest_loging_inactive();
 #define SELFTEST_LOG_EVENT(event) \
 do { \
     if (transport_test_log.diagnostics_active) { \
-        ST_LOG_EVENT(event); \
+        ST_LOG_EVENT(event, 0); \
     } \
 } while (0)
 
@@ -97,6 +100,7 @@ do { \
         ST_LOG_EVENT(event, value); \
     } \
 } while (0)
+
 
 #define PRINT_TRANSPORT_SELFTEST_LOG() \
 do { \
@@ -109,6 +113,7 @@ do { \
     DEBUG_PORT.print("tx avg latency(us): "); DEBUG_PORT.println(transport_test_log.tx_average_latency); \
     DEBUG_PORT.print("rx max latency(us): "); DEBUG_PORT.println(transport_test_log.rx_max_latency); \
     DEBUG_PORT.print("rx min latency(us): "); DEBUG_PORT.println(transport_test_log.rx_min_latency); \
+    DEBUG_PORT.print("rx avg latency(us): "); DEBUG_PORT.println(transport_test_log.rx_average_latency); \
     DEBUG_PORT.print("ack mismatch:       "); DEBUG_PORT.println(transport_test_log.ack_mismatch); \
     DEBUG_PORT.print("ack timeout:        "); DEBUG_PORT.println(transport_test_log.ack_timeout); \
     DEBUG_PORT.print("tx buffer overflow: "); DEBUG_PORT.println(transport_test_log.tx_buffer_overflow); \
@@ -118,6 +123,7 @@ do { \
     DEBUG_PORT.print("payload overflow:   "); DEBUG_PORT.println(transport_test_log.payload_overflow); \
     DEBUG_PORT.print("crc error:          "); DEBUG_PORT.println(transport_test_log.crc_error); \
     DEBUG_PORT.print("rx timeouts:        "); DEBUG_PORT.println(transport_test_log.rx_timeouts); \
+    DEBUG_PORT.print("total error count   "); DEBUG_PORT.println(transport_test_log.total_errors); \
 } while (0)
 
 #endif

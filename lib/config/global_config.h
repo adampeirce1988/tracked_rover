@@ -8,7 +8,7 @@
 
 //=================== main config ====================
 
-#define DIAGNOSTIC_WT_TIMEOUT_MS  3000
+#define DIAGNOSTIC_WT_TIMEOUT_MS  5000                   // max diagnostic test run time before a timeout error
 #define SYSTEM_NOT_ALIVE_TIMEOUT  2000                   // start with 500ms (tune value once tested)
 #define COMUNICATION_IDLE_WARN    1000
 #define COMUNICATION_IDLE_TIMEOUT 2000

@@ -29,7 +29,7 @@ bool request_vehicle_state_change(VEHICLE_STATE requested);
 
 // system variables 
 bool system_alive = true;
-bool selftest_state = false;  
+uint8_t selftest_state = 0;  
 
 uint32_t diagnostics_WDT = 0; 
 
@@ -45,7 +45,7 @@ uint8_t rx_status = 0;
 void setup(){
   // open debug port and print version data. 
   debug_port_begin();                                                    // open the debug port
-  delay(1000);                                                           // run 1s delay before transmitting data 
+  delay(3000);                                                           // run 1s delay before transmitting data 
   PRINT_VERSION_DATA(SW_VERSION, HARDWARE_VERSION, RELEASE_NOTES);       // print version and meta data 
 
   // set the current transport & baud rate. 
@@ -70,6 +70,7 @@ void loop() {
 //*******************************************************************************************/
 //*******************************************************************************************/
 
+bool call_once = true; 
 
 void run_vehicle_state(){
 
@@ -98,9 +99,11 @@ void run_vehicle_state(){
     case VEHICLE_STATE::IDLE:
 
       // on request for diagnostics a test case must be requested 
+      if(call_once){
+      DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "MAIN", "diagnostics called.");
       request_vehicle_state_change(VEHICLE_STATE::DIAGNOSTICS);
-
-
+      call_once = false;
+      }
 
       // comunication established and all buses live.
       // heartbeat monitored and upated. 
@@ -110,31 +113,36 @@ void run_vehicle_state(){
       //    Diagnostic self tests. 
       //    retrieve error & data logs
 
-      //
+  
       if(!check_system_health_flags()){request_vehicle_state_change(VEHICLE_STATE::SAFE_STATE);}
       break;
-      case VEHICLE_STATE::MANUAL: 
 
+      case VEHICLE_STATE::MANUAL: 
       // operational commands accepted and vehicle drivable
     break;
 
-                        case VEHICLE_STATE::DIAGNOSTICS:
-                        
-                        selftest_state = run_test_case();
+          case VEHICLE_STATE::DIAGNOSTICS:
 
-                        if(selftest_state == true ){ // this line has an error changd from SELFTEST_ENDED to true as a temp solution. 
-                          DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "MAIN", "self-test completed.");
-                        }
+          // this will need to be changed to a call from https: 
+          if(sys::diagnostics_active == false){ 
+            DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "MAIN", "diag_active change to true.");
+            sys::diagnostics_active = request_self_test(1); // request test 1 as this is the only test at present
+          }
+          
+          selftest_state = run_test_case();
 
-                        // WDT timer check for diagnostics runs for total test time ensure this id longer than the longest test of calibration. 
-                        if(millis() - diagnostics_WDT > DIAGNOSTIC_WT_TIMEOUT_MS){
-                          DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "MAIN", "VEHICLE_STATE::DIAGNOSTICS Watchdog timer triggered.");
-                          request_vehicle_state_change(VEHICLE_STATE::SAFE_STATE);
-                        }
-
-                        //self-tests and calibrations can be run in ths requested
-                        // heartbeat is not monitored but checked & confirmed before switching back to pre running. 
-                        break;
+          if(selftest_state == SELFTEST_COMPLETED){
+            DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "MAIN", "SELF_TEST COMPLETED!.");
+            update_last_connection_attempt();            //update the hearbeat before exiting to prvent false triger of safe
+            request_vehicle_state_change(VEHICLE_STATE::EXIT_DIAGNOSTICS);  // return to the previous state
+          }
+          
+          //WDT timer check for diagnostics runs for total test time ensure this id longer than the longest test of calibration. 
+          if(millis() - diagnostics_WDT > DIAGNOSTIC_WT_TIMEOUT_MS){
+            DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "MAIN", "VEHICLE_STATE::DIAGNOSTICS Watchdog timer triggered.");
+            request_vehicle_state_change(VEHICLE_STATE::EXIT_DIAGNOSTICS);
+          }
+          break;
 
     case VEHICLE_STATE::EXIT_DIAGNOSTICS: 
       DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "MAIN", "None usable state called VEHICLE_STATE::EXIT_DIAGNOSTICS.");
