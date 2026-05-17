@@ -646,7 +646,7 @@ uint8_t update_tx_fsm(){
   // check for ack confirmation here!
   if(rx_ack.ack_valid == true){ 
     if(tx_pending_ack.f.TYPE == rx_ack.TYPE && tx_pending_ack.f.ID == rx_ack.ID){
-        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "TX", "ack received cheked OK.");
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "TX", "ack received cheked OK.");
     
         tx_pending_ack.waiting  = false;
         

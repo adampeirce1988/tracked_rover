@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <HardwareSerial.h>
 #include "self_test.h"
+#include "log.h"
 #include "transport.h"
 #include "debug.h"
 #include "protocol.h"
@@ -126,7 +127,7 @@ void run_vehicle_state(){
           // this will need to be changed to a call from https: 
           if(sys::diagnostics_active == false){ 
             DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "MAIN", "diag_active change to true.");
-            sys::diagnostics_active = request_self_test(1); // request test 1 as this is the only test at present
+            sys::diagnostics_active = request_self_test(3); // request test 1 as this is the only test at present
           }
           
           selftest_state = run_test_case();
@@ -139,6 +140,12 @@ void run_vehicle_state(){
           
           //WDT timer check for diagnostics runs for total test time ensure this id longer than the longest test of calibration. 
           if(millis() - diagnostics_WDT > DIAGNOSTIC_WT_TIMEOUT_MS){
+            if(watchdog_test_active()){
+              ST_LOG_EVENT(EVENT_WDT_TRIGERED);
+              diagnostics_WDT += ST_WDT_EXTRA_TIME; 
+              DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "WDT", "event_wdt_trigered activated.");
+              break;
+            }
             DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "MAIN", "VEHICLE_STATE::DIAGNOSTICS Watchdog timer triggered.");
             request_vehicle_state_change(VEHICLE_STATE::EXIT_DIAGNOSTICS);
           }

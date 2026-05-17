@@ -7,7 +7,7 @@
 #define DEBUG_FILE_MASK   (DBG_ESP_MAIN | DBG_SELF_TEST | DBG_TRANSPORT | DBG_LOGS)
 // define the levels of debuging required here
   //#define DEBUG_LEVEL_MASK  ( DEBUG_META | DEBUG_ERROR | DEBUG_MSG )
-  #define DEBUG_LEVEL_MASK  (DEBUG_META | DEBUG_ERROR | DEBUG_WARN)
+  #define DEBUG_LEVEL_MASK  (DEBUG_META | DEBUG_NONE | DEBUG_ERROR | DEBUG_WARN)
   //#define DEBUG_LEVEL_MASK  (DEBUG_STREAM | DEBUG_INFO | DBG_DEBUG)
   //#define DEBUG_LEVEL_MASK (DEBUG_NONE)  // use with arduino uno only
 

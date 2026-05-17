@@ -11,6 +11,7 @@ enum LOG_EVENT {
     EVENT_PACKET_SENT,
     EVENT_PACKET_RECEIVED, 
     EVENT_ACK_SENT,
+    EVENT_DELAYED_PACKET,
     EVENT_ACK_RECEIVED, 
     EVENT_TX_MAX_RETIRES,
     EVENT_ACK_MISMATCH,
@@ -21,6 +22,7 @@ enum LOG_EVENT {
     EVENT_DLC_EXCEDED_MAX,
     EVENT_PAYLOAD_OVERFLOW,
     EVENT_CRC_ERROR,
+    EVENT_WDT_TRIGERED, 
     EVENT_RX_TIMEOUT,
     EVENT_TX_LATANCY,
     EVENT_RX_LATANCY,
@@ -43,16 +45,15 @@ typedef struct selftest_metrics {
     // Latency tracking
     uint8_t tx_latency_counter;
     uint8_t rx_latency_counter;
-
     uint16_t tx_max_latency;
     uint16_t tx_min_latency;
     uint16_t tx_average_latency;
     uint32_t tx_total_latency;
-
     uint16_t rx_max_latency;
     uint16_t rx_min_latency;
     uint16_t rx_average_latency;
     uint32_t rx_total_latency;
+    uint8_t delayed_packets;
 
     // TX failures
     uint8_t tx_retries;
@@ -70,6 +71,9 @@ typedef struct selftest_metrics {
 
     //total errors
     uint8_t total_errors; 
+
+    //Watchow test active flags 
+    bool diagnostics_wdt_test_result; 
 
 } selftest_metrics_t;
 
@@ -114,6 +118,7 @@ do { \
     DEBUG_PORT.print("rx max latency(us): "); DEBUG_PORT.println(transport_test_log.rx_max_latency); \
     DEBUG_PORT.print("rx min latency(us): "); DEBUG_PORT.println(transport_test_log.rx_min_latency); \
     DEBUG_PORT.print("rx avg latency(us): "); DEBUG_PORT.println(transport_test_log.rx_average_latency); \
+    DEBUG_PORT.print("delayed packets:    "); DEBUG_PORT.println(transport_test_log.delayed_packets); \
     DEBUG_PORT.print("ack mismatch:       "); DEBUG_PORT.println(transport_test_log.ack_mismatch); \
     DEBUG_PORT.print("ack timeout:        "); DEBUG_PORT.println(transport_test_log.ack_timeout); \
     DEBUG_PORT.print("tx buffer overflow: "); DEBUG_PORT.println(transport_test_log.tx_buffer_overflow); \
