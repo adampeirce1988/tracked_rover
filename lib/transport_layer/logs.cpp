@@ -101,60 +101,63 @@ void transport_selftest_log_clear(){
 // Main logging function
 // -----------------------------
 void ST_LOG_EVENT(LOG_EVENT event, uint32_t value) {
-    switch (event) {
-        case EVENT_PACKET_SENT: transport_test_log.packets_sent++; break;
-        case EVENT_PACKET_RECEIVED: transport_test_log.packets_received++; break;
-        case EVENT_ACK_SENT: transport_test_log.ack_sent++; break;
-        case EVENT_DELAYED_PACKET: transport_test_log.delayed_packets++; break; 
-        case EVENT_ACK_RECEIVED: transport_test_log.ack_received++; transport_test_log.packets_received++; break;
-        case EVENT_TX_MAX_RETIRES: transport_test_log.tx_retries++; transport_test_log.total_errors++; break;
-        case EVENT_ACK_MISMATCH: transport_test_log.ack_mismatch++; transport_test_log.total_errors++;break;
-        case EVENT_ACK_TIMEOUT: transport_test_log.ack_timeout++; transport_test_log.total_errors++;break;
-        case EVENT_TX_BUFF_OVERFLOW: transport_test_log.tx_buffer_overflow++; transport_test_log.total_errors++; break;
-        case EVENT_INVALID_TYPE: transport_test_log.invalid_type++; transport_test_log.total_errors++; break;
-        case EVENT_ACK_OUT_OF_RANGE: transport_test_log.ack_out_of_range++; transport_test_log.total_errors++; break;
-        case EVENT_DLC_EXCEDED_MAX: transport_test_log.dlc_exceeded_max++; transport_test_log.total_errors++; break;
-        case EVENT_PAYLOAD_OVERFLOW: transport_test_log.payload_overflow++; transport_test_log.total_errors++; break;
-        case EVENT_CRC_ERROR: transport_test_log.crc_error++; transport_test_log.total_errors++; break;
-        case EVENT_RX_TIMEOUT: transport_test_log.rx_timeouts++; transport_test_log.total_errors++; break;
-        case EVENT_WDT_TRIGERED: transport_test_log.diagnostics_wdt_test_result = true; break; 
+    if(transport_test_log.diagnostics_active){
+        
+        switch (event) {
+            case EVENT_PACKET_SENT: transport_test_log.packets_sent++; break;
+            case EVENT_PACKET_RECEIVED: transport_test_log.packets_received++; break;
+            case EVENT_ACK_SENT: transport_test_log.ack_sent++; break;
+            case EVENT_DELAYED_PACKET: transport_test_log.delayed_packets++; break; 
+            case EVENT_ACK_RECEIVED: transport_test_log.ack_received++; transport_test_log.packets_received++; break;
+            case EVENT_TX_MAX_RETIRES: transport_test_log.tx_retries++; transport_test_log.total_errors++; break;
+            case EVENT_ACK_MISMATCH: transport_test_log.ack_mismatch++; transport_test_log.total_errors++;break;
+            case EVENT_ACK_TIMEOUT: transport_test_log.ack_timeout++; transport_test_log.total_errors++;break;
+            case EVENT_TX_BUFF_OVERFLOW: transport_test_log.tx_buffer_overflow++; transport_test_log.total_errors++; break;
+            case EVENT_INVALID_TYPE: transport_test_log.invalid_type++; transport_test_log.total_errors++; break;
+            case EVENT_ACK_OUT_OF_RANGE: transport_test_log.ack_out_of_range++; transport_test_log.total_errors++; break;
+            case EVENT_DLC_EXCEDED_MAX: transport_test_log.dlc_exceeded_max++; transport_test_log.total_errors++; break;
+            case EVENT_PAYLOAD_OVERFLOW: transport_test_log.payload_overflow++; transport_test_log.total_errors++; break;
+            case EVENT_CRC_ERROR: transport_test_log.crc_error++; transport_test_log.total_errors++; break;
+            case EVENT_RX_TIMEOUT: transport_test_log.rx_timeouts++; transport_test_log.total_errors++; break;
+            case EVENT_WDT_TRIGERED: transport_test_log.diagnostics_wdt_test_result = true; break; 
 
-        case EVENT_TX_LATANCY:
-            if (value == 0) {
-                DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "LOGS", "tx_latency updated with 0");
+            case EVENT_TX_LATANCY:
+                if (value == 0) {
+                    DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "LOGS", "tx_latency updated with 0");
+                    break;
+                }
+                if (value > transport_test_log.tx_max_latency){
+                    transport_test_log.tx_max_latency = value;
+                }
+                if (value < transport_test_log.tx_min_latency){
+                    transport_test_log.tx_min_latency = value;
+                }
+                
+                update_tx_average_latency(value);
                 break;
-            }
-            if (value > transport_test_log.tx_max_latency){
-                transport_test_log.tx_max_latency = value;
-            }
-            if (value < transport_test_log.tx_min_latency){
-                transport_test_log.tx_min_latency = value;
-            }
-            
-            update_tx_average_latency(value);
+
+            case EVENT_RX_LATANCY:
+                if (value == 0) {
+                    DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "LOGS", "rx_latency updated with 0");
+                    break;
+                }
+                if (value > transport_test_log.rx_max_latency){
+                    transport_test_log.rx_max_latency = value;
+                }
+                if (value < transport_test_log.rx_min_latency){
+                    DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "LOGS", "rx_latency_min latancty: ", transport_test_log.rx_min_latency);    
+                    transport_test_log.rx_min_latency = value;
+                }
+                
+                update_rx_average_latency(value);
             break;
 
-        case EVENT_RX_LATANCY:
-            if (value == 0) {
-                DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "LOGS", "rx_latency updated with 0");
+            case EVENT_CLEAR_LOG:
+                transport_test_log = (selftest_metrics_t){0};
+                transport_test_log.tx_min_latency = UINT16_MAX;
+                transport_test_log.rx_min_latency = UINT16_MAX;
                 break;
-            }
-            if (value > transport_test_log.rx_max_latency){
-                transport_test_log.rx_max_latency = value;
-            }
-            if (value < transport_test_log.rx_min_latency){
-                DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "LOGS", "rx_latency_min latancty: ", transport_test_log.rx_min_latency);    
-                transport_test_log.rx_min_latency = value;
-            }
-            
-            update_rx_average_latency(value);
-        break;
-
-        case EVENT_CLEAR_LOG:
-            transport_test_log = (selftest_metrics_t){0};
-            transport_test_log.tx_min_latency = UINT16_MAX;
-            transport_test_log.rx_min_latency = UINT16_MAX;
-            break;
+        }
     }
 }
 

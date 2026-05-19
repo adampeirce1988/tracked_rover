@@ -91,19 +91,9 @@ void set_transport_selftest_loging_inactive();
 // -----------------------------
 // Logging macros
 // -----------------------------
-#define SELFTEST_LOG_EVENT(event) \
-do { \
-    if (transport_test_log.diagnostics_active) { \
-        ST_LOG_EVENT(event, 0); \
-    } \
-} while (0)
+#define SELFTEST_LOG_EVENT(event) do{ST_LOG_EVENT(event, 0);} while (0)
 
-#define SELFTEST_LOG_EVENT_VAL(event, value) \
-do { \
-    if (transport_test_log.diagnostics_active) { \
-        ST_LOG_EVENT(event, value); \
-    } \
-} while (0)
+#define SELFTEST_LOG_EVENT_VAL(event, value) do{ST_LOG_EVENT(event, value);} while (0)
 
 
 #define PRINT_TRANSPORT_SELFTEST_LOG() \

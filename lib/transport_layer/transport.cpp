@@ -245,6 +245,7 @@ static void pack_ack(uint8_t type, uint8_t id, struct frame *f){
 
 void transport_get_frame(struct frame *out){
   *out = rx_packet.f;
+  rx_packet.frame_ready = false; 
   DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "MSG", "receive frame returned to protocal layer");
 }
 
@@ -606,7 +607,7 @@ uint8_t update_tx_fsm(){
         tx_return_status = TX_SUCCESS;
 
         // store thelongest and shotest tx transmission times add to non_self test metrics later. 
-        uint32_t total_tx_frame_time = micros() - rx_start_timestamp;
+        uint32_t total_tx_frame_time = micros() - tx_start_timestamp;
 
         // log the selftest event 
         SELFTEST_LOG_EVENT_VAL(EVENT_TX_LATANCY, total_tx_frame_time);

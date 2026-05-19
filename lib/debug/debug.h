@@ -7,6 +7,7 @@
 
   extern void debug_port_begin();
 
+  // print the version data defined in global_config.h
   #define PRINT_VERSION_DATA(sw_version, hardware_version, release_notes)\
     do{\
       DEBUG_PORT.println(sw_version);\
@@ -14,6 +15,23 @@
       DEBUG_PORT.println(release_notes);\
     } while(0)
   
+
+    // print a progress bar
+    #define PRINT_PROGRESS_BAR_START()\
+    do {\
+      DEBUG_PORT.print("PROGRESS: ");\
+    } while(0)
+
+  #define PRINT_PROGRESS_BAR_PROGRESS()\
+    do {\
+      DEBUG_PORT.print("*");\
+    } while(0)
+
+    #define PRINT_PROGRESS_BAR_END()\
+    do {\
+      DEBUG_PORT.println(" 100%");\
+    } while(0)  
+
 
   #define DEBUG_PRINT_MSG(file, level, type, msg)\
     do {\
