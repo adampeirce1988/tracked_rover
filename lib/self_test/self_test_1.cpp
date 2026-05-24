@@ -23,8 +23,8 @@ uint8_t self_test_1(uint8_t no_of_packets, uint16_t delay_time_us, bool random_d
 
         self_test::next_transmission_time = micros();
         // print information (only at the sart of the test)
-        DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_NONE, "TEST", "running self_test_1 good packet test: ", no_of_packets, " msgs.");
-        DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_NONE, "TEST", "self_test_1 tests packets transmitted speed: ", delay_time_us, " us");
+        DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_META, "TEST", "running self_test_1 good packet test: ", no_of_packets, " msgs.");
+        DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_META, "TEST", "self_test_1 tests packets transmitted speed: ", delay_time_us, " us");
     }
 
     // create a non-blocking loop to only send packts after alocatred time. 

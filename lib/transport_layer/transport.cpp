@@ -35,6 +35,7 @@ static void transmit_packet(struct frame *f);
 static bool pack_message(uint8_t type, uint8_t ack, uint8_t id, uint8_t dlc, uint8_t *data, struct frame *ptr);
 static void pack_ack(uint8_t type, uint8_t id, struct frame *f);
 static void copy_frame(struct frame *source, struct frame *destination);
+static void reset_rx_message_struct();
 
 //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
@@ -105,6 +106,8 @@ struct frame *active;                                  // active frame for sendi
 Transport_IO *current_transport = DEFAULT_TRANSPORT;   // communication port struct defined in transport.h and initialized in main.cpp
 
 // global variables
+
+
 static uint32_t last_read_byte = 0x00; 
 static uint32_t rx_wdt_timestamp = 0; 
 static uint8_t packet_id = 0x01; 
@@ -112,6 +115,9 @@ static uint8_t packet_id = 0x01;
 // Timestamps(us) 
   uint32_t tx_start_timestamp = 0; 
   uint32_t rx_start_timestamp = 0;
+  uint32_t total_rx_frame_time = 0;
+  uint32_t total_tx_frame_time = 0;
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -214,6 +220,7 @@ static bool pack_message(uint8_t type, uint8_t ack, uint8_t id, uint8_t dlc, uin
 
   // flush the ack struct before packaging the frame.
   flush_struct(f); // flush the struct before packaging the frame  
+
   // pack frame with passed data.
   f->TYPE = type;
   f->ACK = ack;
@@ -225,6 +232,9 @@ static bool pack_message(uint8_t type, uint8_t ack, uint8_t id, uint8_t dlc, uin
     }
   }  
   f->CRC = calculate_crc(f); 
+
+  // if error injection config is set inject an error. 
+  tx_frame_error_injection(f);
 
   // debug print the packed frame before sendingg the frame.
   DEBUG_PRINT_DATA_PTR_FRAME(DEBUG_FILE, DEBUG_MSG, TX_PACK_MSG, "244", START_BYTE, "PAC_PTR", f);
@@ -250,7 +260,6 @@ void transport_get_frame(struct frame *out){
 }
 
 static bool rx_msg_wdt_check(){
-
   if(rx_state != RX_STATE_WAIT_START && (micros() - last_read_byte) > MSG_WDT_TIMEOUT_US){
     DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_ERROR, "WDT", "rx incoming data watchdog timer timeout. elapsed time: ", (micros() - last_read_byte), "us");
     DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "WDT", "watchdog timer timout occoured in rx_state: ", rx_state);
@@ -259,6 +268,21 @@ static bool rx_msg_wdt_check(){
   else{
     return false; 
   }
+}
+
+void reset_rx_message_struct(){
+  rx_packet.f.TYPE = 0;
+  rx_packet.f.ACK = 0;
+  rx_packet.f.ID = 0;
+  rx_packet.f.DLC = 0;
+  for(uint8_t i = 0; i < MAX_PAYLOAD_LEN; i++){
+    rx_packet.f.payload[i] = 0;
+  }
+  rx_packet.f.CRC = 0; 
+  rx_packet.crc_check = 0; 
+  rx_packet.error_code = 0; 
+  rx_packet.frame_ready = false; 
+  rx_packet.payload_position = 0; 
 }
 
 static void transmit_packet(struct frame *f){
@@ -282,42 +306,63 @@ void copy_frame(struct frame *scr, struct frame *dst){
   return;
 }
 
+uint16_t get_tx_latancy(){  
+  if(total_tx_frame_time > UINT16_MAX){
+    return UINT16_MAX; 
+  }
+
+  return total_tx_frame_time; 
+}
+
+uint16_t get_rx_latancy(){
+  if(total_rx_frame_time > UINT16_MAX){
+    return UINT16_MAX; 
+  }
+
+  return total_rx_frame_time;  
+}
+
+
 ///////////////// RECEIVE DATA FRAME ////////////////////
 
 uint8_t update_rx_fsm(){
   
-  uint8_t rx_return_status = RX_STATE_IDLE; //initiates the return value
-  
-  if (current_transport->available() > 0){
+  uint8_t rx_return_status = RX_RETURN_CODES::RX_STATE_IDLE; //initiates the return value
+  uint8_t avaliable_bytes = current_transport->available();  // get the current amount of data
+  uint8_t incoming = 0; 
+
+  if(avaliable_bytes > 0 || rx_state == RX_STATE_ERROR){
     
-    uint8_t incoming = current_transport->read();
-    last_read_byte = micros();
+    // only read bytes if data avaliable.  
+    if(avaliable_bytes > 0 && rx_state != RX_STATE_ERROR){
+      incoming = current_transport->read();
+      last_read_byte = micros();
+    }
 
     switch(rx_state){
 
       case RX_STATE_WAIT_START: 
+        if(incoming == START_BYTE){
+          //log start of read
+          rx_start_timestamp = micros();
 
-      if(incoming == START_BYTE){
-        //log start of read
-        rx_start_timestamp = micros();
+          flush_struct(&rx_packet.f);
 
-        flush_struct(&rx_packet.f);
+          rx_packet.crc_check = 0;
+          rx_packet.payload_position = 0;
+          rx_packet.error_code = 0; 
+          rx_packet.ack_response = false; 
+          rx_packet.frame_ready = false; 
 
-        rx_packet.crc_check = 0;
-        rx_packet.payload_position = 0;
-        rx_packet.error_code = 0; 
-        rx_packet.ack_response = false; 
-        rx_packet.frame_ready = false; 
+          rx_state = RX_STATE_READ_TYPE;
+          rx_return_status = RX_RETURN_CODES::START_RECEIVED;
 
-        rx_state = RX_STATE_READ_TYPE;
-        rx_return_status = START_RECEIVED;
-
-        DEBUG_PRINT_MSG_VAL_HEX(DEBUG_FILE, DEBUG_INFO, "RX", "start byte received: ", incoming);
-        DEBUG_STREAM_START(DEBUG_FILE, DEBUG_STREAM, "RX", incoming);
-      }
-      else{
-        rx_return_status = WAITING_FOR_START;
-      }
+          DEBUG_PRINT_MSG_VAL_HEX(DEBUG_FILE, DEBUG_INFO, "RX", "start byte received: ", incoming);
+          DEBUG_STREAM_START(DEBUG_FILE, DEBUG_STREAM, "RX", incoming);
+        }
+        else{
+          rx_return_status = RX_RETURN_CODES::WAITING_FOR_START;
+        }
       break;
 
       case RX_STATE_READ_TYPE:
@@ -326,7 +371,7 @@ uint8_t update_rx_fsm(){
         rx_packet.crc_check = inline_crc_calc(rx_packet.crc_check, incoming);
 
         rx_state = RX_STATE_READ_ACK;
-        rx_return_status = TYPE_RECEIVED;
+        rx_return_status = RX_RETURN_CODES::TYPE_RECEIVED;
 
         DEBUG_STREAM_DATA(DEBUG_FILE, DEBUG_STREAM, incoming);
       break;
@@ -341,27 +386,27 @@ uint8_t update_rx_fsm(){
         if(rx_packet.f.ACK == ACK_REQUEST){
           DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "ACK", "ACK request received.");
           rx_state = RX_STATE_READ_ID;
-          rx_return_status = ACK_REQUEST_RECEIVED;
+          rx_return_status = RX_RETURN_CODES::ACK_REQUEST_RECEIVED;
         }
         else if(rx_packet.f.ACK == ACK_RESPONSE){
           DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "ACK", "ACK response received.");
           rx_state = RX_STATE_READ_ID;
-          rx_return_status = ACK_RESPONSE_RECEIVED;
+          rx_return_status = RX_RETURN_CODES::ACK_RESPONSE_RECEIVED;
         }
         else if(rx_packet.f.ACK == NACK){
           DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "ACK", "NACK request received.");
           rx_state = RX_STATE_READ_ID;
-          rx_return_status = NACK_REQUEST_RECEIVED;
+          rx_return_status = RX_RETURN_CODES::NACK_REQUEST_RECEIVED;
         }
         else if(rx_packet.f.ACK == NORMAL_FRAME){
           DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "ACK", "normal frame received.");
           rx_state = RX_STATE_READ_ID;
-          rx_return_status = NORMAL_FRAME_RECEIVED;
+          rx_return_status = RX_RETURN_CODES::NORMAL_FRAME_RECEIVED;
         }
         else{
           // handel ack out of range error 
-          rx_packet.error_code = ACK_OUT_OF_RANGE;
-          rx_return_status = ACK_OUT_OF_RANGE;
+          rx_packet.error_code = RX_RETURN_CODES::ACK_OUT_OF_RANGE;
+          rx_return_status = RX_RETURN_CODES::ACK_OUT_OF_RANGE;
           rx_state = RX_STATE_ERROR;
         }
       break;
@@ -370,29 +415,31 @@ uint8_t update_rx_fsm(){
         rx_packet.f.ID = incoming;
         rx_packet.crc_check = inline_crc_calc(rx_packet.crc_check, incoming);
         
-        rx_state = RX_STATE_READ_DLC;
-        rx_return_status = ID_RECEIVED; 
-
         DEBUG_STREAM_DATA(DEBUG_FILE, DEBUG_STREAM, incoming);
+
+        rx_state = RX_STATE_READ_DLC;
+        rx_return_status = RX_RETURN_CODES::ID_RECEIVED; 
       break;
       
       case RX_STATE_READ_DLC: 
         if(incoming > ARRAY_SIZE(rx_packet.f.payload)){
-          rx_return_status = DLC_OVER_CAPACITY;
-          rx_packet.error_code = DLC_OVER_CAPACITY;
+          rx_return_status = RX_RETURN_CODES::DLC_OVER_CAPACITY;
+          rx_packet.error_code = RX_RETURN_CODES::DLC_OVER_CAPACITY;
           rx_state = RX_STATE_ERROR;
         } 
         else{
           rx_packet.f.DLC = incoming;
           rx_packet.crc_check = inline_crc_calc(rx_packet.crc_check, incoming);
 
+          DEBUG_STREAM_DATA(DEBUG_FILE, DEBUG_STREAM, incoming);
+
           if(rx_packet.f.DLC == 0){
             rx_state = RX_STATE_READ_CRC;
-            rx_return_status = DLC_RECEIVED;
+            rx_return_status = RX_RETURN_CODES::DLC_RECEIVED;
           }
           else{
             rx_state = RX_STATE_READ_PAYLOAD;
-            rx_return_status = DLC_RECEIVED;
+            rx_return_status = RX_RETURN_CODES::DLC_RECEIVED;
           }
         }
       break; 
@@ -403,37 +450,40 @@ uint8_t update_rx_fsm(){
           rx_packet.crc_check = inline_crc_calc(rx_packet.crc_check, incoming);
           rx_packet.payload_position ++; 
           
-          rx_return_status = RECEIVING_DATA;
+          rx_return_status = RX_RETURN_CODES::RECEIVING_DATA;
 
           DEBUG_STREAM_DATA(DEBUG_FILE, DEBUG_STREAM, incoming);
         }
         if (rx_packet.payload_position == rx_packet.f.DLC){
           rx_state = RX_STATE_READ_CRC;
-          rx_return_status = PAYLOAD_COMPLETE;
+          rx_return_status = RX_RETURN_CODES::PAYLOAD_COMPLETE;
         }
         else if (rx_packet.payload_position > rx_packet.f.DLC){
           // error detected
           rx_state = RX_STATE_ERROR;
-          rx_return_status = PAYLOAD_OVERFLOW; 
-          rx_packet.error_code = PAYLOAD_OVERFLOW;
+          rx_return_status = RX_RETURN_CODES::PAYLOAD_OVERFLOW; 
+          rx_packet.error_code = RX_RETURN_CODES::PAYLOAD_OVERFLOW;
         }
       break;
 
       case RX_STATE_READ_CRC:
 
         rx_packet.f.CRC = incoming;
-      
+        
+        // print / stream received frame. 
+        DEBUG_STREAM_END(DEBUG_FILE, DEBUG_STREAM, incoming);
+        DEBUG_PRINT_DATA_FRAME(DEBUG_FILE, DEBUG_MSG, RX_FRAME, "462", START_BYTE, "[RX]", rx_packet.f);
+
         // check and report corupt frames
         if(rx_packet.crc_check != rx_packet.f.CRC){
+          rx_return_status = RX_RETURN_CODES::CRC_ERROR; 
+          rx_packet.error_code = RX_RETURN_CODES::CRC_ERROR;
           rx_state = RX_STATE_ERROR;
-          rx_return_status = CRC_ERROR; 
-          rx_packet.error_code = CRC_ERROR;
-
+          break; // TEST 
         }
         else{ 
           DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "CRC", "CRC check OK.");
           
-
           if(rx_packet.f.ACK == ACK_REQUEST){
             DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "RX", "responding to ACK request.");
             pack_ack(rx_packet.f.TYPE, rx_packet.f.ID, &tx_priority_packet.f);
@@ -445,54 +495,54 @@ uint8_t update_rx_fsm(){
             rx_ack.TYPE = rx_packet.f.TYPE;
             rx_ack.ID = rx_packet.f.ID;
             rx_ack.ack_valid = true;
-            rx_return_status = ACK_READY;
+            rx_return_status = RX_RETURN_CODES::ACK_READY;
           } 
           else{
             SELFTEST_LOG_EVENT_VAL(EVENT_PACKET_RECEIVED, 0);
             DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "NORM", "normal packet received ");
             rx_packet.frame_ready = true; 
-            rx_return_status = FRAME_READY; 
+            rx_return_status = RX_RETURN_CODES::FRAME_READY; 
           }
 
           // log end time and update the logest time if greater than the longest. 
-          uint32_t total_rx_frame_time = micros() - rx_start_timestamp;
+          total_rx_frame_time = micros() - rx_start_timestamp;
 
           // log the selftest event
           SELFTEST_LOG_EVENT_VAL(EVENT_RX_LATANCY, total_rx_frame_time);
 
           rx_state = RX_STATE_WAIT_START;
-
-          DEBUG_STREAM_END(DEBUG_FILE, DEBUG_STREAM, incoming);
-          DEBUG_PRINT_DATA_FRAME(DEBUG_FILE, DEBUG_MSG, RX_FRAME, "462", START_BYTE, "[RX]", rx_packet.f);
         }  
       break;
     
 
       case RX_STATE_ERROR: 
-        if(rx_packet.error_code == INVALID_TYPE){
+        if(rx_packet.error_code == RX_RETURN_CODES::INVALID_TYPE){
            /*report type error here*/
         }
-        else if(rx_packet.error_code == ACK_OUT_OF_RANGE ){
+        else if(rx_packet.error_code == RX_RETURN_CODES::ACK_OUT_OF_RANGE ){
           DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "ACK", "out of range ACK: ", rx_packet.f.ACK);
           SELFTEST_LOG_EVENT(EVENT_ACK_OUT_OF_RANGE);
         }
-        else if(rx_packet.error_code == DLC_OVER_CAPACITY){
+        else if(rx_packet.error_code == RX_RETURN_CODES::DLC_OVER_CAPACITY){
           DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "RX", "DLC greater that payload capacity: ", ARRAY_SIZE(rx_packet.f.payload));
           SELFTEST_LOG_EVENT(EVENT_DLC_EXCEDED_MAX);
         }
-        else if(rx_packet.error_code == PAYLOAD_OVERFLOW){
+        else if(rx_packet.error_code == RX_RETURN_CODES::PAYLOAD_OVERFLOW){
           DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "DLC", "Payload exceded DLC: ", rx_packet.payload_position);
           SELFTEST_LOG_EVENT(EVENT_PAYLOAD_OVERFLOW);
         }
-        else if(rx_packet.error_code == MSG_TIMEOUT_ERROR){
+        else if(rx_packet.error_code == RX_RETURN_CODES::MSG_TIMEOUT_ERROR){
           DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_ERROR, "RX", "RX watch dog timer trigered elapsed time: ", CONVERT_US_TO_MS((rx_wdt_timestamp - last_read_byte)), "ms");
           SELFTEST_LOG_EVENT(EVENT_RX_TIMEOUT);
         }
-        else if(rx_packet.error_code == CRC_ERROR){
+        else if(rx_packet.error_code == RX_RETURN_CODES::CRC_ERROR){
           DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "CRC", "CRC check NOK. calculated CRC: ", rx_packet.crc_check);
           SELFTEST_LOG_EVENT(EVENT_CRC_ERROR);
         }
         
+        // reset all rx packet data. 
+        reset_rx_message_struct();
+
         rx_state = RX_STATE_WAIT_START;
       break;
     }
@@ -501,8 +551,8 @@ uint8_t update_rx_fsm(){
   if(rx_msg_wdt_check() == true && rx_state != RX_STATE_WAIT_START){
     rx_wdt_timestamp = micros();
     rx_state = RX_STATE_ERROR;
-    rx_return_status =  MSG_TIMEOUT_ERROR; 
-    rx_packet.error_code = MSG_TIMEOUT_ERROR;
+    rx_return_status =  RX_RETURN_CODES::MSG_TIMEOUT_ERROR; 
+    rx_packet.error_code = RX_RETURN_CODES::MSG_TIMEOUT_ERROR;
   }
 
   return rx_return_status;
@@ -538,7 +588,7 @@ uint8_t update_tx_fsm(){
   switch(tx_state){
 
     case TX_STATE_IDLE:
-      tx_return_status = TX_IDLE_STATE; 
+      tx_return_status = TX_RETURN_CODES::TX_IDLE_STATE; 
     break;
     
 
@@ -561,11 +611,11 @@ uint8_t update_tx_fsm(){
           tx_pending_ack.ack_timestamp = micros();
           
           tx_state = TX_STATE_SUCCESS;
-          tx_return_status = TX_PENDING_ACK;
+          tx_return_status = TX_RETURN_CODES::TX_PENDING_ACK;
         }
         else{
           tx_state = TX_STATE_SUCCESS;
-          tx_return_status = TX_TRANSMITING;
+          tx_return_status = TX_RETURN_CODES::TX_TRANSMITING;
         }
       break; 
     }
@@ -582,7 +632,7 @@ uint8_t update_tx_fsm(){
           DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "TX", " ACK not receeived atteming to resend message. retry: ", tx_pending_ack.retry_counter);
           
           tx_state = TX_STATE_IDLE;
-          tx_return_status = RESENDING_MSG;
+          tx_return_status = TX_RETURN_CODES::RESENDING_MSG;
           SELFTEST_LOG_EVENT(EVENT_TX_MAX_RETIRES);
           
         }
@@ -590,9 +640,9 @@ uint8_t update_tx_fsm(){
           // report ack not received
           tx_pending_ack .failed = true;
 
-          tx_pending_ack .error_code = ACK_NOT_RECEVIED; 
+          tx_pending_ack .error_code = TX_RETURN_CODES::ACK_NOT_RECEVIED; 
           tx_state = TX_STATE_FAILED;
-          tx_return_status = TX_ERROR;
+          tx_return_status = TX_RETURN_CODES::TX_TRANSMISION_ERROR;
 
         }
       break;
@@ -604,10 +654,10 @@ uint8_t update_tx_fsm(){
         packet_id  = packet_id + 1;
 
         tx_state = TX_STATE_IDLE; // this is line 527
-        tx_return_status = TX_SUCCESS;
+        tx_return_status = TX_RETURN_CODES::TX_TRANSMISION_SUCCESS;
 
         // store thelongest and shotest tx transmission times add to non_self test metrics later. 
-        uint32_t total_tx_frame_time = micros() - tx_start_timestamp;
+        total_tx_frame_time = micros() - tx_start_timestamp;
 
         // log the selftest event 
         SELFTEST_LOG_EVENT_VAL(EVENT_TX_LATANCY, total_tx_frame_time);
@@ -617,23 +667,23 @@ uint8_t update_tx_fsm(){
 
     case TX_STATE_FAILED:{
         // report ack errors 
-        if(tx_pending_ack.error_code == ACK_NOT_RECEVIED){
+        if(tx_pending_ack.error_code == TX_RETURN_CODES::ACK_NOT_RECEVIED){
           DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_ERROR, "TX", "No ACK receeived after ", tx_pending_ack .retry_counter, " attemps.");
           DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "TX", "packet failed to send");
           SELFTEST_LOG_EVENT(EVENT_ACK_TIMEOUT);
         }
-        else if(tx_pending_ack.error_code == ACK_MISMATCHED){
+        else if(tx_pending_ack.error_code == TX_RETURN_CODES::ACK_MISMATCHED){
           DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "TX", "ACK mismatched received ack ID: ", rx_packet.f.ID);
           DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "TX", "ACK mismatched received TYPE: ", rx_packet.f.TYPE);
           SELFTEST_LOG_EVENT(EVENT_ACK_MISMATCH);
         }
-        else if(tx_pending_ack.error_code == TX_BUFFER_OVERFLOW || tx_priority_packet.error_code == TX_BUFFER_OVERFLOW || tx_normal_packet.error_code == TX_BUFFER_OVERFLOW){
+        else if(tx_pending_ack.error_code == TX_RETURN_CODES::TX_BUFFER_OVERFLOW || tx_priority_packet.error_code == TX_RETURN_CODES::TX_BUFFER_OVERFLOW || tx_normal_packet.error_code == TX_RETURN_CODES::TX_BUFFER_OVERFLOW){
           DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "TX", "failed to send packet due to serial bufer overflow. ");
           SELFTEST_LOG_EVENT(EVENT_TX_BUFF_OVERFLOW);
         }
 
         tx_state = TX_STATE_IDLE;
-        tx_return_status = TX_ERROR;
+        tx_return_status = TX_RETURN_CODES::TX_TRANSMISION_ERROR;
       break;  
     }
   }
@@ -664,8 +714,8 @@ uint8_t update_tx_fsm(){
       rx_ack.ack_valid = false;
 
       tx_state = TX_STATE_FAILED;
-      tx_return_status = ACK_MISMATCHED;
-      tx_pending_ack.error_code = ACK_MISMATCHED; 
+      tx_return_status = TX_RETURN_CODES::ACK_MISMATCHED;
+      tx_pending_ack.error_code = TX_RETURN_CODES::ACK_MISMATCHED; 
     }
   }
 

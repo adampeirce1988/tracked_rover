@@ -10,20 +10,18 @@
 
 bool request_vehicle_state_change(VEHICLE_STATE requested){
 
-  switch(vehicle_state){
+  switch(active_vehicle_state){
 
     case VEHICLE_STATE::SAFE_STATE:
       if(requested == VEHICLE_STATE::SAFE_STATE){
-        sys::verbous_current_state = "SAFE_STATE";
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "MAIN", "Current state already active requested: VEHICLE_STATE::SAFE_STATE");
       }
       else if(requested == VEHICLE_STATE::IDLE && health_test_status == true){
-        vehicle_state = VEHICLE_STATE::IDLE;
-        sys::verbous_current_state = "IDLE";
+        active_vehicle_state = VEHICLE_STATE::IDLE;
       }
       else if(requested == VEHICLE_STATE::DIAGNOSTICS){
         return_state = VEHICLE_STATE::SAFE_STATE;
-        vehicle_state = VEHICLE_STATE::DIAGNOSTICS;
-        sys::verbous_current_state = "DIAGNOSTICS";
+        active_vehicle_state = VEHICLE_STATE::DIAGNOSTICS;
         diagnostics_WDT = millis();
       }
       else{
@@ -35,18 +33,15 @@ bool request_vehicle_state_change(VEHICLE_STATE requested){
 
     case VEHICLE_STATE::IDLE:
       if(requested == VEHICLE_STATE::SAFE_STATE){
-        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "MAIN", "ERROR: VEHICLE_STATE::SAFE_STATE requested from IDLE.");
-        vehicle_state = VEHICLE_STATE::SAFE_STATE; 
-        sys::verbous_current_state = "SAFE_STATE";
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "MAIN", "VEHICLE_STATE::SAFE_STATE requested from IDLE.");
+        active_vehicle_state = VEHICLE_STATE::SAFE_STATE; 
       }
       else if(requested == VEHICLE_STATE::MANUAL){
-        vehicle_state = VEHICLE_STATE::MANUAL;
-        sys::verbous_current_state = "MANUAL"; 
+        active_vehicle_state = VEHICLE_STATE::MANUAL;
       }
       else if(requested == VEHICLE_STATE::DIAGNOSTICS){
         return_state = VEHICLE_STATE::IDLE; 
-        vehicle_state = VEHICLE_STATE::DIAGNOSTICS; 
-        sys::verbous_current_state = "DAIGNOSTICS"; 
+        active_vehicle_state = VEHICLE_STATE::DIAGNOSTICS; 
         diagnostics_WDT = millis();
       }
       else{
@@ -58,12 +53,11 @@ bool request_vehicle_state_change(VEHICLE_STATE requested){
 
       case VEHICLE_STATE::MANUAL:
         if(requested == VEHICLE_STATE::SAFE_STATE){
-          vehicle_state = VEHICLE_STATE::SAFE_STATE;
-          sys::verbous_current_state = "SAFE_STATE";
+          active_vehicle_state = VEHICLE_STATE::SAFE_STATE;
+          DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "MAIN", "VEHICLE_STATE::SAFE_STATE requested from IDLE.");
         }
         else if(requested == VEHICLE_STATE::IDLE){
-          vehicle_state = VEHICLE_STATE::IDLE; 
-          sys::verbous_current_state = "IDLE"; 
+          active_vehicle_state = VEHICLE_STATE::IDLE; 
         }
         else{
           DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "MAIN", "ERROR: VEHICLE_STATE::MANUALE not avaliable form the current state");
@@ -81,12 +75,12 @@ bool request_vehicle_state_change(VEHICLE_STATE requested){
 
         if(requested == VEHICLE_STATE::SAFE_STATE && return_state == VEHICLE_STATE::SAFE_STATE){
           DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "MAIN",  "DIAGNOSTICS returnung to VEHICLE_STATE::SAFE_STATE.");
-          vehicle_state = return_state; 
+          active_vehicle_state = return_state; 
           return_state = VEHICLE_STATE::SAFE_STATE;  
         }
         else if(requested == VEHICLE_STATE::IDLE && return_state == VEHICLE_STATE::IDLE){
           DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "MAIN",  "DIAGNOSTICS returnung to VEHICLE_STATE::IDLE.");
-          vehicle_state = return_state; 
+          active_vehicle_state = return_state; 
           return_state = VEHICLE_STATE::SAFE_STATE; 
         
         }
@@ -99,10 +93,8 @@ bool request_vehicle_state_change(VEHICLE_STATE requested){
 
       case VEHICLE_STATE::FAIL_SAFE:
         DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "MAIN", "VEHICLE_STATE::FAIL_SAFE activated"); 
-
         // reset all valuse here hen return to safe
         // continue to opperte no commands to be actiones. 
-
         return false; 
       break; 
 

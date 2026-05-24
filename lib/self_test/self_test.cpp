@@ -67,8 +67,9 @@ uint8_t run_test_case(){
             }
             else if(self_test::requested_test_id == 1){self_test_state = TEST_OPERATION::TRANSPORT_SELF_TEST_1;}
             else if(self_test::requested_test_id == 2){self_test_state = TEST_OPERATION::TRANSPORT_SELF_TEST_2;}
-            else if(self_test::requested_test_id == 2){self_test_state = TEST_OPERATION::TRANSPORT_SELF_TEST_3;}
-            else if(self_test::requested_test_id == 3){self_test_state = TEST_OPERATION::MAIN_SELF_TEST_1;}
+            else if(self_test::requested_test_id == 3){self_test_state = TEST_OPERATION::TRANSPORT_SELF_TEST_3;}
+            else if(self_test::requested_test_id == 4){self_test_state = TEST_OPERATION::TRANSPORT_SELF_TEST_4;}
+            else if(self_test::requested_test_id == 5){self_test_state = TEST_OPERATION::MAIN_SELF_TEST_1;}
 
             // rest the test request once the state is changed 
             self_test::current_active_test = self_test::requested_test_id; 
@@ -112,11 +113,19 @@ uint8_t run_test_case(){
         /////////////////////////////// TEST 3 ///////////////////////////////
         case TEST_OPERATION::TRANSPORT_SELF_TEST_3:
                 // create test 3 here test 3 shoulsd include random back to back packets 
+                self_test::current_test_status_code = self_test_2(TEST_3_PACKET_COUNT, TEST_3_PACKET_DELAY_US, TEST_3_ERROR_COUNT, TX_SET_FAULT_MODE::CRC_CHANGE, TEST_3_ERROR_VALUE);
                 check_self_test_resutls(self_test::current_test_status_code); 
                 return self_test::current_test_status_code; 
         break; 
         
         /////////////////////////////// TEST 4 ///////////////////////////////
+        case TEST_OPERATION::TRANSPORT_SELF_TEST_4:
+                // create test 3 here test 3 shoulsd include random back to back packets 
+                self_test::current_test_status_code = self_test_2(TEST_4_PACKET_COUNT, TEST_4_PACKET_DELAY_US, TEST_4_ERROR_COUNT, TX_SET_FAULT_MODE::CRC_RAND_FLIP_BIT);
+                check_self_test_resutls(self_test::current_test_status_code); 
+                return self_test::current_test_status_code; 
+        break; 
+        
         /////////////////////////////// TEST 5 ///////////////////////////////
 
         /////////////////////////////// TEST 6 ///////////////////////////////
@@ -125,8 +134,6 @@ uint8_t run_test_case(){
                 check_self_test_resutls(self_test::current_test_status_code); 
                 return self_test::current_test_status_code; 
         break;
-
-
     }
     return SELFTEST_NO_TEST_RUNNING;
 }

@@ -2,52 +2,61 @@
 #ifndef DEBUG_H
 #define DEBUG_H 
 
-  #include <Arduino.h>
-  #include "debug_config.h" 
+#include <Arduino.h>
+#include "debug_config.h" 
 
-  extern void debug_port_begin();
+// function prototypes 
+extern void debug_port_begin();
+extern void dissable_verbous_error();
+extern void enable_verbous_error();
 
-  // print the version data defined in global_config.h
-  #define PRINT_VERSION_DATA(sw_version, hardware_version, release_notes)\
-    do{\
-      DEBUG_PORT.println(sw_version);\
-      DEBUG_PORT.println(hardware_version);\
-      DEBUG_PORT.println(release_notes);\
-    } while(0)
+//variabls 
+extern bool verbous_debug_enabled; 
+
+// print the version data defined in global_config.h
+#define PRINT_VERSION_DATA(sw_version, hardware_version, release_notes) do{ \
+  DEBUG_PORT.println(sw_version); \
+  DEBUG_PORT.println(hardware_version); \
+  DEBUG_PORT.println(release_notes); \
+} while(0)
   
 
-    // print a progress bar
-    #define PRINT_PROGRESS_BAR_START()\
-    do {\
-      DEBUG_PORT.print("PROGRESS: ");\
-    } while(0)
+// print a progress bar
+#define PRINT_PROGRESS_BAR_START() do { \
+  if(verbous_debug_enabled == false){ \
+    DEBUG_PORT.print("PROGRESS: "); \
+  } \
+} while(0)
 
-  #define PRINT_PROGRESS_BAR_PROGRESS()\
-    do {\
-      DEBUG_PORT.print("*");\
-    } while(0)
+#define PRINT_PROGRESS_BAR_PROGRESS() do {\
+  if(verbous_debug_enabled == false){ \
+    DEBUG_PORT.print("#");\
+  } \
+} while(0)
 
-    #define PRINT_PROGRESS_BAR_END()\
-    do {\
-      DEBUG_PORT.println(" 100%");\
-    } while(0)  
+#define PRINT_PROGRESS_BAR_END() do {\
+  if(verbous_debug_enabled == false){ \
+    DEBUG_PORT.println(" 100%");\
+  } \
+} while(0)  
 
 
-  #define DEBUG_PRINT_MSG(file, level, type, msg)\
-    do {\
-      if ((DEBUG_FILE_MASK & (file)) &&  (DEBUG_LEVEL_MASK & (level))) {\
-        PRINT_RUNTIME(millis());\
-        PRINT_FILE_NAME(file);\
-        PRINT_LEVEL(level);\
-        DEBUG_PORT.print("[");\
-        DEBUG_PORT.print(type);\
-        DEBUG_PORT.print("]");\
-        DEBUG_PORT.println(msg);\
-      }\
-    } while(0)
+#define DEBUG_PRINT_MSG(file, level, type, msg) do {\
+  if(verbous_debug_enabled == true){ \
+    if((DEBUG_FILE_MASK & (file)) &&  (DEBUG_LEVEL_MASK & (level))) {\
+      PRINT_RUNTIME(millis());\
+      PRINT_FILE_NAME(file);\
+      PRINT_LEVEL(level);\
+      DEBUG_PORT.print("[");\
+      DEBUG_PORT.print(type);\
+      DEBUG_PORT.print("]");\
+      DEBUG_PORT.println(msg);\
+    } \
+  } \
+} while(0)
 
-  #define DEBUG_PRINT_MSG_VAL(file, level, type, msg, val)\
-    do {\
+  #define DEBUG_PRINT_MSG_VAL(file, level, type, msg, val) do {\
+    if(verbous_debug_enabled == true){ \
       if ((DEBUG_FILE_MASK & (file)) &&  (DEBUG_LEVEL_MASK & (level))) {\
         PRINT_RUNTIME(millis());\
         PRINT_FILE_NAME(file);\
@@ -58,184 +67,184 @@
         DEBUG_PORT.print(msg);\
         DEBUG_PORT.println(val);\
       }\
-    } while(0)
+    }\
+  } while(0)
 
 
-  #define DEBUG_PRINT_MSG_VAL_MSG(file, level, type, msg1, val, msg2)\
-    do {\
-      if ((DEBUG_FILE_MASK & (file)) &&  (DEBUG_LEVEL_MASK & (level))) {\
-        PRINT_RUNTIME(millis());\
-        PRINT_FILE_NAME(file);\
-        PRINT_LEVEL(level);\
-        DEBUG_PORT.print("[");\
-        DEBUG_PORT.print(type);\
-        DEBUG_PORT.print("]");\
-        DEBUG_PORT.print(msg1);\
-        DEBUG_PORT.print(val);\
-        DEBUG_PORT.println(msg2);\
-      }\
-    } while(0)
-
-    #define DEBUG_PRINT_MSG_VAL_HEX(file, level, type, msg, val) \
-    do {\
-      if ((DEBUG_FILE_MASK & (file)) &&  (DEBUG_LEVEL_MASK & (level))) {\
-        PRINT_RUNTIME(millis());\
-        PRINT_FILE_NAME(file);\
-        PRINT_LEVEL(level);\
-        DEBUG_PORT.print("[");\
-        DEBUG_PORT.print(type);\
-        DEBUG_PORT.print("]");\
-        DEBUG_PORT.print(msg);\
-        DEBUG_PORT.println(val, HEX);\
-      }\
-    } while(0)
-
-
-
-  #define DEBUG_PRINT_DATA_FRAME(file, level, frame_type, line, start_byte, frame_name, frame)\
-    do{\
-      if((DEBUG_FILE_MASK & (file)) &&  (DEBUG_LEVEL_MASK & (level)) && (DEBUG_FRAME_MASK & (frame_type))) {\
-        PRINT_RUNTIME(millis());\
-        PRINT_FILE_NAME(file);\
-        PRINT_LEVEL(level);\
-        DEBUG_PORT.print(frame_name);\
-        DEBUG_PORT.print(":");\
-        DEBUG_PORT.print(line);\
-        DEBUG_PORT.print("]");\
-        DEBUG_PORT.print(start_byte, HEX);\
-        DEBUG_PORT.print(", ");\
-        DEBUG_PORT.print(frame.TYPE, HEX);\
-        DEBUG_PORT.print(", ");\
-        DEBUG_PORT.print(frame.ACK, HEX);\
-        DEBUG_PORT.print(", ");\
-        DEBUG_PORT.print(frame.ID, HEX);\
-        DEBUG_PORT.print(", ");\
-        DEBUG_PORT.print(frame.DLC, HEX);\
-        DEBUG_PORT.print(", ");\
-        for(uint8_t i = 0; i < frame.DLC; i ++){\
-          DEBUG_PORT.print(frame.payload[i], HEX);\
-          DEBUG_PORT.print(", ");\
-        }\
-        DEBUG_PORT.println(frame.CRC, HEX);\
-      }\
-    } while (0)
-
-  #define DEBUG_PRINT_DATA_PTR_FRAME(file, level, frame_type, line, start_byte, frame_name, frame)\
-    do{\
-      if((DEBUG_FILE_MASK & (file)) &&  (DEBUG_LEVEL_MASK & (level)) && (DEBUG_FRAME_MASK & (frame_type))) {\
-        PRINT_RUNTIME(millis());\
-        PRINT_FILE_NAME(file);\
-        PRINT_LEVEL(level);\
-        DEBUG_PORT.print(frame_name);\
-        DEBUG_PORT.print(":");\
-        DEBUG_PORT.print(line);\
-        DEBUG_PORT.print("]");\
-        DEBUG_PORT.print(start_byte, HEX);\
-        DEBUG_PORT.print(", ");\
-        DEBUG_PORT.print((frame)->TYPE, HEX);\
-        DEBUG_PORT.print(", ");\
-        DEBUG_PORT.print((frame)->ACK, HEX);\
-        DEBUG_PORT.print(", ");\
-        DEBUG_PORT.print((frame)->ID, HEX);\
-        DEBUG_PORT.print(", ");\
-        DEBUG_PORT.print((frame)->DLC, HEX);\
-        DEBUG_PORT.print(", ");\
-        for(uint8_t i = 0; i < (frame)->DLC; i ++){\
-          DEBUG_PORT.print((frame)->payload[i], HEX);\
-          DEBUG_PORT.print(", ");\
-        }\
-        DEBUG_PORT.println((frame)->CRC, HEX);\
-      }\
-    } while (0)
-  
-
-  #define DEBUG_STREAM_START(file, level, msg, byte)\
-    do{\
-      if((DEBUG_FILE_MASK & (file)) && (DEBUG_LEVEL_MASK & (level))) {\
-        DEBUG_PORT.print("\n");\
-        PRINT_RUNTIME(millis());\
-        PRINT_FILE_NAME(file);\
-        PRINT_LEVEL(level);\
-        DEBUG_PORT.print(msg);\
-        DEBUG_PORT.print(byte ,HEX);\
-      }\
-    } while(0)
-
-  #define DEBUG_STREAM_DATA(file, level, byte)\
-    do{\
-      if((DEBUG_FILE_MASK & (file)) && (DEBUG_LEVEL_MASK & (level))) {\
-        DEBUG_PORT.print(", ");\
-        DEBUG_PORT.print(byte ,HEX);\
-      }\
-    } while(0)
-
-  #define DEBUG_STREAM_END(file, level, byte)\
-    do{\
-      if((DEBUG_FILE_MASK & (file)) && (DEBUG_LEVEL_MASK & (level))) {\
-        DEBUG_PORT.print(byte ,HEX);\
-      }\
-    } while(0)
-
-
-  #define PRINT_RUNTIME(ms)\
-    do {\
-      uint32_t _t = ms;\
-      uint32_t seconds = (_t) / 1000;\
-      uint32_t millis_part = (_t) % 1000;\
+#define DEBUG_PRINT_MSG_VAL_MSG(file, level, type, msg1, val, msg2) do {\
+  if(verbous_debug_enabled == true){ \
+    if ((DEBUG_FILE_MASK & (file)) &&  (DEBUG_LEVEL_MASK & (level))) {\
+      PRINT_RUNTIME(millis());\
+      PRINT_FILE_NAME(file);\
+      PRINT_LEVEL(level);\
       DEBUG_PORT.print("[");\
-      if(seconds < 1000000) {DEBUG_PORT.print("0");}\
-      if(seconds < 100000){  DEBUG_PORT.print("0");}\
-      if(seconds < 10000){   DEBUG_PORT.print("0");}\
-      if(seconds < 1000){    DEBUG_PORT.print("0");}\
-      if(seconds < 100){     DEBUG_PORT.print("0");}\
-      if(seconds < 10){      DEBUG_PORT.print("0");}\
-      DEBUG_PORT.print(seconds);\
-      DEBUG_PORT.print(".");\
-      if(millis_part < 100){ DEBUG_PORT.print("0");}\
-      if(millis_part < 10){  DEBUG_PORT.print("0");}\
-      DEBUG_PORT.print(millis_part);\
+      DEBUG_PORT.print(type);\
       DEBUG_PORT.print("]");\
-    } while(0)
+      DEBUG_PORT.print(msg1);\
+      DEBUG_PORT.print(val);\
+      DEBUG_PORT.println(msg2);\
+    } \
+  } \
+} while(0)
 
-  #define PRINT_FILE_NAME(file_name)\
-    do{\
-      if((file_name) & DBG_MEGA_MAIN)             {DEBUG_PORT.print("[MEGA]");}\
-      else if ((file_name) & DBG_ESP_MAIN)        {DEBUG_PORT.print("[ESP]");}\
-      else if ((file_name) & DBG_TRANSPORT)       {DEBUG_PORT.print("[TRAN]");}\
-      else if ((file_name) & DBG_PROTOCOL)        {DEBUG_PORT.print("[PROT]");}\
-      else if ((file_name) & DBG_ESP_OTA)         {DEBUG_PORT.print("[OTA]");}\
-      else if ((file_name) & DBG_TRANSPORT_UART)  {DEBUG_PORT.print("[UART]");}\
-      else if ((file_name) & DBG_TRANSPORT_FIFO)  {DEBUG_PORT.print("[FIFO]");}\
-      else if ((file_name) & DBG_SELF_TEST)       {DEBUG_PORT.print("[TEST]");}\
-      else if ((file_name) & DBG_SYSTEM)          {DEBUG_PORT.print("[SYS]");}\
-      else if ((file_name) & DBG_LOGS)            {DEBUG_PORT.print("[LOGS]");}\
-      else{DEBUG_PORT.print("[----]");}\
-    } while(0)
+#define DEBUG_PRINT_MSG_VAL_HEX(file, level, type, msg, val) do {\
+  if(verbous_debug_enabled == true){ \
+    if ((DEBUG_FILE_MASK & (file)) &&  (DEBUG_LEVEL_MASK & (level))) {\
+      PRINT_RUNTIME(millis());\
+      PRINT_FILE_NAME(file);\
+      PRINT_LEVEL(level);\
+      DEBUG_PORT.print("[");\
+      DEBUG_PORT.print(type);\
+      DEBUG_PORT.print("]");\
+      DEBUG_PORT.print(msg);\
+      DEBUG_PORT.println(val, HEX);\
+    }\
+  } \
+} while(0)
 
-  #define PRINT_LEVEL(dbg_level)\
-    do{\
-      if((dbg_level) & DEBUG_ERROR)          {DEBUG_PORT.print("[ERROR]");}\
-      else if((dbg_level) & DEBUG_WARN)      {DEBUG_PORT.print("[WARN]");}\
-      else if((dbg_level) & DEBUG_INFO)      {DEBUG_PORT.print("[INFO]");}\
-      else if((dbg_level) & DEBUG_DEBUG)     {DEBUG_PORT.print("[DEBUG]");}\
-      else if((dbg_level) & DEBUG_MSG)       {DEBUG_PORT.print("[MSG]");}\
-      else if((dbg_level) & DEBUG_STREAM)    {DEBUG_PORT.print("[STREAM]");}\
-      else if ((dbg_level) & DEBUG_NONE)     {DEBUG_PORT.print("[NONE]");}\
-      else if ((dbg_level) & DEBUG_META)     {DEBUG_PORT.print("[META]");}\
-      else{DEBUG_PORT.print("[----]");}\
-    } while(0)
+#define DEBUG_PRINT_DATA_FRAME(file, level, frame_type, line, start_byte, frame_name, frame) do{\
+  if((DEBUG_FILE_MASK & (file)) &&  (DEBUG_LEVEL_MASK & (level)) && (DEBUG_FRAME_MASK & (frame_type))) {\
+    PRINT_RUNTIME(millis());\
+    PRINT_FILE_NAME(file);\
+    PRINT_LEVEL(level);\
+    DEBUG_PORT.print(frame_name);\
+    DEBUG_PORT.print(":");\
+    DEBUG_PORT.print(line);\
+    DEBUG_PORT.print("]");\
+    DEBUG_PORT.print(start_byte, HEX);\
+    DEBUG_PORT.print(", ");\
+    DEBUG_PORT.print(frame.TYPE, HEX);\
+    DEBUG_PORT.print(", ");\
+    DEBUG_PORT.print(frame.ACK, HEX);\
+    DEBUG_PORT.print(", ");\
+    DEBUG_PORT.print(frame.ID, HEX);\
+    DEBUG_PORT.print(", ");\
+    DEBUG_PORT.print(frame.DLC, HEX);\
+    DEBUG_PORT.print(", ");\
+    for(uint8_t i = 0; i < frame.DLC; i ++){\
+      DEBUG_PORT.print(frame.payload[i], HEX);\
+      DEBUG_PORT.print(", ");\
+    }\
+    DEBUG_PORT.println(frame.CRC, HEX);\
+  }\
+} while (0)
 
-    // not currnetly used
-    #define DEBUG_PRINT_FIFO_VAR(var1, var2, var3, var4, var5)\
-    do{\
-      DEBUG_PORT.print(" head: "); DEBUG_PORT.print(var1);\
-      DEBUG_PORT.print(", tail: "); DEBUG_PORT.print(var2);\
-      DEBUG_PORT.print(", tx_delay: "); DEBUG_PORT.print(var3);\
-      DEBUG_PORT.print(" ,last_rx_read: "); DEBUG_PORT.print(var4);\
-      DEBUG_PORT.print(" ,micros: "); DEBUG_PORT.print(var5);\
-      DEBUG_PORT.print(" ,micros - last_read: "); DEBUG_PORT.print(var4 - var5);\
-      DEBUG_PORT.print(" , internal_avaliable: ");\
-    } while(0)
+#define DEBUG_PRINT_DATA_PTR_FRAME(file, level, frame_type, line, start_byte, frame_name, frame) do{\
+  if((DEBUG_FILE_MASK & (file)) &&  (DEBUG_LEVEL_MASK & (level)) && (DEBUG_FRAME_MASK & (frame_type))) {\
+    PRINT_RUNTIME(millis());\
+    PRINT_FILE_NAME(file);\
+    PRINT_LEVEL(level);\
+    DEBUG_PORT.print(frame_name);\
+    DEBUG_PORT.print(":");\
+    DEBUG_PORT.print(line);\
+    DEBUG_PORT.print("]");\
+    DEBUG_PORT.print(start_byte, HEX);\
+    DEBUG_PORT.print(", ");\
+    DEBUG_PORT.print((frame)->TYPE, HEX);\
+    DEBUG_PORT.print(", ");\
+    DEBUG_PORT.print((frame)->ACK, HEX);\
+    DEBUG_PORT.print(", ");\
+    DEBUG_PORT.print((frame)->ID, HEX);\
+    DEBUG_PORT.print(", ");\
+    DEBUG_PORT.print((frame)->DLC, HEX);\
+    DEBUG_PORT.print(", ");\
+    for(uint8_t i = 0; i < (frame)->DLC; i ++){\
+      DEBUG_PORT.print((frame)->payload[i], HEX);\
+      DEBUG_PORT.print(", ");\
+    }\
+    DEBUG_PORT.println((frame)->CRC, HEX);\
+  }\
+} while (0)
+
+
+#define DEBUG_STREAM_START(file, level, msg, byte) do{\
+  if(verbous_debug_enabled == true){ \
+    if((DEBUG_FILE_MASK & (file)) && (DEBUG_LEVEL_MASK & (level))) { \
+      DEBUG_PORT.print("\n"); \
+      PRINT_RUNTIME(millis()); \
+      PRINT_FILE_NAME(file); \
+      PRINT_LEVEL(level); \
+      DEBUG_PORT.print(msg); \
+      DEBUG_PORT.print(" "); \
+      DEBUG_PORT.print(byte ,HEX); \
+    } \
+  } \
+} while(0)
+
+#define DEBUG_STREAM_DATA(file, level, byte) do{ \
+  if(verbous_debug_enabled == true){ \
+    if((DEBUG_FILE_MASK & (file)) && (DEBUG_LEVEL_MASK & (level))) { \
+      DEBUG_PORT.print(", ");\
+      DEBUG_PORT.print(byte ,HEX);\
+    } \
+  }\
+} while(0)
+
+#define DEBUG_STREAM_END(file, level, byte) do{ \
+  if(verbous_debug_enabled == true){ \
+    if((DEBUG_FILE_MASK & (file)) && (DEBUG_LEVEL_MASK & (level))) {\
+      DEBUG_PORT.print(byte ,HEX);\
+    }\
+  } \
+} while(0)
+
+
+#define PRINT_RUNTIME(ms) do {\
+  uint32_t _t = ms;\
+  uint32_t seconds = (_t) / 1000;\
+  uint32_t millis_part = (_t) % 1000;\
+  DEBUG_PORT.print("[");\
+  if(seconds < 1000000) {DEBUG_PORT.print("0");}\
+  if(seconds < 100000){  DEBUG_PORT.print("0");}\
+  if(seconds < 10000){   DEBUG_PORT.print("0");}\
+  if(seconds < 1000){    DEBUG_PORT.print("0");}\
+  if(seconds < 100){     DEBUG_PORT.print("0");}\
+  if(seconds < 10){      DEBUG_PORT.print("0");}\
+  DEBUG_PORT.print(seconds);\
+  DEBUG_PORT.print(".");\
+  if(millis_part < 100){ DEBUG_PORT.print("0");}\
+  if(millis_part < 10){  DEBUG_PORT.print("0");}\
+  DEBUG_PORT.print(millis_part);\
+  DEBUG_PORT.print("]");\
+} while(0)
+
+#define PRINT_FILE_NAME(file_name) do{\
+  if((file_name) & DBG_MEGA_MAIN)             {DEBUG_PORT.print("[MEGA]");}\
+  else if ((file_name) & DBG_ESP_MAIN)        {DEBUG_PORT.print("[ESP]");}\
+  else if ((file_name) & DBG_TRANSPORT)       {DEBUG_PORT.print("[TRAN]");}\
+  else if ((file_name) & DBG_PROTOCOL)        {DEBUG_PORT.print("[PROT]");}\
+  else if ((file_name) & DBG_ESP_OTA)         {DEBUG_PORT.print("[OTA]");}\
+  else if ((file_name) & DBG_TRANSPORT_UART)  {DEBUG_PORT.print("[UART]");}\
+  else if ((file_name) & DBG_TRANSPORT_FIFO)  {DEBUG_PORT.print("[FIFO]");}\
+  else if ((file_name) & DBG_SELF_TEST)       {DEBUG_PORT.print("[TEST]");}\
+  else if ((file_name) & DBG_SYSTEM)          {DEBUG_PORT.print("[SYS]");}\
+  else if ((file_name) & DBG_LOGS)            {DEBUG_PORT.print("[LOGS]");}\
+  else{DEBUG_PORT.print("[----]");}\
+} while(0)
+
+#define PRINT_LEVEL(dbg_level) do{\
+    if((dbg_level) & DEBUG_ERROR)          {DEBUG_PORT.print("[ERROR]");}\
+    else if((dbg_level) & DEBUG_WARN)      {DEBUG_PORT.print("[WARN]");}\
+    else if((dbg_level) & DEBUG_INFO)      {DEBUG_PORT.print("[INFO]");}\
+    else if((dbg_level) & DEBUG_DEBUG)     {DEBUG_PORT.print("[DEBUG]");}\
+    else if((dbg_level) & DEBUG_MSG)       {DEBUG_PORT.print("[MSG]");}\
+    else if((dbg_level) & DEBUG_STREAM)    {DEBUG_PORT.print("[STREAM]");}\
+    else if ((dbg_level) & DEBUG_NONE)     {DEBUG_PORT.print("[NONE]");}\
+    else if ((dbg_level) & DEBUG_META)     {DEBUG_PORT.print("[META]");}\
+    else if ((dbg_level) & DEBUG_TEST)     {DEBUG_PORT.print("[TEST]");}\
+    else{DEBUG_PORT.print("[----]");}\
+} while(0)
+
+// not currnetly used
+#define DEBUG_PRINT_FIFO_VAR(var1, var2, var3, var4, var5) do{\
+    DEBUG_PORT.print(" head: "); DEBUG_PORT.print(var1);\
+    DEBUG_PORT.print(", tail: "); DEBUG_PORT.print(var2);\
+    DEBUG_PORT.print(", tx_delay: "); DEBUG_PORT.print(var3);\
+    DEBUG_PORT.print(" ,last_rx_read: "); DEBUG_PORT.print(var4);\
+    DEBUG_PORT.print(" ,micros: "); DEBUG_PORT.print(var5);\
+    DEBUG_PORT.print(" ,micros - last_read: "); DEBUG_PORT.print(var4 - var5);\
+    DEBUG_PORT.print(" , internal_avaliable: ");\
+} while(0)
 
 
 #endif

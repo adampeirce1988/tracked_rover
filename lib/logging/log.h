@@ -24,6 +24,7 @@ enum LOG_EVENT {
     EVENT_CRC_ERROR,
     EVENT_WDT_TRIGERED, 
     EVENT_RX_TIMEOUT,
+    EVENT_ERROR_INJECTED,
     EVENT_TX_LATANCY,
     EVENT_RX_LATANCY,
     EVENT_CLEAR_LOG
@@ -41,6 +42,7 @@ typedef struct selftest_metrics {
     uint8_t packets_received;
     uint8_t ack_sent;
     uint8_t ack_received;
+    uint8_t injected_errors; 
 
     // Latency tracking
     uint8_t tx_latency_counter;
@@ -119,6 +121,7 @@ do { \
     DEBUG_PORT.print("crc error:          "); DEBUG_PORT.println(transport_test_log.crc_error); \
     DEBUG_PORT.print("rx timeouts:        "); DEBUG_PORT.println(transport_test_log.rx_timeouts); \
     DEBUG_PORT.print("total error count   "); DEBUG_PORT.println(transport_test_log.total_errors); \
+    DEBUG_PORT.print("injected errors.    "); DEBUG_PORT.println(transport_test_log.injected_errors); \
 } while (0)
 
 #endif

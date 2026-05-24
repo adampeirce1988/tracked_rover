@@ -31,7 +31,7 @@ uint8_t selftest_state      = 0;
 uint32_t diagnostics_WDT    = 0;
 
 // Protocol / dispatcher status
-uint8_t rx_dispatcher_status = 0;
+uint8_t rx_dispacher_status = 0;
 
 // Transport status
 // NOTE:
@@ -48,7 +48,6 @@ uint8_t rx_status = 0;
 // TEST ONLY
 // Remove after diagnostics refactor
 bool TEST_call_diag_once = true;
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Utility Functions

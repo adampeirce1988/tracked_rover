@@ -17,8 +17,6 @@ bool check_system_health_flags();
 
 namespace sys {
 
-extern const char* verbous_current_state;
-
 extern uint32_t sys_heartbeat;
 extern uint32_t tx_last_valid_packet; 
 extern uint32_t last_connection_attempt;

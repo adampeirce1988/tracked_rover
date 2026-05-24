@@ -24,11 +24,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 // Vehicle always boots into SAFE_STATE
-VEHICLE_STATE vehicle_state = VEHICLE_STATE::SAFE_STATE;
+VEHICLE_STATE active_vehicle_state = VEHICLE_STATE::SAFE_STATE;
+
+// previous active state this should be diffrent from above.
+VEHICLE_STATE last_vehicle_state = VEHICLE_STATE::FAIL_SAFE; 
 
 // Used when temporarily entering another state
 VEHICLE_STATE return_state  = VEHICLE_STATE::SAFE_STATE;
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Vehicle State Machine
@@ -37,9 +39,7 @@ VEHICLE_STATE return_state  = VEHICLE_STATE::SAFE_STATE;
 
 void run_vehicle_state(){
 
-  switch(vehicle_state){
-
-
+  switch(active_vehicle_state){
 
     ///////////////////////////////////////////////////////////////////////////
     // SAFE STATE
@@ -119,8 +119,8 @@ void run_vehicle_state(){
         // this will need to be changed to a call from https: 
         if(sys::diagnostics_active == false){ 
         DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "MAIN", "diag_active change to true.");
-        // this function will need to be called by the web interface once built.
-        sys::diagnostics_active = request_self_test(1); // request test 1 - 3 as this is the only test at present
+        // this function will need to be called by the web interface once built
+        sys::diagnostics_active = request_self_test(4); // request test 1 - 5 as this is the only test at present ***CONFIG TEST HERE***
         }
         
         selftest_state = run_test_case();
@@ -148,7 +148,7 @@ void run_vehicle_state(){
     // DEFAULT
     ///////////////////////////////////////////////////////////////////////////
     default:
-        vehicle_state = VEHICLE_STATE::SAFE_STATE; 
+        active_vehicle_state = VEHICLE_STATE::SAFE_STATE; 
     break; 
   };
 }

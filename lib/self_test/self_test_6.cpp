@@ -24,6 +24,7 @@ uint8_t self_test_6(){
 
     // runs once on first loop
     if(self_test::watchdog_timer_test_active == false){
+        dissable_verbous_error(); // dissable verbous error reporting
         self_test::test_end_countdown_timer = millis() + (DIAGNOSTIC_WT_TIMEOUT_MS + 1);  
         self_test::watchdog_timer_test_active = true; 
         DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_NONE, "TEST", "diagnostics watdogtimer test in progress:"); 
@@ -47,6 +48,7 @@ uint8_t self_test_6(){
         PRINT_PROGRESS_BAR_END(); 
         self_test::watchdog_timer_test_active = false; 
         print_counter = 1; 
+        enable_verbous_error();
         return SELFTEST_FAILED;
     }
     else{

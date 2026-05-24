@@ -4,11 +4,10 @@
 
 // define the files that you would like to debug here
 // #define DEBUG_FILE_MASK   (DBG_ESP_MAIN | DBG_TRANSPORT | DBG_TRANSPORT_FIFO | DBG_SELF_TEST | DBG_LOGS | DBG_SYSTEM)
-#define DEBUG_FILE_MASK   (DBG_ESP_MAIN | DBG_SELF_TEST | DBG_TRANSPORT | DBG_LOGS | DBG_SYSTEM)
+#define DEBUG_FILE_MASK   (DBG_SELF_TEST | DBG_TRANSPORT | DBG_LOGS | DBG_SYSTEM)
 // define the levels of debuging required here
   //#define DEBUG_LEVEL_MASK  ( DEBUG_META | DEBUG_ERROR | DEBUG_MSG )
-  #define DEBUG_LEVEL_MASK  (DEBUG_META | DEBUG_NONE | DEBUG_ERROR | DEBUG_WARN)
-  //#define DEBUG_LEVEL_MASK  (DEBUG_STREAM | DEBUG_INFO | DBG_DEBUG)
+  #define DEBUG_LEVEL_MASK  (DEBUG_META | DEBUG_NONE | DEBUG_ERROR | DEBUG_WARN )
   //#define DEBUG_LEVEL_MASK (DEBUG_NONE)  // use with arduino uno only
 
 
@@ -39,6 +38,7 @@
 #define DEBUG_WARN               (1UL << 5)
 #define DEBUG_INFO               (1UL << 6)
 #define DEBUG_DEBUG              (1UL << 7)
+#define DEBUG_TEST               (1UL << 8)
 // change to uint16 if more bits. are required
 
 //------------ debug print frame bitmask------------ //

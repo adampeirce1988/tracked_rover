@@ -1,7 +1,7 @@
 #ifndef SYSTEM_H
 #define SYSTEM_H
 
-
+#include <Arduino.h>
 
 // system variables 
 extern bool health_test_status;    // defines if the health_Test has passes or failed
@@ -30,13 +30,15 @@ enum class VEHICLE_STATE{
 };
 
 //decalir variables and set starting vehicle state. 
-extern VEHICLE_STATE vehicle_state;             // set vehicle to safe state on boot.
-extern VEHICLE_STATE return_state;
+extern VEHICLE_STATE active_vehicle_state;       // set vehicle to safe state on boot.
+extern VEHICLE_STATE last_vehicle_state;        // used for dispalying change only on state change. 
+extern VEHICLE_STATE return_state;              // used for retrurning from diagnostics. 
 
 const char* vehicle_state_to_string(VEHICLE_STATE state);
 
 // finite state macheine calls 
 void run_vehicle_state();
 bool request_vehicle_state_change(VEHICLE_STATE requested);
+const char* vehicle_state_to_string(VEHICLE_STATE state);
 
 #endif 

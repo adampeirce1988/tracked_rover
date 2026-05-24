@@ -9,7 +9,8 @@
 
 #define DEBUG_FILE DBG_SELF_TEST
 
-void check_self_test_resutls(uint8_t status_code){
+
+ void check_self_test_resutls(uint8_t status_code){
     if(status_code == SELFTEST_PASSED){
         self_test_state = TEST_OPERATION::TEST_RESULT_PASSED;
     }
@@ -18,7 +19,7 @@ void check_self_test_resutls(uint8_t status_code){
     }
 }
 
-uint8_t weighted_random_ack(){
+ uint8_t weighted_random_ack(){
 
     uint8_t r = random(0, 101); // random no 0 - 100 
 
@@ -26,7 +27,7 @@ uint8_t weighted_random_ack(){
     return NORMAL_FRAME;               // 80% chance of normal frame 
 }
 
-uint16_t weighted_random_delay(uint16_t std_delay){
+ uint16_t weighted_random_delay(uint16_t std_delay){
    
     uint8_t r = random(0, 101); // random no 0 - 100 
 
@@ -42,3 +43,16 @@ uint16_t weighted_random_delay(uint16_t std_delay){
     }
 }
 
+ uint8_t self_test_inline_crc_calc(uint8_t CRC, uint8_t byte){
+  CRC ^= byte;
+
+  for (uint8_t i = 0; i < 8; i++) {
+    if (CRC & 0x80){
+     CRC = (CRC << 1) ^ 0x07;
+    }
+    else{
+      CRC <<= 1;
+    }
+  }
+  return CRC;
+}

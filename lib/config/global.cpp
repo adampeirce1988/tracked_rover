@@ -16,8 +16,6 @@
 
 namespace sys {
 
-const char* verbous_current_state = "SAFE_STATE";
-
 //test 
 bool diagnostics_active = false; 
 
