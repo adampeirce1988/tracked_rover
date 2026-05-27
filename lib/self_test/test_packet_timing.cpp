@@ -11,7 +11,7 @@
 #define DEBUG_FILE DBG_SELF_TEST
 
 
-uint8_t self_test_1(uint8_t no_of_packets, uint16_t delay_time_us, bool random_delay_active){
+uint8_t self_test_transport_random_packet(uint8_t no_of_packets, uint16_t delay_time_us, bool random_delay_active){
     
     // test setup(runs only once)
     if(self_test::current_test_packet == 0){
@@ -53,7 +53,7 @@ uint8_t self_test_1(uint8_t no_of_packets, uint16_t delay_time_us, bool random_d
             }
 
             // report when an  ack is sent. 
-            if(ack == ACK_REQUEST){
+            if(ack == TRANSPORT_ACK_TYPE::ACK_REQUEST){
                 DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "ACK", "random packet sent with ack request set. ack_request: ", ack);
             }
 

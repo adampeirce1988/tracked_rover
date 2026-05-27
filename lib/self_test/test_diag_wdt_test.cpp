@@ -16,11 +16,10 @@
 // test variabls  
 uint8_t print_counter = 1;
 
-uint8_t self_test_6(){
+uint8_t self_test_diagnostics_wdt(){
 
-        // print a progress bar
+    // print a progress bar
     uint16_t divisor = DIAGNOSTIC_WT_TIMEOUT_MS / 25;
-
 
     // runs once on first loop
     if(self_test::watchdog_timer_test_active == false){
@@ -31,6 +30,7 @@ uint8_t self_test_6(){
         PRINT_PROGRESS_BAR_START(); 
 
     }
+
 
     // print a progress bar to show progress i
     if(self_test::test_end_countdown_timer - millis() < (DIAGNOSTIC_WT_TIMEOUT_MS - (divisor * print_counter))){

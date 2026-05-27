@@ -50,8 +50,8 @@ TX_FAILURE_MODE set_test_type(TX_SET_FAULT_MODE type){
     switch(type){
         case TX_SET_FAULT_MODE::TYPE_CHANGE:           return TX_FAILURE_MODE::TYPE_CHANGE; 
         case TX_SET_FAULT_MODE::ACK_CHANGE:            return TX_FAILURE_MODE::ACK_CHANGE; 
-        case TX_SET_FAULT_MODE::ID_CHANGE:             return TX_FAILURE_MODE::ID_CHANGE;
-        case TX_SET_FAULT_MODE::DLC_CHANGE:            return TX_FAILURE_MODE::DLC_CHANGE;
+        case TX_SET_FAULT_MODE::ID_CHANGE:             return TX_FAILURE_MODE::ID_CHANGE; 
+        case TX_SET_FAULT_MODE::RAND_DLC_CHANGE:       return TX_FAILURE_MODE::DLC_CHANGE;
         case TX_SET_FAULT_MODE::DLC_OVER_MAX_CAPACITY: return TX_FAILURE_MODE::DLC_OVER_MAX_CAPACITY;
         case TX_SET_FAULT_MODE::CRC_RAND_FLIP_BIT:     return TX_FAILURE_MODE::CRC_RAND_FLIP_BIT; 
         case TX_SET_FAULT_MODE::CRC_CHANGE:            return TX_FAILURE_MODE::CRC_CHANGE; 
@@ -95,19 +95,31 @@ void tx_frame_error_injection(struct frame *f ){ // TODO: add a config struct fo
                 str_failure_type = "f->ID";
             break;
 
-            case TX_FAILURE_MODE::DLC_CHANGE:
-                f->DLC = tx_fault_injection_cfg.value; 
+            case TX_FAILURE_MODE::DLC_CHANGE:{
+                uint8_t rand_dlc = random(0, MAX_PAYLOAD_LEN + 1); // random change
+                if(rand_dlc == f->DLC){
+                    if(f->DLC > 0){ 
+                        f->DLC -= 1; 
+                    }
+                    else{
+                        f->DLC += 1; 
+                    }
+                }
+                else{
+                    f->DLC = rand_dlc; 
+                }
+                //f->DLC = tx_fault_injection_cfg.value; 
                 str_failure_type = "f->DLC";
-            break;
+            } break;
             
-            case TX_FAILURE_MODE::DLC_OVER_MAX_CAPACITY: 
+            case TX_FAILURE_MODE::DLC_OVER_MAX_CAPACITY:{ 
                 f->DLC = MAX_PAYLOAD_LEN + 1; 
                 str_failure_type = "f->DLC";
-            break;
+            } break;
 
             case TX_FAILURE_MODE::CRC_RAND_FLIP_BIT:{
                 // Get random bit
-                uint8_t bit_position = random(0, sizeof(uint8_t));  // random no between 0-7
+                uint8_t bit_position = random(0, 8);  // random no between 0-7
                 f->CRC ^= (1<<bit_position); 
                 str_failure_type = "CRC_RAND_FLIP_BIT";
                 break;
@@ -124,7 +136,7 @@ void tx_frame_error_injection(struct frame *f ){ // TODO: add a config struct fo
             { 
                 // get the random possintions
                 uint8_t data_position = random(0, f->DLC); 
-                uint8_t bit_position = random(0, sizeof(uint8_t)); 
+                uint8_t bit_position = random(0, 8); 
                 f->payload[data_position] ^= (1<<bit_position); 
                 str_failure_type = "RAND_DATA_FLIP_BIT";
             }    
@@ -133,7 +145,14 @@ void tx_frame_error_injection(struct frame *f ){ // TODO: add a config struct fo
             case TX_FAILURE_MODE::RAND_DATA_CHANGE:
             {
                 uint8_t data_position = random(0, f->DLC); 
-                f->payload[data_position] = tx_fault_injection_cfg.value; 
+                uint8_t rand_data = random(0, 256); 
+
+                if(f->payload[data_position] == rand_data){
+                    rand_data ++; 
+                }
+                
+                f->payload[data_position] = rand_data;
+
                 str_failure_type = "RAND_DATA_CHANGE";
             }
             break;

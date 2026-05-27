@@ -22,7 +22,7 @@ uint8_t rx_message_task_dispatcher(){
         break;  
     
         case MSG_ESTABLISH_COMMUNICATION:
-            transport_queue_message(MSG_CONFIRM_COMMUNICATION, NORMAL_FRAME, 0, NULL);
+            transport_queue_message(MSG_CONFIRM_COMMUNICATION, TRANSPORT_ACK_TYPE::NORMAL_FRAME, 0, NULL);
             return PROTOCOL_RX_RETURN_CODE::PROTO_VALID_TYPE;
         break;
 

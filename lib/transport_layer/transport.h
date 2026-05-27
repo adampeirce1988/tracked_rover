@@ -18,10 +18,12 @@
 constexpr uint8_t START_BYTE =                0xFF;
 
 // ================= ACK TYPES =================
+namespace TRANSPORT_ACK_TYPE{
 constexpr uint8_t NORMAL_FRAME =              0x00;
 constexpr uint8_t ACK_REQUEST  =              0x01;
 constexpr uint8_t ACK_RESPONSE =              0x02;
 constexpr uint8_t NACK =                      0x03;
+};
 
 // ================= RX RETURN CODES =================
 namespace RX_RETURN_CODES{
@@ -69,7 +71,7 @@ enum class TX_SET_FAULT_MODE{
   TYPE_CHANGE,
   ACK_CHANGE,
   ID_CHANGE,
-  DLC_CHANGE,
+  RAND_DLC_CHANGE,
   DLC_OVER_MAX_CAPACITY,
   CRC_RAND_FLIP_BIT, 
   CRC_CHANGE, 

@@ -193,7 +193,7 @@ static void flush_struct(struct frame *f){
 
 void transport_queue_message(uint8_t type, uint8_t ack, uint8_t dlc, uint8_t *data){
   // send ack frame
-  if(ack == ACK_RESPONSE){
+  if(ack == TRANSPORT_ACK_TYPE::ACK_RESPONSE){
     pack_ack(type, rx_packet.f.ID, &tx_priority_packet.f);
     tx_priority_packet.waiting = true;
     DEBUG_PRINT_DATA_FRAME(DEBUG_FILE, DEBUG_MSG, TX_ACK_MSG, "199", START_BYTE, "ACK_PAC", tx_priority_packet.f);
@@ -247,7 +247,7 @@ static void pack_ack(uint8_t type, uint8_t id, struct frame *f){
 
   //pack frame with passed data.
   f->TYPE = type;
-  f->ACK = ACK_RESPONSE;
+  f->ACK = TRANSPORT_ACK_TYPE::ACK_RESPONSE;
   f->ID = id;
   f->DLC = 0x00; // no data to sent in ACK.
   f->CRC = calculate_crc(f); 
@@ -383,22 +383,22 @@ uint8_t update_rx_fsm(){
 
         DEBUG_STREAM_DATA(DEBUG_FILE, DEBUG_STREAM, incoming);
     
-        if(rx_packet.f.ACK == ACK_REQUEST){
+        if(rx_packet.f.ACK == TRANSPORT_ACK_TYPE::ACK_REQUEST){
           DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "ACK", "ACK request received.");
           rx_state = RX_STATE_READ_ID;
           rx_return_status = RX_RETURN_CODES::ACK_REQUEST_RECEIVED;
         }
-        else if(rx_packet.f.ACK == ACK_RESPONSE){
+        else if(rx_packet.f.ACK == TRANSPORT_ACK_TYPE::ACK_RESPONSE){
           DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "ACK", "ACK response received.");
           rx_state = RX_STATE_READ_ID;
           rx_return_status = RX_RETURN_CODES::ACK_RESPONSE_RECEIVED;
         }
-        else if(rx_packet.f.ACK == NACK){
+        else if(rx_packet.f.ACK == TRANSPORT_ACK_TYPE::NACK){
           DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "ACK", "NACK request received.");
           rx_state = RX_STATE_READ_ID;
           rx_return_status = RX_RETURN_CODES::NACK_REQUEST_RECEIVED;
         }
-        else if(rx_packet.f.ACK == NORMAL_FRAME){
+        else if(rx_packet.f.ACK == TRANSPORT_ACK_TYPE::NORMAL_FRAME){
           DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "ACK", "normal frame received.");
           rx_state = RX_STATE_READ_ID;
           rx_return_status = RX_RETURN_CODES::NORMAL_FRAME_RECEIVED;
@@ -484,12 +484,12 @@ uint8_t update_rx_fsm(){
         else{ 
           DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "CRC", "CRC check OK.");
           
-          if(rx_packet.f.ACK == ACK_REQUEST){
+          if(rx_packet.f.ACK == TRANSPORT_ACK_TYPE::ACK_REQUEST){
             DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "RX", "responding to ACK request.");
             pack_ack(rx_packet.f.TYPE, rx_packet.f.ID, &tx_priority_packet.f);
             tx_priority_packet.waiting = true;
           }
-          else if(rx_packet.f.ACK == ACK_RESPONSE){ 
+          else if(rx_packet.f.ACK == TRANSPORT_ACK_TYPE::ACK_RESPONSE){ 
             SELFTEST_LOG_EVENT(EVENT_ACK_RECEIVED);
             DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "ACK", "received ack response. ");
             rx_ack.TYPE = rx_packet.f.TYPE;
@@ -601,7 +601,7 @@ uint8_t update_tx_fsm(){
         transmit_packet(active);
         DEBUG_PRINT_DATA_PTR_FRAME(DEBUG_FILE, DEBUG_MSG, TX_FRAME, "533", START_BYTE, "TX_PTR", active);
 
-        if(active->ACK == ACK_REQUEST){
+        if(active->ACK == TRANSPORT_ACK_TYPE::ACK_REQUEST){
           copy_frame(active, &tx_pending_ack.f);
 
           // reset the all parameters to default 

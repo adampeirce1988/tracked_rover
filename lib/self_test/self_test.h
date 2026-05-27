@@ -6,14 +6,14 @@
 #include "debug.h"
 
 //=============== test status codes ================ 
-#define SELFTEST_NO_TEST_RUNNING     0
-#define SELFTEST_RUNNING             1
-#define SELFTEST_PASSED              2
-#define SELFTEST_FAILED              3 
-#define SELFTEST_COMPLETED           4
+#define SELFTEST_NO_TEST_RUNNING                0
+#define SELFTEST_RUNNING                        1
+#define SELFTEST_PASSED                         2
+#define SELFTEST_FAILED                         3 
+#define SELFTEST_COMPLETED                      4
 // //================ ================ ================ 
 
-#define ST_WDT_EXTRA_TIME            250  // tune to stop timout errors 
+constexpr uint8_t ST_WDT_EXTRA_TIME =           250;   // tune to stop timout errors 
 //=============== gloabal variables ================
 
 //================ ================ ================ 

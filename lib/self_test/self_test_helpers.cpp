@@ -23,8 +23,8 @@
 
     uint8_t r = random(0, 101); // random no 0 - 100 
 
-    if(r < RANDOM_ACK_PERCENTAGE)  {return ACK_REQUEST;}  // 20% chance of requiring ack 
-    return NORMAL_FRAME;               // 80% chance of normal frame 
+    if(r < RANDOM_ACK_PERCENTAGE)  {return TRANSPORT_ACK_TYPE::ACK_REQUEST;}  // 20% chance of requiring ack 
+    return TRANSPORT_ACK_TYPE::NORMAL_FRAME;               // 80% chance of normal frame 
 }
 
  uint16_t weighted_random_delay(uint16_t std_delay){

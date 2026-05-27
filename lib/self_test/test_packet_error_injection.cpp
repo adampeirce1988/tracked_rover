@@ -11,17 +11,17 @@
 
 uint8_t next_injection_position = 0; 
 
-uint8_t self_test_2(uint8_t no_of_packets, uint16_t delay_time_us, uint8_t error_count, TX_SET_FAULT_MODE fault_type, uint8_t fault_value){
+uint8_t self_test_error_injection(uint8_t no_of_packets, uint8_t error_count, TX_SET_FAULT_MODE fault_type, uint8_t fault_value){
 
     // test setup(runs only once)
     if(self_test::current_test_packet == 0){
 
-        //print test inoformartion
+        //print test inoformartion // *** TODO: MAKE TESTING TYOE DYNAMIC AND REFLECT SELECTED TEST TYPE ***
         DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_NONE, "TEST", "running self_test_2 corrup crc error count: ", error_count, " corupt frames.");
-        DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_NONE, "TEST", "self_test_1 tests packets transmitted speed: ", delay_time_us, " us");
+        DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_NONE, "TEST", "self_test_1 tests packets transmitted speed: ", DEFAULT_PACKET_DELAY_US, " us");
 
         // enable progress bar  
-        if(TEST_2_VERBOUS_OUTPUT == false){
+        if(TEST_VERBOUS_OUTPUT == false){
             dissable_verbous_error();                 // disble verbous error reporting
             PRINT_PROGRESS_BAR_START();               // Progress bar
         }     
@@ -50,7 +50,7 @@ uint8_t self_test_2(uint8_t no_of_packets, uint16_t delay_time_us, uint8_t error
         }
         
         // set the next transmision time
-        self_test::next_transmission_time += delay_time_us;
+        self_test::next_transmission_time += DEFAULT_PACKET_DELAY_US;
     
         //run the selftest 
         if(self_test::current_test_packet < no_of_packets){
@@ -59,8 +59,8 @@ uint8_t self_test_2(uint8_t no_of_packets, uint16_t delay_time_us, uint8_t error
             
             // bult data frame
             uint8_t type = random(1, 256);                    // random type 1-255 ** NO TYPE CHECK IMPLIMENTED **
-            uint8_t ack  = NORMAL_FRAME;                      // send all packets as normal frames
-            uint8_t dlc  = random(0,(MAX_PAYLOAD_LEN + 1));   // set random dlc
+            uint8_t ack  = TRANSPORT_ACK_TYPE::NORMAL_FRAME;                      // send all packets as normal frames
+            uint8_t dlc  = random(1,(MAX_PAYLOAD_LEN + 1));   // set random dlc 1 - MAX_PAYLOAD
             uint8_t data[MAX_PAYLOAD_LEN]; 
             for(int i = 0; i < dlc; i++){
                 data[i] = random(0,255);
@@ -69,7 +69,7 @@ uint8_t self_test_2(uint8_t no_of_packets, uint16_t delay_time_us, uint8_t error
             //inject the error at a random interval
             if(self_test::current_test_packet % 10 == next_injection_position){
                 ST_LOG_EVENT(EVENT_ERROR_INJECTED);
-                set_tx_fault_injection_active(TX_SET_FAULT_MODE::CRC_RAND_FLIP_BIT, fault_value);
+                set_tx_fault_injection_active(fault_type, fault_value);
             }
 
             // set the next random packet every 10 packets 
@@ -126,7 +126,7 @@ uint8_t self_test_2(uint8_t no_of_packets, uint16_t delay_time_us, uint8_t error
     if(micros() > self_test::next_transmission_time){
         
         // set the next transmision time
-        self_test::next_transmission_time += delay_time_us;
+        self_test::next_transmission_time += DEFAULT_PACKET_DELAY_US;
     
         //run the t=selftest 
         if(self_test::current_test_packet < no_of_packets){

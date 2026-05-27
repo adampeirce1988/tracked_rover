@@ -6,10 +6,10 @@
 
 
 void establish_coms(){
-    transport_queue_message(MSG_ESTABLISH_COMMUNICATION, ACK_REQUEST, 0, NULL);
+    transport_queue_message(MSG_ESTABLISH_COMMUNICATION, TRANSPORT_ACK_TYPE::ACK_REQUEST, 0, NULL);
 }
 
 void confirm_coms(){
-    transport_queue_message(MSG_CONFIRM_COMMUNICATION, NORMAL_FRAME, 0, NULL);
+    transport_queue_message(MSG_CONFIRM_COMMUNICATION, TRANSPORT_ACK_TYPE::NORMAL_FRAME, 0, NULL);
 }
 
