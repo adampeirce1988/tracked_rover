@@ -3,6 +3,8 @@
 #include "debug.h"
 #include "debug_config.h"
 #include "global_config.h"
+#include "global.h"
+
 
 #define DEBUG_FILE DBG_LOGS
 
