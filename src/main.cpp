@@ -4,7 +4,8 @@
 #include <Arduino.h>
 #include <HardwareSerial.h>
 #include "self_test.h"
-#include "log.h"
+#include "log.h"  // remove at the end of refactor
+#include "logger.h"
 #include "transport.h"
 #include "debug.h"
 #include "protocol.h"
@@ -13,9 +14,12 @@
 #include "messages.h"
 #include "system.h"
 
-
 #define DEBUG_FILE DBG_ESP_MAIN
 
+// return code variable 
+uint8_t rx_transport_status = 0;  
+uint8_t tx_transport_status = 0;
+uint8_t rx_protocol_status = 0; 
 
 void setup(){
   // open debug port and print version data. 
@@ -30,26 +34,29 @@ void setup(){
 }
 
 void loop() {
-  // print state change only on change. 
+  
+  // print state change only on change. - to be dispalyed in the web interface on rlease
   if(active_vehicle_state != last_vehicle_state){
     DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "MAIN", "vehicle state cahnged active_vehicle_state: ", vehicle_state_to_string(active_vehicle_state));
     last_vehicle_state = active_vehicle_state; 
   }
 
-  // update core systems 
-  rx_status = update_rx_fsm(); 
-  tx_status = update_tx_fsm();
+  rx_transport_status = update_rx_fsm(); 
+  tx_transport_status = update_tx_fsm();
 
-  // check for avaliable packets and run the dispacher
+  // check for avaliable packets and run the dispacher - [TODO]: add a bit wise check for valid type 
   if(frame_avaliable() > 0){
-    rx_dispacher_status = rx_message_task_dispatcher();
-    if(rx_dispacher_status == false){
-      DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "MAIN", "message recived with an invalid type. type: " , missmatche_type_received);
-    }
+    rx_protocol_status = rx_message_task_dispatcher();
   }
 
-  fifo_io_uart_engine_update();    // this only needs to run if transport diagnostics occours. 
+  // process returned codes & log if an error is received
+  process_transport_rx_return_error(rx_transport_status); 
+  process_transport_tx_return_error(tx_transport_status); 
+  process_protocol_return_error(rx_protocol_status);      
+
+
+  fifo_io_uart_engine_update();                                  // this only needs to run if transport diagnostics occours. 
   
-  // run vehicle requested FSM. 
-  run_vehicle_state();
+  
+  run_vehicle_state();                                           // run vehicle requested FSM. 
 }

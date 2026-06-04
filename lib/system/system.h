@@ -4,20 +4,17 @@
 #include <Arduino.h>
 
 // system variables 
-extern bool health_test_status;    // defines if the health_Test has passes or failed
-extern uint8_t selftest_state;        // status code for diagnostic self test 
-extern uint32_t diagnostics_WDT;      // WDT diagnostics test timeout
-extern uint8_t rx_dispacher_status;   // status code for the protocol state macheince
+extern bool health_test_status;                 // defines if the health_Test has passes or failed
+extern uint8_t selftest_state;                  // status code for diagnostic self test 
+extern uint32_t diagnostics_WDT;                // WDT diagnostics test timeout
+
+extern uint8_t tx_transport_status;             // stores status code for the transport tx state macheince
+extern uint8_t rx_transport_status;             // stores status code for the transport rx state macheince
+extern uint8_t rx_protocol_status;              // stores status code for the protocol state macheince
 
 //********** TEST ONLY **********
 extern bool TEST_call_diag_once;  // test only code delete once refactored.
 //*******************************
-
-// these values are currnetly logged but unused the need to be used to log errors 
-// this functionality can then be used to remove logging from transport. 
-extern uint8_t tx_status; 
-extern uint8_t rx_status; 
-
   
 
 enum class VEHICLE_STATE{

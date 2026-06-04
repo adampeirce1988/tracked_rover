@@ -24,7 +24,7 @@
 
 //////////////////////////////////////
 #define QUEUE_SIZE                 3
-#define PENDING_ACK_QUEUE_SOZE     2
+#define PENDING_ACK_QUEUE_SIZE     2
 //////////////////////////////////////
 
 //#define START_BYTE                 0xFF                  // default start byte 0xFF
@@ -61,7 +61,7 @@
     #define HARDWARE_VERSION       "ARDUINO MEGA 2650\n"
     #define RELEASE_NOTES          "-latest version of software contains a software uart simulator \n- *currently in development* this will allow a full slef test of the transport lay allowing testing of all failure types\n"
                              
-    #define MAX_SERIAL_BUFFER SIZE 64
+    #define MAX_SERIAL_BUFFER_SIZE 64
     
 
     #define DEBUG_PORT             Serial

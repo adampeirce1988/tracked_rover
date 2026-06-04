@@ -1,3 +1,4 @@
+
 #include <stdint.h> 
 #include "metrics.h"
 
@@ -9,6 +10,7 @@ struct latency_buffer{
     uint8_t count = 0;                       // total entries in buffer 
     uint32_t sum = 0;                        // total sum of buffer
 };
+
 
 // initialise the latency ring buffers
 static latency_buffer rx_latency_buffer = {}; // move to .cpp
@@ -23,6 +25,9 @@ static uint16_t latency_get_min(const latency_buffer &b);
 static uint16_t latency_get_max(const latency_buffer &b);
 static uint16_t latency_get_average(const latency_buffer &b);
 static uint16_t latency_get_jitter(const latency_buffer &b);
+
+//print run time metrics
+ void print_runtime_metrics();
 
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -168,3 +173,5 @@ uint16_t rx_latency_get_average(){
 uint16_t rx_latency_get_jitter(){
     return latency_get_jitter(rx_latency_buffer);
 }
+
+

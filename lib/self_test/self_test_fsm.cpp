@@ -21,7 +21,7 @@ namespace self_test {
     bool diagnostics_active = false; 
     bool test_end_counter = false; 
     bool watchdog_timer_test_active = false; 
-}
+};
 
 TEST_OPERATION self_test_state = TEST_OPERATION::TEST_DISPACHER; 
 //=========================================================
@@ -116,7 +116,7 @@ uint8_t run_test_case(){
         } break; 
        
         /////////////////////////////// TRANSPORT TEST 2 ///////////////////////////////
-         // run a good packet test with tight timing and random reduced time between transmisios
+         // run a good packet test with tight timing and random reduced time between transmisios (1:10)
         case TEST_OPERATION::TRANSPORT_SELF_TEST_2:{ 
 
             self_test::current_test_status_code = self_test_transport_random_packet(
@@ -255,5 +255,6 @@ uint8_t run_test_case(){
                 return self_test::current_test_status_code; 
         }break;
     }
+    
     return SELFTEST_NO_TEST_RUNNING;
 }

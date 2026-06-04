@@ -6,8 +6,10 @@
 #include "messages.h"
 #include "global_config.h"
 
+
 uint8_t missmatche_type_received; 
 
+// frame for storing thr read frame
 frame protocol_fame; 
 
 uint8_t rx_message_task_dispatcher(){ 

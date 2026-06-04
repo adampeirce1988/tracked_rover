@@ -104,8 +104,9 @@ void transport_selftest_log_clear(){
 // -----------------------------
 // Main logging function
 // -----------------------------
+
 void ST_LOG_EVENT(LOG_EVENT event, uint32_t value) {
-    if(transport_test_log.diagnostics_active){
+    if(sys::diagnostics_active){
         switch (event) {
             case EVENT_PACKET_SENT:       transport_test_log.packets_sent++;                                          break;
             case EVENT_PACKET_RECEIVED:   transport_test_log.packets_received++;                                      break;

@@ -1,11 +1,21 @@
 #ifndef SELF_TEST_H
 #define SELF_TEST_H
 
+#pragma once
+
 #include <Arduino.h>
 #include "global_config.h"
 #include "debug.h"
 
-//=============== test status codes ================ 
+//=============== test status codes ================
+// enum class SELF_TEST_RETURN_CODE{ 
+//     NO_TEST_RUNNING, 
+//     TEST_RUNNING, 
+//     TEST_PASSED, 
+//     TEST_FAILED,
+//     TEST_COMPLETED
+// }; 
+
 #define SELFTEST_NO_TEST_RUNNING                0
 #define SELFTEST_RUNNING                        1
 #define SELFTEST_PASSED                         2

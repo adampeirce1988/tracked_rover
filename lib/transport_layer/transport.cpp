@@ -106,8 +106,6 @@ struct frame *active;                                  // active frame for sendi
 Transport_IO *current_transport = DEFAULT_TRANSPORT;   // communication port struct defined in transport.h and initialized in main.cpp
 
 // global variables
-
-
 static uint32_t last_read_byte = 0x00; 
 static uint32_t rx_wdt_timestamp = 0; 
 static uint8_t packet_id = 0x01; 
@@ -306,7 +304,7 @@ void copy_frame(struct frame *scr, struct frame *dst){
   return;
 }
 
-uint16_t get_tx_latancy(){  
+uint16_t transport_get_tx_latancy(){  
   if(total_tx_frame_time > UINT16_MAX){
     return UINT16_MAX; 
   }
@@ -314,7 +312,7 @@ uint16_t get_tx_latancy(){
   return total_tx_frame_time; 
 }
 
-uint16_t get_rx_latancy(){
+uint16_t transport_get_rx_latancy(){
   if(total_rx_frame_time > UINT16_MAX){
     return UINT16_MAX; 
   }
@@ -571,17 +569,20 @@ uint8_t update_tx_fsm(){
     DEBUG_PRINT_DATA_FRAME(DEBUG_FILE, DEBUG_MSG, TX_PRIORITY, "487", START_BYTE, "PRIORITY", tx_priority_packet.f);
     tx_priority_packet.waiting = false; 
     tx_state = TX_STATE_SENDING;
+    tx_return_status = TX_RETURN_CODES::TX_ACK_TRANSMISION_SUCCESS; 
     SELFTEST_LOG_EVENT(EVENT_ACK_SENT);  //log sent acks
   }
   else if((tx_state == TX_STATE_IDLE) && (tx_pending_ack.retry == true)){
     active = &tx_pending_ack.f;
     tx_state = TX_STATE_RETRY;
     tx_pending_ack.retry = false; 
+    tx_return_status = TX_RETURN_CODES::TX_RETRY_TRANSMISION_SUCCESS;
   }
   else if((tx_state == TX_STATE_IDLE) && tx_normal_packet.waiting == true){
     active = &tx_normal_packet.f;
     tx_normal_packet.waiting = false; 
     tx_state = TX_STATE_SENDING; 
+    tx_return_status = TX_RETURN_CODES::TX_TRANSMISION_SUCCESS;
     SELFTEST_LOG_EVENT(EVENT_PACKET_SENT);  // log sent packets 
   }
 
@@ -653,14 +654,15 @@ uint8_t update_tx_fsm(){
 
         packet_id  = packet_id + 1;
 
-        tx_state = TX_STATE_IDLE; // this is line 527
-        tx_return_status = TX_RETURN_CODES::TX_TRANSMISION_SUCCESS;
+        tx_state = TX_STATE_IDLE;
 
         // store thelongest and shotest tx transmission times add to non_self test metrics later. 
         total_tx_frame_time = micros() - tx_start_timestamp;
 
         // log the selftest event 
         SELFTEST_LOG_EVENT_VAL(EVENT_TX_LATANCY, total_tx_frame_time);
+
+        // return the value seected by at the inital frame seletion
 
       break;
     }

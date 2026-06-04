@@ -1,6 +1,8 @@
 #ifndef SELF_TEST_INTERNAL_H
 #define SELF_TEST_INTERNAL_H
 
+#pragma once
+
 #include <stdint.h>
 #include "debug.h"
 #include "transport.h"
@@ -25,10 +27,10 @@ constexpr bool DISABLE_RANDOM_PACKET_TIMING_DELAY =  false;
 //****************************************************** 
 
 //**************** injection test config ***************** 
-constexpr uint8_t INJECTION_PACKET_COUNT =              100;
-constexpr uint16_t INJECTION_PACKET_DELAY_US =          20000;
-constexpr uint8_t INJECTION_ERROR_COUNT =               INJECTION_PACKET_COUNT / 10; // 10% errors 
-constexpr uint8_t TEST_9_ERROR_VALUE =                  0xFE;  // change this to random and handle duplics/ matching 
+constexpr uint8_t INJECTION_PACKET_COUNT =            100;
+constexpr uint16_t INJECTION_PACKET_DELAY_US =        20000;
+constexpr uint8_t INJECTION_ERROR_COUNT =             INJECTION_PACKET_COUNT / 10; // 10% errors 
+constexpr uint8_t TEST_9_ERROR_VALUE =                0xFE;  // change this to random and handle duplics/ matching 
 //************************************************
 
 

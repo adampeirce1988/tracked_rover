@@ -41,6 +41,28 @@ extern bool verbous_debug_enabled;
 } while(0)  
 
 
+// print ST & RT log header 
+#define PRINT_ST_LOG_HEARDER() do { \
+  DEBUG_PORT.print("========== ST_LOG =========="); \
+} while(0)
+
+#define PRINT_RT_LOG_HEARDER() do { \
+  DEBUG_PORT.print("========== RT_LOG =========="); \
+} while(0)
+
+#define PRINT_LOG_ENTRY(variable_name, value) do { \
+  DEBUG_PORT.print(variable_name); \
+  DEBUG_PORT.println(value); \
+} while(0)
+
+#define PRINT_LOG_SEPERATOR() do { \
+  DEBUG_PORT.print("**********  **********"); \
+} while(0)
+
+#define PRINT_LOG_FOOTER(len_of_title) do { \
+  DEBUG_PORT.print("=========================="); \
+} while(0)
+
 #define DEBUG_PRINT_MSG(file, level, type, msg) do {\
   if(verbous_debug_enabled == true){ \
     if((DEBUG_FILE_MASK & (file)) &&  (DEBUG_LEVEL_MASK & (level))) {\

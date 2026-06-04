@@ -48,21 +48,24 @@ namespace RX_RETURN_CODES{
   constexpr uint8_t PAYLOAD_OVERFLOW =        18;
   constexpr uint8_t CRC_ERROR =               19;
   constexpr uint8_t MSG_TIMEOUT_ERROR =       20;
-};
+}
 
 // ================= TX RETURN CODES =================
 namespace TX_RETURN_CODES{
-  constexpr uint8_t TX_IDLE_STATE =           0;
-  constexpr uint8_t TX_PENDING_ACK =          1;
-  constexpr uint8_t TX_TRANSMITING =          2;
-  constexpr uint8_t RESENDING_MSG =           3;
-  constexpr uint8_t TX_TRANSMISION_SUCCESS =  4;
-  constexpr uint8_t TX_TRANSMISION_ERROR =    5;
-  constexpr uint8_t ACK_NOT_RECEVIED =        6;
-  constexpr uint8_t ACK_MISMATCHED =          7;
-  constexpr uint8_t ACK_WDT_TIMEOUT =         8;
-  constexpr uint8_t TX_BUFFER_OVERFLOW =      9;
-};
+  constexpr uint8_t TX_IDLE_STATE =                0;
+  constexpr uint8_t TX_PENDING_ACK =               1;
+  constexpr uint8_t TX_TRANSMITING =               2;
+  constexpr uint8_t RESENDING_MSG =                3;
+  constexpr uint8_t TX_TRANSMISION_SUCCESS =       4;
+  constexpr uint8_t TX_ACK_TRANSMISION_SUCCESS =   5;
+  constexpr uint8_t TX_RETRY_TRANSMISION_SUCCESS = 6; 
+  constexpr uint8_t TX_TRANSMISION_ERROR =         7;
+  constexpr uint8_t ACK_NOT_RECEVIED =             8;
+  constexpr uint8_t ACK_MISMATCHED =               9;
+  constexpr uint8_t ACK_WDT_TIMEOUT =              10;
+  constexpr uint8_t TX_BUFFER_OVERFLOW =           11;
+ 
+}
 
 // =============== ENUM CLASS ===============
 // global class used to select a test. 
@@ -116,8 +119,8 @@ void fifo_io_uart_engine_update();
 //Diagnostics
 void set_tx_fault_injection_active(TX_SET_FAULT_MODE type, uint8_t value);    // must be set each time i fault is to be injected i to the system.
 void tx_frame_error_injection(frame *f);   // injection point for faults in inside pack messag after packing and crc are calculated. 
-uint16_t get_tx_latancy(); // should only be called once FRAME_READY is confimed 
-uint16_t get_rx_latancy(); // should only be called once TX_TRANSMISSION_SUCSESS 
+uint16_t transport_get_tx_latancy(); // should only be called once FRAME_READY is confimed 
+uint16_t transport_get_rx_latancy(); // should only be called once TX_TRANSMISSION_SUCSESS 
 
 // transport 
 void com_port_open();

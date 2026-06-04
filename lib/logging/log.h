@@ -35,14 +35,14 @@ enum LOG_EVENT {
 // -----------------------------
 typedef struct selftest_metrics {
 
-    bool diagnostics_active;
+    bool diagnostics_active; 
 
     // Counters
     uint8_t packets_sent;
     uint8_t packets_received;
     uint8_t ack_sent;
     uint8_t ack_received;
-    uint8_t injected_errors; 
+    uint8_t injected_errors;
 
     // Latency tracking
     uint8_t tx_latency_counter;
@@ -85,10 +85,18 @@ extern selftest_metrics_t transport_test_log;
 // -----------------------------
 // Logging API
 // -----------------------------
+
+// remove these once tested
 void ST_LOG_EVENT(LOG_EVENT event, uint32_t value = 0);
 void transport_selftest_log_clear();
-void set_transport_selftest_loging_active();
+
+// selft test loging active/ inactive
+void set_transport_selftest_loging_active();  
 void set_transport_selftest_loging_inactive();
+
+// // part of log_event router
+// void process_rx_return_error(uint8_t return_code);
+// void process_tx_return_error(uint8_t return_code);
 
 // -----------------------------
 // Logging macros

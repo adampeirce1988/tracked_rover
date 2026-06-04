@@ -1,0 +1,35 @@
+
+[TODO]: cange trasport returns to enum class. 
+
+enum class TX_RETURN_CODES : uint8_t {
+    TX_IDLE_STATE = 0,
+    TX_PENDING_ACK,
+    TX_TRANSMITING,
+    RESENDING_MSG,
+    TX_TRANSMISION_SUCCESS,
+    TX_TRANSMISION_ERROR,
+    ACK_NOT_RECEVIED,
+    ACK_MISMATCHED,
+    ACK_WDT_TIMEOUT,
+    TX_BUFFER_OVERFLOW
+};
+Then your function becomes:
+void process_tx_return_error(TX_RETURN_CODES code)
+{
+    switch(code)
+    {
+        case TX_RETURN_CODES::ACK_NOT_RECEVIED:
+            break;
+
+        case TX_RETURN_CODES::ACK_WDT_TIMEOUT:
+            break;
+
+        case TX_RETURN_CODES::TX_BUFFER_OVERFLOW:
+            break;
+
+        default:
+            break;
+    }
+}
+
+[TODO]: rework transport to assesss acks inside a case: and return a code on good ack received. 
