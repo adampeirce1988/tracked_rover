@@ -1,60 +1,52 @@
 
 #include <stdint.h>
+#include <Arduino.h>
 #include "global.h"
 #include "runtime_error_log.h"
 
-struct ERROR{
-    uint8_t count = 0;
-    uint32_t first_occorance = 0;
-    uint32_t last_occourance = 0;
-    bool latch = false;
-};
+// internal forward declerations
+static void rt_log_entry_clear(ERROR_STRUCT &s); 
 
 
-struct _RT_LOG{
+//ERROR_STRUCT RT_ERROR_LOG[ERROR_ID_COUNT]; 
+ERROR_STRUCT rt_error_log_array[ERROR_ID_COUNT]; 
+   
+void rt_log_error(ERROR_STRUCT &s, bool latch_error = false){
+    if(sys::diagnostics_active || s.latch){ // if diagnostics test active do not log or the fault is latched
+        return; 
+    }
 
-    
-    // transport TX errors
-    uint8_t ack_mismatch = 0;
-    uint8_t ack_not_received = 0;
-    uint8_t ack_timeout = 0;
-    uint8_t tx_buffer_overflow = 0;
+    const uint32_t timestamp = millis();
+    s.last_occurrence = timestamp; // change to numreicl time and date stamp
 
-    // transpoert RX errors
-    uint8_t ack_out_of_range = 0;
-    uint8_t dlc_exceeded_max = 0;
-    uint8_t payload_overflow = 0;
-    uint8_t crc_error = 0;
-    uint8_t rx_timeouts = 0;
+    if(s.count == 0){
+        s.first_occurrence = timestamp; // change to numreicl time and date stamp
+    }
 
-    // protocol errors
-    uint8_t invalid_type = 0;
-};
+    if(s.count < UINT8_MAX){
+        s.count ++;  
+    }
 
-// struct declerations 
-static _RT_LOG RT_LOG; 
-
-void rt_log_event(RT_LOG_EVENT event){
-
-    if(!sys::diagnostics_active){
-    
-        switch(event){
-            case RT_LOG_EVENT::EVENT_ACK_NOT_RECEIVED:
-                // system errors go here 
-            break; 
-
-            case RT_LOG_EVENT::EVENT_LOG_CLEAR:
-                // clear log errors here
-            break; 
-
-            default:
-                break; 
-
-        }
+    if(latch_error){ // latch the error untill a good packet is received. 
+        s.latch = true; 
     }
 }
 
+void rt_log_entry_clear(ERROR_STRUCT &s){
+    if(s.count > 0){
+        s.count = 0; 
+        s.first_occurrence = 0;
+        s.last_occurrence = 0; 
+        s.latch = false;
+    }
+}
 
-void rt_log_clear(){
-    rt_log_event(RT_LOG_EVENT::EVENT_LOG_CLEAR);
+void rt_clear_latch(ERROR_STRUCT &s){
+    s.latch = false; 
+}
+
+void rt_erase_error_codes(){
+    for(uint8_t i = 0; i < ERROR_ID_COUNT; i ++){
+        rt_log_entry_clear(rt_error_log_array[i]); 
+    }
 }

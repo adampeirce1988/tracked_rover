@@ -31,23 +31,24 @@ void  process_transport_tx_return_error(uint8_t return_code){
 
         case TX_RETURN_CODES::ACK_NOT_RECEVIED:
                 st_log_event(ST_LOG_EVENT::EVENT_ACK_NOT_RECEIVED, LOG_TYPE::ERROR); 
-                rt_log_event(RT_LOG_EVENT::EVENT_ACK_NOT_RECEIVED);  
-        break; 
-
-        case TX_RETURN_CODES::ACK_MISMATCHED: 
-                st_log_event(ST_LOG_EVENT::EVENT_ACK_MISMATCH, LOG_TYPE::ERROR);
-    
+                rt_log_error(rt_error_log_array[ERROR_ID_ACK_NOT_RECEIVED], false);
         break; 
 
         case TX_RETURN_CODES::ACK_WDT_TIMEOUT:
             // log ack_wdt 
                 st_log_event(ST_LOG_EVENT::EVENT_ACK_WDT_TIEOUT, LOG_TYPE::ERROR);
+                rt_log_error(rt_error_log_array[ERROR_ID_ACK_WDT_TIMEOUT], true);
         break; 
     
-        
+        case TX_RETURN_CODES::ACK_MISMATCHED: 
+                st_log_event(ST_LOG_EVENT::EVENT_ACK_MISMATCH, LOG_TYPE::ERROR);
+                rt_log_error(rt_error_log_array[ERROR_ID_ACK_MISMATCH], false);
+        break; 
+
         case TX_RETURN_CODES::TX_BUFFER_OVERFLOW:
             // log buffer overflow 
                 st_log_event(ST_LOG_EVENT::EVENT_TX_BUFFER_OVERFLOW, LOG_TYPE::ERROR);
+                rt_log_error(rt_error_log_array[ERROR_ID_TX_BUFFER_OVERFLOW], true);
 
         break; 
 
@@ -65,86 +66,57 @@ void process_transport_rx_return_error(uint8_t rx_return_code){
         case RX_RETURN_CODES::FRAME_READY:
             // store the latancy of the last received frame
             rx_latency_add_value(transport_get_rx_latancy());
-
-            if(sys::diagnostics_active == true){
-                st_log_event(ST_LOG_EVENT::EVENT_PACKET_RECEIVED, LOG_TYPE::METRIC);
-            }
+            st_log_event(ST_LOG_EVENT::EVENT_PACKET_RECEIVED, LOG_TYPE::METRIC);
         break;
         
         case RX_RETURN_CODES::ACK_READY:
             rx_latency_add_value(transport_get_rx_latancy());
-
-            if(sys::diagnostics_active == true){
-                st_log_event(ST_LOG_EVENT::EVENT_ACK_RECEIVED , LOG_TYPE::METRIC);
-            }
+            st_log_event(ST_LOG_EVENT::EVENT_ACK_RECEIVED , LOG_TYPE::METRIC);
+            rt_clear_latch(rt_error_log_array[ERROR_ID_ACK_WDT_TIMEOUT]); 
+            // reset tx and rx ack related error flags 
         break; 
 
         case RX_RETURN_CODES::NACK_REQUEST_RECEIVED: 
             rx_latency_add_value(transport_get_rx_latancy());
-
-            if(sys::diagnostics_active == true){
-                st_log_event(ST_LOG_EVENT::EVENT_NACK_REVEIVED, LOG_TYPE::METRIC);
-            }  
+            st_log_event(ST_LOG_EVENT::EVENT_NACK_REVEIVED, LOG_TYPE::METRIC);
+            
         break; 
         
         case RX_RETURN_CODES::INVALID_TYPE:
-            // log error 
-            if(sys::diagnostics_active == true){
-                st_log_event(ST_LOG_EVENT::EVENT_INVALID_TYPE , LOG_TYPE::ERROR);
-            }
-            else{
-                // dtc_log_event(DTC_LOG_EVENT::EVENT_INVALID_TYPE);
-            }
+            // this should be loged from protocol
+            st_log_event(ST_LOG_EVENT::EVENT_INVALID_TYPE , LOG_TYPE::ERROR);
         break;
 
         case RX_RETURN_CODES::ACK_OUT_OF_RANGE:
             // log error 
-            if(sys::diagnostics_active == true){
                 st_log_event(ST_LOG_EVENT::EVENT_ACK_OUT_OF_RANGE, LOG_TYPE::ERROR);
-            }
-            else{
-                // dtc_log_event(DTC_LOG_EVENT::EVENT_INVALID_TYPE);
-            }
+                rt_log_error(rt_error_log_array[ERROR_ID_ACK_OUT_OF_RANGE], false);
+    
         break; 
 
         case RX_RETURN_CODES::DLC_OVER_CAPACITY:
             // log error 
-            if(sys::diagnostics_active == true){
                 st_log_event(ST_LOG_EVENT::EVENT_DLC_OVER_CAPACITY , LOG_TYPE::ERROR);
-            }
-            else{
-                // dtc_log_event(DTC_LOG_EVENT::EVENT_INVALID_TYPE);
-            }
+                rt_log_error(rt_error_log_array[ERROR_ID_DLC_OVER_CAPACITY], false);
         break;
 
         case RX_RETURN_CODES::PAYLOAD_OVERFLOW:
            // log error
-            if(sys::diagnostics_active == true){
                 st_log_event(ST_LOG_EVENT::EVENT_PAYLOAD_OVERFLOW, LOG_TYPE::ERROR);
-            }
-            else{
-                // dtc_log_event(DTC_LOG_EVENT::EVENT_INVALID_TYPE);
-            }
+                rt_log_error(rt_error_log_array[ERROR_ID_PAYLOAD_OVERFLOW], false);
         break; 
 
         case RX_RETURN_CODES::CRC_ERROR:
             // log error
-            if(sys::diagnostics_active == true){
                 st_log_event(ST_LOG_EVENT::EVENT_CRC_ERROR, LOG_TYPE::ERROR);
-            }
-            else{
-                // dtc_log_event(DTC_LOG_EVENT::EVENT_INVALID_TYPE);
-            }
+                rt_log_error(rt_error_log_array[ERROR_ID_CRC_ERROR], false);
         break; 
 
         case RX_RETURN_CODES::MSG_TIMEOUT_ERROR:
             // log error
-            if(sys::diagnostics_active == true){
                 st_log_event(ST_LOG_EVENT::EVENT_MSG_TIMEOUT_ERROR, LOG_TYPE::ERROR);
-            }
-            else{
-                // dtc_log_event(DTC_LOG_EVENT::EVENT_INVALID_TYPE);
-            }
+                rt_log_error(rt_error_log_array[ERROR_ID_MSG_TIMEOUT], false);
+       
         break;
 
         default:
