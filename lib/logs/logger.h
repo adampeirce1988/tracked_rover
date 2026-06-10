@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 
+
 // -----------------------------
 // Logging API
 // -----------------------------
@@ -13,7 +14,9 @@ void process_transport_tx_return_error(uint8_t return_code);
 void process_protocol_return_error(uint8_t return_code); // not yet implimented 
 
 void st_clear_log();
-void rt_clear_log(); // not yet implimented.
+//bool st_check_test_result(ST_TEST_ENTRY entry, EVALUATION_TYPE evaluation_type,  uint8_t expected_result); // types not exposed
+void rt_erase_error_codes(); 
+
 
 // metrics API's
 // TX API function prototypes 

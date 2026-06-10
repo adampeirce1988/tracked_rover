@@ -5,8 +5,8 @@
 #include <stdint.h>
 
 namespace LOG_TYPE{
-constexpr bool ERROR = true; 
-constexpr bool METRIC = false; 
+    constexpr bool ERROR = true; 
+    constexpr bool METRIC = false; 
 };
 
 enum class ST_LOG_EVENT{
@@ -34,9 +34,31 @@ enum class ST_LOG_EVENT{
     EVENT_LOG_CLEAR // clear all log files.
 };
 
+enum class ST_TEST_ENTRY {
+    ST_LOG_PACKETS_SENT,
+    ST_LOG_ACKS_TRANSMITTED,
+    ST_LOG_RETRY_ATTEMPT,
+    ST_LOG_ACK_NOT_RECEIVED, 
+    ST_LOG_ACK_MISMATCH, 
+    ST_LOG_ACK_TIMEOUT,
+    ST_LOG_TX_BUFFER_OVERFLOW, 
+    ST_LOG_PACKETES_RECEIVED,
+    ST_LOG_ACK_RECEIVED, 
+    ST_LOG_NACK_RECEIVED, 
+    ST_LOG_INVALID_TPYE, 
+    ST_LOG_ACK_OUT_OF_RANGE, 
+    ST_LOG_DLC_OVER_CAPACITY,
+    ST_LOG_CRC_ERROR,
+    ST_LOG_MSG_TIMEOUT
+};
+
+enum class EVALUATION_TYPE{
+    EQUAL,
+    GREATER_THAN,
+    LESS_THAN
+};
 
 // forward declerations
 void st_log_event(ST_LOG_EVENT event, bool log_type);
-
 
 #endif

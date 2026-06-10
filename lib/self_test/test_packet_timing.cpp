@@ -3,7 +3,9 @@
 #include "global_config.h"
 #include "transport.h"
 #include "log.h"
+#include "logger.h"
 #include "self_test.h"
+#include "self_test_logger.h"
 #include "debug.h"
 #include "debug_config.h"
 #include "self_test_internal.h"
@@ -17,9 +19,9 @@ uint8_t self_test_transport_random_packet(uint8_t no_of_packets, uint16_t delay_
     if(self_test::current_test_packet == 0){
 
         transport_set(&fifo_io);                  // set current transport to fifo. 
-        transport_selftest_log_clear();           // reset all previous loged data.  *** MAY NEED TAYLORING TO SPECIFIC TEST TYPES **
+        transport_selftest_log_clear();           // reset all previous loged data.  **DELETE ONCE LOGING IS MOVED**
+        st_clear_log();                           // rest selftest error log
         set_transport_selftest_loging_active();   // activate loging
-        //self_test::current_test_packet = 1;             // set the packet counter to 1 so reporting is correct
 
         self_test::next_transmission_time = micros();
         // print information (only at the sart of the test)
@@ -74,10 +76,11 @@ uint8_t self_test_transport_random_packet(uint8_t no_of_packets, uint16_t delay_
 
     // exit the self test runs one at the end of the test
     if(self_test::test_end_counter == true && micros() - self_test::test_end_countdown_timer > TEST_END_COUNTDOWN_TIMER_US){
-        self_test::current_test_packet = 0;                     // reset the packet count a the end of the test 
-        //transport_set(&uart_io); //*** DISABLED FOR TESTING *** // set transport back to uart on completion of test.
-        set_transport_selftest_loging_inactive();               // dissable loging once test is completed 
-        PRINT_TRANSPORT_SELFTEST_LOG();
+        self_test::current_test_packet = 0;                        // reset the packet count a the end of the test 
+        //transport_set(&uart_io); //*** DISABLED FOR TESTING ***  // set transport back to uart on completion of test.
+        set_transport_selftest_loging_inactive();                  // dissable loging once test is completed 
+        PRINT_TRANSPORT_SELFTEST_LOG();                  
+        // ******************* // add st log printing here and create a global call to call it from logger.h 
         
 
         // check for pass or fail 0 errors expected. 

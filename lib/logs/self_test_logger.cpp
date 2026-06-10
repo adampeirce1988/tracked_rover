@@ -2,10 +2,12 @@
 
 #include <stdint.h>
 #include "self_test_logger.h"
-#include "logger.h"
-#include "transport.h" 
+#include "metrics.h"
+#include "transport.h"
 #include "global.h"
 #include "debug.h"
+
+#define DEBUG_FILE DBG_LOGS
 
 // strucs 
 struct _ST_LOG{
@@ -73,47 +75,8 @@ void st_log_event(ST_LOG_EVENT event, bool log_type = LOG_TYPE::METRIC){
             case ST_LOG_EVENT::EVENT_PAYLOAD_OVERFLOW:    { ST_LOG.payload_overflow++; }    break; 
             case ST_LOG_EVENT::EVENT_CRC_ERROR:           { ST_LOG.crc_error++;}            break;
             case ST_LOG_EVENT::EVENT_MSG_TIMEOUT_ERROR:   { ST_LOG.rx_timeouts++;}          break;
-
             // clear error log
-            case ST_LOG_EVENT::EVENT_LOG_CLEAR:
-                // clear metrics
-                ST_LOG.packets_sent = 0; 
-                ST_LOG.packets_received = 0; 
-                ST_LOG.ack_received = 0;
-                ST_LOG.nack_received = 0; 
-                ST_LOG.ack_transmitted = 0; 
-                ST_LOG.retry_attempt = 0; 
-                ST_LOG.ack_valid = 0;
-                ST_LOG.valid_type = 0;   
-
-                // test metrics
-                ST_LOG.injected_error = 0;
-                ST_LOG.delayed_packets = 0;
-
-                //clear TX errors 
-                ST_LOG.ack_mismatch = 0;
-                ST_LOG.ack_not_received = 0;
-                ST_LOG.ack_timeout = 0;
-                ST_LOG.tx_buffer_overflow = 0;
-
-                // RX failures
-                ST_LOG.invalid_type = 0;
-                ST_LOG.ack_out_of_range = 0;
-                ST_LOG.dlc_exceeded_max = 0;
-                ST_LOG.payload_overflow = 0;
-                ST_LOG.crc_error = 0;
-                ST_LOG.rx_timeouts = 0;
-
-
-                // protocol errors
-                ST_LOG.invalid_type = 0; 
-                ST_LOG.inhibited_message = 0; 
-                ST_LOG.reserved_type = 0;
-                
-                // total error count
-                ST_LOG.total_errors = 0;
-
-            break;
+            case ST_LOG_EVENT::EVENT_LOG_CLEAR:           { ST_LOG = {};}                   break;
         }   
 
         // increment total error is fault flag is true
@@ -122,13 +85,63 @@ void st_log_event(ST_LOG_EVENT event, bool log_type = LOG_TYPE::METRIC){
 
         }
     }
-    return; 
 }
 
+bool st_check_test_result(ST_TEST_ENTRY entry, EVALUATION_TYPE evaluation_type,  uint8_t expected_result){
 
+    uint8_t test_value = 0; 
+    
+    switch(entry){
+        // set test value here before test occours
+        case ST_TEST_ENTRY::ST_LOG_PACKETS_SENT:  {test_value = ST_LOG.packets_sent;}     break; 
+        case ST_TEST_ENTRY::ST_LOG_ACKS_TRANSMITTED:   {test_value = ST_LOG.ack_transmitted;}  break; 
+        case ST_TEST_ENTRY::ST_LOG_RETRY_ATTEMPT:   {test_value =ST_LOG.retry_attempt;} break; 
+        case ST_TEST_ENTRY::ST_LOG_ACK_NOT_RECEIVED: {test_value = ST_LOG.ack_not_received;} break; 
+        case ST_TEST_ENTRY::ST_LOG_ACK_MISMATCH: {test_value = ST_LOG.ack_mismatch;} break; 
+        case ST_TEST_ENTRY::ST_LOG_ACK_TIMEOUT: {test_value = ST_LOG.ack_timeout;} break;
+        case ST_TEST_ENTRY::ST_LOG_TX_BUFFER_OVERFLOW: {test_value = ST_LOG.tx_buffer_overflow;} break; 
+
+        case ST_TEST_ENTRY::ST_LOG_PACKETES_RECEIVED: {test_value = ST_LOG.packets_received;} break; 
+        case ST_TEST_ENTRY::ST_LOG_ACK_RECEIVED: {test_value = ST_LOG.ack_received;} break;
+        case ST_TEST_ENTRY::ST_LOG_NACK_RECEIVED: {test_value = ST_LOG.nack_received;} break; 
+        case ST_TEST_ENTRY::ST_LOG_INVALID_TPYE: {test_value = ST_LOG.invalid_type;} break;
+        case ST_TEST_ENTRY::ST_LOG_ACK_OUT_OF_RANGE: {test_value = ST_LOG.ack_out_of_range;} break;
+        case ST_TEST_ENTRY::ST_LOG_DLC_OVER_CAPACITY: {test_value = ST_LOG.dlc_exceeded_max;} break; 
+        case ST_TEST_ENTRY::ST_LOG_CRC_ERROR: {test_value = ST_LOG.crc_error;} break; 
+        case ST_TEST_ENTRY::ST_LOG_MSG_TIMEOUT: {test_value = ST_LOG.rx_timeouts;} break; 
+
+        default: 
+            DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "LOG", "ST_TEST_ENTRY invalid entry");
+            return false; 
+    }
+
+    if(evaluation_type == EVALUATION_TYPE::EQUAL){
+        if(test_value == expected_result) {
+            return true;
+        }
+    }
+    else if(evaluation_type == EVALUATION_TYPE::GREATER_THAN){
+        if(test_value > expected_result){
+            return true; 
+        }
+    }
+    else if(evaluation_type == EVALUATION_TYPE::LESS_THAN){
+        if(test_value < expected_result){
+            return true; 
+        }
+    }
+    else {
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "LOG", "evaluation type invalid");
+    }
+
+    return false; 
+ }
+
+    
 void st_log_clear(){
     st_log_event(ST_LOG_EVENT::EVENT_LOG_CLEAR);
 }
+
 
 void st_print_log(){
     // Print header
@@ -143,14 +156,14 @@ void st_print_log(){
         PRINT_LOG_ENTRY("retries attempted:.....",ST_LOG.retry_attempt);
     // System metrics
         PRINT_LOG_SEPERATOR();
-        PRINT_LOG_ENTRY("tx max latancy:........", tx_latency_get_max());
-        PRINT_LOG_ENTRY("tx min latancy:........", tx_latency_get_min());
-        PRINT_LOG_ENTRY("tx avragelatancy:......", tx_latency_get_average());
-        PRINT_LOG_ENTRY("tx jitter:.............", tx_latency_get_jitter());
-        PRINT_LOG_ENTRY("rx max latancy:........", rx_latency_get_max());
-        PRINT_LOG_ENTRY("rx min latancy:........", rx_latency_get_min());
-        PRINT_LOG_ENTRY("rx avragelatancy:......", rx_latency_get_average());
-        PRINT_LOG_ENTRY("rx jitter:.............", rx_latency_get_jitter());      
+        PRINT_LOG_ENTRY("tx max latancy:........", latency_get_max(tx_latency_buffer));
+        PRINT_LOG_ENTRY("tx min latancy:........", latency_get_min(tx_latency_buffer));
+        PRINT_LOG_ENTRY("tx avragelatancy:......", latency_get_average(tx_latency_buffer ));
+        PRINT_LOG_ENTRY("tx jitter:.............", latency_get_jitter(tx_latency_buffer ));
+        PRINT_LOG_ENTRY("rx max latancy:........", latency_get_max(rx_latency_buffer));
+        PRINT_LOG_ENTRY("rx min latancy:........", latency_get_min(rx_latency_buffer));
+        PRINT_LOG_ENTRY("rx avragelatancy:......", latency_get_average(rx_latency_buffer));
+        PRINT_LOG_ENTRY("rx jitter:.............", latency_get_jitter(rx_latency_buffer));      
     // Errors metrics
         PRINT_LOG_SEPERATOR();
         PRINT_LOG_ENTRY("injected errors........",ST_LOG.injected_error);

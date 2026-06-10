@@ -28,6 +28,6 @@ extern ERROR_STRUCT rt_error_log_array[ERROR_ID_COUNT];
 // forward declerations 
 void rt_log_error(ERROR_STRUCT &s, bool latch_active_error); 
 void rt_clear_latch(ERROR_STRUCT &s);
-void rt_erase_error_codes();
+
 
 #endif
