@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include "self_test_logger.h"
+#include "logger.h"
 #include "metrics.h"
 #include "transport.h"
 #include "global.h"
@@ -52,7 +53,7 @@ static _ST_LOG ST_LOG;
 
 
 // functions 
-void st_log_event(ST_LOG_EVENT event, bool log_type = LOG_TYPE::METRIC){ 
+void st_log_event(ST_LOG_EVENT event, bool log_type){ 
     if(sys::diagnostics_active){
         switch(event){
             
@@ -107,8 +108,9 @@ bool st_check_test_result(ST_TEST_ENTRY entry, EVALUATION_TYPE evaluation_type, 
         case ST_TEST_ENTRY::ST_LOG_INVALID_TPYE: {test_value = ST_LOG.invalid_type;} break;
         case ST_TEST_ENTRY::ST_LOG_ACK_OUT_OF_RANGE: {test_value = ST_LOG.ack_out_of_range;} break;
         case ST_TEST_ENTRY::ST_LOG_DLC_OVER_CAPACITY: {test_value = ST_LOG.dlc_exceeded_max;} break; 
-        case ST_TEST_ENTRY::ST_LOG_CRC_ERROR: {test_value = ST_LOG.crc_error;} break; 
+        case ST_TEST_ENTRY::ST_LOG_CRC_ERRORS: {test_value = ST_LOG.crc_error;} break; 
         case ST_TEST_ENTRY::ST_LOG_MSG_TIMEOUT: {test_value = ST_LOG.rx_timeouts;} break; 
+        case ST_TEST_ENTRY::ST_LOG_TOTAL_ERRORS:  {test_value = ST_LOG.total_errors;} break; 
 
         default: 
             DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "LOG", "ST_TEST_ENTRY invalid entry");
@@ -138,8 +140,8 @@ bool st_check_test_result(ST_TEST_ENTRY entry, EVALUATION_TYPE evaluation_type, 
  }
 
     
-void st_log_clear(){
-    st_log_event(ST_LOG_EVENT::EVENT_LOG_CLEAR);
+void st_clear_log(){
+    st_log_event(ST_LOG_EVENT::EVENT_LOG_CLEAR, LOG_TYPE::METRIC);
 }
 
 

@@ -2,31 +2,15 @@
 #include <stdint.h> 
 #include "metrics.h"
 
-// [NOTE]: **** all moved to header to allow calling in other internal modules only external 
 //  API calls to be exposed in logging.h
 
-// // **** ring buffer struct
-// struct latency_buffer{
-//     uint16_t latency[LATENCY_BUFFER_SIZE];   // latency buffer
-//     uint8_t index = 0;                       // current index to be written next 
-//     uint8_t count = 0;                       // total entries in buffer 
-//     uint32_t sum = 0;                        // total sum of buffer
-// };
-
-
 // // **** initialise the latency ring buffers
-// static latency_buffer rx_latency_buffer = {}; // move to .cpp
-// static latency_buffer tx_latency_buffer = {}; // move to .cpp
-
-
+latency_buffer rx_latency_buffer = {}; // move to .cpp
+latency_buffer tx_latency_buffer = {}; // move to .cpp
 
 // function declarations ** MOVE THESE TO THE.h file to be used by other functions in the module. 
 static void latency_add_value(latency_buffer &b, uint16_t latency);
 static void latency_clear_buffer(latency_buffer &b); uint16_t latency_get_min(const latency_buffer &b);
-// **** uint16_t latency_get_max(const latency_buffer &b);
-// **** uint16_t latency_get_average(const latency_buffer &b);
-// **** uint16_t latency_get_jitter(const latency_buffer &b);
-// **** uint16_t latency_get_min(const latency_buffer &b)
 
 //print run time metrics
  void print_runtime_metrics();
@@ -52,7 +36,7 @@ static void latency_add_value(latency_buffer &b, uint16_t latency){
     b.index = (b.index + 1) % LATENCY_BUFFER_SIZE;
 }
 
-static void latency_clear_buffer(latency_buffer &b){
+void latency_clear_buffer(latency_buffer &b){
     
     // the buffer can stay in its current state as all checks are done using b.coun
     b.count = 0; 
@@ -61,7 +45,7 @@ static void latency_clear_buffer(latency_buffer &b){
 }
 
 
-static uint16_t latency_get_max(const latency_buffer &b){
+uint16_t latency_get_max(latency_buffer &b){
 
     uint16_t max = 0; 
 
@@ -78,7 +62,7 @@ static uint16_t latency_get_max(const latency_buffer &b){
     return max; 
 }
 
-static uint16_t latency_get_min(const latency_buffer &b){
+uint16_t latency_get_min( latency_buffer &b){
 
     uint16_t min = UINT16_MAX;
 
@@ -95,7 +79,7 @@ static uint16_t latency_get_min(const latency_buffer &b){
     return min; 
 }
 
-static uint16_t latency_get_average(const latency_buffer &b){
+uint16_t latency_get_average( latency_buffer &b){
     // protect against 0 division.
     if(b.count == 0){
         return 0;
@@ -106,7 +90,7 @@ static uint16_t latency_get_average(const latency_buffer &b){
 }
 
 
-static uint16_t latency_get_jitter(const latency_buffer &b){
+uint16_t latency_get_jitter( latency_buffer &b){
 
     uint16_t max = 0;  
     uint16_t min = UINT16_MAX; 
@@ -170,7 +154,6 @@ uint16_t rx_latency_get_max(){
 }
 uint16_t rx_latency_get_average(){
     return latency_get_average(rx_latency_buffer);
-
 }
 uint16_t rx_latency_get_jitter(){
     return latency_get_jitter(rx_latency_buffer);

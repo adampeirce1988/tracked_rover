@@ -15,17 +15,17 @@ struct latency_buffer{
 };
 
 // initialise the latency ring buffers
-static latency_buffer rx_latency_buffer = {};
-static latency_buffer tx_latency_buffer = {}; 
+extern latency_buffer rx_latency_buffer;
+extern latency_buffer tx_latency_buffer;
 
 // forward declerations 
 void tx_latency_add_value(uint16_t latency);
 void rx_latency_add_value(uint16_t latency);
 
 // required internal call for internal module to call the get metrics functions
-uint16_t latency_get_max(const latency_buffer &b);
-uint16_t latency_get_average(const latency_buffer &b);
-uint16_t latency_get_jitter(const latency_buffer &b);
-uint16_t latency_get_min(const latency_buffer &b);
+uint16_t latency_get_max(latency_buffer &b);
+uint16_t latency_get_average(latency_buffer &b);
+uint16_t latency_get_jitter(latency_buffer &b);
+uint16_t latency_get_min(latency_buffer &b);
 
 #endif

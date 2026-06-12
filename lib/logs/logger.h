@@ -4,6 +4,31 @@
 #include <stdint.h>
 
 
+// enum class ST_TEST_ENTRY {
+//     ST_LOG_PACKETS_SENT,
+//     ST_LOG_ACKS_TRANSMITTED,
+//     ST_LOG_RETRY_ATTEMPT,
+//     ST_LOG_ACK_NOT_RECEIVED, 
+//     ST_LOG_ACK_MISMATCH, 
+//     ST_LOG_ACK_TIMEOUT,
+//     ST_LOG_TX_BUFFER_OVERFLOW, 
+//     ST_LOG_PACKETES_RECEIVED,
+//     ST_LOG_ACK_RECEIVED, 
+//     ST_LOG_NACK_RECEIVED, 
+//     ST_LOG_INVALID_TPYE, 
+//     ST_LOG_ACK_OUT_OF_RANGE, 
+//     ST_LOG_DLC_OVER_CAPACITY,
+//     ST_LOG_CRC_ERRORS,
+//     ST_LOG_MSG_TIMEOUT,
+//     ST_LOG_TOTAL_ERRORS
+// };
+
+// enum class EVALUATION_TYPE{
+//     EQUAL,
+//     GREATER_THAN,
+//     LESS_THAN
+// };
+
 // -----------------------------
 // Logging API
 // -----------------------------
@@ -14,6 +39,8 @@ void process_transport_tx_return_error(uint8_t return_code);
 void process_protocol_return_error(uint8_t return_code); // not yet implimented 
 
 void st_clear_log();
+void st_print_log();
+
 //bool st_check_test_result(ST_TEST_ENTRY entry, EVALUATION_TYPE evaluation_type,  uint8_t expected_result); // types not exposed
 void rt_erase_error_codes(); 
 

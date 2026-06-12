@@ -5,7 +5,6 @@
 #include "log.h"
 #include "logger.h"
 #include "self_test.h"
-#include "self_test_logger.h"
 #include "debug.h"
 #include "debug_config.h"
 #include "self_test_internal.h"
@@ -20,7 +19,7 @@ uint8_t self_test_transport_random_packet(uint8_t no_of_packets, uint16_t delay_
 
         transport_set(&fifo_io);                  // set current transport to fifo. 
         transport_selftest_log_clear();           // reset all previous loged data.  **DELETE ONCE LOGING IS MOVED**
-        st_clear_log();                           // rest selftest error log
+        st_clear_log();                           // rest selftest error log ** NEW FUNCTIOON **
         set_transport_selftest_loging_active();   // activate loging
 
         self_test::next_transmission_time = micros();
@@ -80,10 +79,13 @@ uint8_t self_test_transport_random_packet(uint8_t no_of_packets, uint16_t delay_
         //transport_set(&uart_io); //*** DISABLED FOR TESTING ***  // set transport back to uart on completion of test.
         set_transport_selftest_loging_inactive();                  // dissable loging once test is completed 
         PRINT_TRANSPORT_SELFTEST_LOG();                  
-        // ******************* // add st log printing here and create a global call to call it from logger.h 
+        st_print_log();                                            // print selftest log ** NEW FUNCTIOON **
         
 
-        // check for pass or fail 0 errors expected. 
+        // check for pass or fail 0 errors expected. ** NEW CHECK ** remove other call once tested 
+        //check_self_test_resutls(ST_TEST_ENTRY::ST_LOG_TOTAL_ERRORS, EVALUATION_TYPE::EQUAL, 100) // the  enums need referancing in the.h file. 
+
+        // check for pass or fail 0 errors expected.
         if(transport_test_log.total_errors == 0 &&
            transport_test_log.packets_received == no_of_packets && 
            transport_test_log.ack_sent == transport_test_log.ack_received){

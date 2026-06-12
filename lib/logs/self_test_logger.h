@@ -4,10 +4,12 @@
 
 #include <stdint.h>
 
+// TODO EXPOSE THESE ENUM FOR USAGE IN GLOBAL SPACE
+
 namespace LOG_TYPE{
     constexpr bool ERROR = true; 
     constexpr bool METRIC = false; 
-};
+}
 
 enum class ST_LOG_EVENT{
     // TX EVENT
@@ -48,8 +50,9 @@ enum class ST_TEST_ENTRY {
     ST_LOG_INVALID_TPYE, 
     ST_LOG_ACK_OUT_OF_RANGE, 
     ST_LOG_DLC_OVER_CAPACITY,
-    ST_LOG_CRC_ERROR,
-    ST_LOG_MSG_TIMEOUT
+    ST_LOG_CRC_ERRORS,
+    ST_LOG_MSG_TIMEOUT,
+    ST_LOG_TOTAL_ERRORS
 };
 
 enum class EVALUATION_TYPE{
@@ -59,6 +62,6 @@ enum class EVALUATION_TYPE{
 };
 
 // forward declerations
-void st_log_event(ST_LOG_EVENT event, bool log_type);
+void st_log_event (ST_LOG_EVENT event, bool log_type);
 
 #endif
