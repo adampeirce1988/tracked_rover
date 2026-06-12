@@ -3,7 +3,7 @@
 #include "global_config.h"
 #include "transport.h"
 #include "log.h"
-#include "logger.h"
+#include "logger.h" // this should inlude ST functions
 #include "self_test.h"
 #include "debug.h"
 #include "debug_config.h"
@@ -83,8 +83,14 @@ uint8_t self_test_transport_random_packet(uint8_t no_of_packets, uint16_t delay_
         
 
         // check for pass or fail 0 errors expected. ** NEW CHECK ** remove other call once tested 
-        //check_self_test_resutls(ST_TEST_ENTRY::ST_LOG_TOTAL_ERRORS, EVALUATION_TYPE::EQUAL, 100) // the  enums need referancing in the.h file. 
-
+        if( st_check_test_result(ST_TEST_ENTRY::ST_LOG_PACKETS_SENT, EVALUATION_TYPE::EQUAL, 100) ||
+            st_check_test_result(ST_TEST_ENTRY::ST_LOG_PACKETES_RECEIVED, EVALUATION_TYPE::EQUAL, no_of_packets) ||
+            st_compare_test_result(ST_TEST_ENTRY::ST_LOG_PACKETS_SENT, EVALUATION_TYPE::EQUAL, ST_TEST_ENTRY::ST_LOG_ACK_RECEIVED)
+        ){
+                return SELFTEST_PASSED; 
+        }
+         
+        
         // check for pass or fail 0 errors expected.
         if(transport_test_log.total_errors == 0 &&
            transport_test_log.packets_received == no_of_packets && 

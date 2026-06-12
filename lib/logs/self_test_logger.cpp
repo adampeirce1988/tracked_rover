@@ -56,7 +56,6 @@ static _ST_LOG ST_LOG;
 void st_log_event(ST_LOG_EVENT event, bool log_type){ 
     if(sys::diagnostics_active){
         switch(event){
-            
             // TX Logging 
             case ST_LOG_EVENT::EVENT_PACKET_SENT:         { ST_LOG.packets_sent++; }        break; 
             case ST_LOG_EVENT::EVENT_ACK_SENT:            { ST_LOG.ack_transmitted++;}      break; 
@@ -88,35 +87,39 @@ void st_log_event(ST_LOG_EVENT event, bool log_type){
     }
 }
 
-bool st_check_test_result(ST_TEST_ENTRY entry, EVALUATION_TYPE evaluation_type,  uint8_t expected_result){
-
-    uint8_t test_value = 0; 
-    
+uint8_t get_test_value(ST_TEST_ENTRY entry){
     switch(entry){
         // set test value here before test occours
-        case ST_TEST_ENTRY::ST_LOG_PACKETS_SENT:  {test_value = ST_LOG.packets_sent;}     break; 
-        case ST_TEST_ENTRY::ST_LOG_ACKS_TRANSMITTED:   {test_value = ST_LOG.ack_transmitted;}  break; 
-        case ST_TEST_ENTRY::ST_LOG_RETRY_ATTEMPT:   {test_value =ST_LOG.retry_attempt;} break; 
-        case ST_TEST_ENTRY::ST_LOG_ACK_NOT_RECEIVED: {test_value = ST_LOG.ack_not_received;} break; 
-        case ST_TEST_ENTRY::ST_LOG_ACK_MISMATCH: {test_value = ST_LOG.ack_mismatch;} break; 
-        case ST_TEST_ENTRY::ST_LOG_ACK_TIMEOUT: {test_value = ST_LOG.ack_timeout;} break;
-        case ST_TEST_ENTRY::ST_LOG_TX_BUFFER_OVERFLOW: {test_value = ST_LOG.tx_buffer_overflow;} break; 
+        case ST_TEST_ENTRY::ST_LOG_PACKETS_SENT:       {return ST_LOG.packets_sent;}       break; 
+        case ST_TEST_ENTRY::ST_LOG_ACKS_TRANSMITTED:   {return ST_LOG.ack_transmitted;}    break; 
+        case ST_TEST_ENTRY::ST_LOG_RETRY_ATTEMPT:      {return ST_LOG.retry_attempt;}      break; 
+        case ST_TEST_ENTRY::ST_LOG_ACK_NOT_RECEIVED:   {return ST_LOG.ack_not_received;}   break; 
+        case ST_TEST_ENTRY::ST_LOG_ACK_MISMATCH:       {return ST_LOG.ack_mismatch;}       break; 
+        case ST_TEST_ENTRY::ST_LOG_ACK_TIMEOUT:        {return ST_LOG.ack_timeout;}        break;
+        case ST_TEST_ENTRY::ST_LOG_TX_BUFFER_OVERFLOW: {return ST_LOG.tx_buffer_overflow;} break; 
 
-        case ST_TEST_ENTRY::ST_LOG_PACKETES_RECEIVED: {test_value = ST_LOG.packets_received;} break; 
-        case ST_TEST_ENTRY::ST_LOG_ACK_RECEIVED: {test_value = ST_LOG.ack_received;} break;
-        case ST_TEST_ENTRY::ST_LOG_NACK_RECEIVED: {test_value = ST_LOG.nack_received;} break; 
-        case ST_TEST_ENTRY::ST_LOG_INVALID_TPYE: {test_value = ST_LOG.invalid_type;} break;
-        case ST_TEST_ENTRY::ST_LOG_ACK_OUT_OF_RANGE: {test_value = ST_LOG.ack_out_of_range;} break;
-        case ST_TEST_ENTRY::ST_LOG_DLC_OVER_CAPACITY: {test_value = ST_LOG.dlc_exceeded_max;} break; 
-        case ST_TEST_ENTRY::ST_LOG_CRC_ERRORS: {test_value = ST_LOG.crc_error;} break; 
-        case ST_TEST_ENTRY::ST_LOG_MSG_TIMEOUT: {test_value = ST_LOG.rx_timeouts;} break; 
-        case ST_TEST_ENTRY::ST_LOG_TOTAL_ERRORS:  {test_value = ST_LOG.total_errors;} break; 
+        case ST_TEST_ENTRY::ST_LOG_PACKETES_RECEIVED:  {return ST_LOG.packets_received;}   break; 
+        case ST_TEST_ENTRY::ST_LOG_ACK_RECEIVED:       {return ST_LOG.ack_received;}       break;
+        case ST_TEST_ENTRY::ST_LOG_NACK_RECEIVED:      {return ST_LOG.nack_received;}      break; 
+        case ST_TEST_ENTRY::ST_LOG_INVALID_TPYE:       {return ST_LOG.invalid_type;}       break;
+        case ST_TEST_ENTRY::ST_LOG_ACK_OUT_OF_RANGE:   {return ST_LOG.ack_out_of_range;}   break;
+        case ST_TEST_ENTRY::ST_LOG_DLC_OVER_CAPACITY:  {return ST_LOG.dlc_exceeded_max;}   break; 
+        case ST_TEST_ENTRY::ST_LOG_CRC_ERRORS:         {return ST_LOG.crc_error;}          break; 
+        case ST_TEST_ENTRY::ST_LOG_MSG_TIMEOUT:        {return ST_LOG.rx_timeouts;}        break; 
+        case ST_TEST_ENTRY::ST_LOG_TOTAL_ERRORS:       {return ST_LOG.total_errors;}       break; 
 
         default: 
             DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "LOG", "ST_TEST_ENTRY invalid entry");
-            return false; 
+            break; 
     }
+    return UINT8_MAX;
+}
 
+
+bool st_check_test_result(ST_TEST_ENTRY entry, EVALUATION_TYPE evaluation_type, uint8_t expected_result){
+
+    uint8_t test_value = get_test_value(entry); 
+    
     if(evaluation_type == EVALUATION_TYPE::EQUAL){
         if(test_value == expected_result) {
             return true;
@@ -137,8 +140,34 @@ bool st_check_test_result(ST_TEST_ENTRY entry, EVALUATION_TYPE evaluation_type, 
     }
 
     return false; 
- }
+}
 
+bool st_compare_test_result(ST_TEST_ENTRY entry, EVALUATION_TYPE evaluation_type, ST_TEST_ENTRY expected_result){
+
+    uint8_t test_value_1 = get_test_value(entry); 
+    uint8_t test_value_2 = get_test_value(expected_result);
+    
+    if(evaluation_type == EVALUATION_TYPE::EQUAL){
+        if(test_value_1 == test_value_2) {
+            return true;
+        }
+    }
+    else if(evaluation_type == EVALUATION_TYPE::GREATER_THAN){
+        if(test_value_1 > test_value_2){
+            return true; 
+        }
+    }
+    else if(evaluation_type == EVALUATION_TYPE::LESS_THAN){
+        if(test_value_1 < test_value_2){
+            return true; 
+        }
+    }
+    else {
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "LOG", "evaluation type invalid");
+    }
+
+    return false; 
+}
     
 void st_clear_log(){
     st_log_event(ST_LOG_EVENT::EVENT_LOG_CLEAR, LOG_TYPE::METRIC);
