@@ -43,11 +43,11 @@ extern bool verbous_debug_enabled;
 
 // print ST & RT log header 
 #define PRINT_ST_LOG_HEARDER() do { \
-  DEBUG_PORT.print("========== ST_LOG =========="); \
+  DEBUG_PORT.print("========== ST_LOG ==========\n"); \
 } while(0)
 
 #define PRINT_RT_LOG_HEARDER() do { \
-  DEBUG_PORT.print("========== RT_LOG =========="); \
+  DEBUG_PORT.print("========== RT_LOG ==========\n"); \
 } while(0)
 
 #define PRINT_LOG_ENTRY(variable_name, value) do { \
@@ -56,11 +56,11 @@ extern bool verbous_debug_enabled;
 } while(0)
 
 #define PRINT_LOG_SEPERATOR() do { \
-  DEBUG_PORT.print("**********  **********"); \
+  DEBUG_PORT.print("**********  **********\n"); \
 } while(0)
 
 #define PRINT_LOG_FOOTER(len_of_title) do { \
-  DEBUG_PORT.print("=========================="); \
+  DEBUG_PORT.print("==========================\n"); \
 } while(0)
 
 #define DEBUG_PRINT_MSG(file, level, type, msg) do {\

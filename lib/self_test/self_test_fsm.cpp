@@ -83,13 +83,15 @@ uint8_t run_test_case(){
             self_test::requested_test_id = 0;
         } break; 
 
+        // Should there be a case START_SELF_TEST: ?? **********************
+
         case TEST_OPERATION::TEST_RESULT_PASSED:{
-            DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_ERROR, "TEST", "self_test_", self_test::current_active_test, ": PASSED.");
+            DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_META, "TEST", "self_test_", self_test::current_active_test, ": PASSED.");
             self_test_state = TEST_OPERATION::END_SELF_TEST; 
         } break;
 
         case TEST_OPERATION::TEST_RESULT_FAILED:{
-            DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_ERROR, "TEST", "self_test_", self_test::current_active_test, ": FAILED.");
+            DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_META, "TEST", "self_test_", self_test::current_active_test, ": FAILED.");
             self_test_state = TEST_OPERATION::END_SELF_TEST;
         } break;
 

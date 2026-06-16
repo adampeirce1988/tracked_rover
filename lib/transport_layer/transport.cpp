@@ -486,6 +486,7 @@ uint8_t update_rx_fsm(){
             DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "RX", "responding to ACK request.");
             pack_ack(rx_packet.f.TYPE, rx_packet.f.ID, &tx_priority_packet.f);
             tx_priority_packet.waiting = true;
+            rx_return_status = RX_RETURN_CODES::FRAME_READY;  // this is not tested ***
           }
           else if(rx_packet.f.ACK == TRANSPORT_ACK_TYPE::ACK_RESPONSE){ 
             SELFTEST_LOG_EVENT(EVENT_ACK_RECEIVED);
@@ -611,13 +612,13 @@ uint8_t update_tx_fsm(){
           tx_pending_ack.retry_counter = 0; 
           tx_pending_ack.ack_timestamp = micros();
           
-          tx_state = TX_STATE_SUCCESS;
-          tx_return_status = TX_RETURN_CODES::TX_PENDING_ACK;
+          //tx_state = TX_STATE_SUCCESS;
+          //tx_return_status = TX_RETURN_CODES::TX_PENDING_ACK; // remove once all st cases are tested
         }
-        else{
-          tx_state = TX_STATE_SUCCESS;
-          tx_return_status = TX_RETURN_CODES::TX_TRANSMITING;
-        }
+        //else{
+          tx_state = TX_STATE_SUCCESS;                          // remove once all st cases are tested
+        //   //tx_return_status = TX_RETURN_CODES::TX_TRANSMITING; // remove once all st cases are tested
+        //}                                                       // remove once all st cases are tested
       break; 
     }
 

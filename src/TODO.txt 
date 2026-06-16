@@ -1,35 +1,21 @@
 
-[TODO]: cange trasport returns to enum class. 
+test status:
 
-enum class TX_RETURN_CODES : uint8_t {
-    TX_IDLE_STATE = 0,
-    TX_PENDING_ACK,
-    TX_TRANSMITING,
-    RESENDING_MSG,
-    TX_TRANSMISION_SUCCESS,
-    TX_TRANSMISION_ERROR,
-    ACK_NOT_RECEVIED,
-    ACK_MISMATCHED,
-    ACK_WDT_TIMEOUT,
-    TX_BUFFER_OVERFLOW
-};
-Then your function becomes:
-void process_tx_return_error(TX_RETURN_CODES code)
-{
-    switch(code)
-    {
-        case TX_RETURN_CODES::ACK_NOT_RECEVIED:
-            break;
+[verified]:
+- 100 good packet test:..........OK PROGRESS: ######################### 100%
+- 100 good packet stress test:...OK PROGRESS: ######################### 100%
+- TYPE_CHANGE....................not implimented
+- ACK_CHANGE.....................
+- ID_CHANGE......................not implimented
+- DLC_CHANGE.....................not validate
+- DLC_OVER_MAX_CAPACITY..........not validate
+- CRC_RAND_FLIP_BIT..............not validate
+- CRC_CHANGE.....................not validate
+- RAND_DATA_FLIP_BIT.............not validate
+- RAND_DATA_CHANGE...............not validate
+- diagnostics WDT test:..........OK PROGRESS: ######################## 100%
 
-        case TX_RETURN_CODES::ACK_WDT_TIMEOUT:
-            break;
 
-        case TX_RETURN_CODES::TX_BUFFER_OVERFLOW:
-            break;
-
-        default:
-            break;
-    }
-}
-
-[TODO]: rework transport to assesss acks inside a case: and return a code on good ack received. 
+[FIXED]: 
+- BUG that stoped WDT_timer test from returning the test result.
+- added a progress bar to the packet test. 

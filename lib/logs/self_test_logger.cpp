@@ -58,7 +58,7 @@ void st_log_event(ST_LOG_EVENT event, bool log_type){
         switch(event){
             // TX Logging 
             case ST_LOG_EVENT::EVENT_PACKET_SENT:         { ST_LOG.packets_sent++; }        break; 
-            case ST_LOG_EVENT::EVENT_ACK_SENT:            { ST_LOG.ack_transmitted++;}      break; 
+            case ST_LOG_EVENT::EVENT_ACK_SENT:            { ST_LOG.ack_transmitted++;}      break; // error here 
             case ST_LOG_EVENT::EVENT_RETRY_SENT:          { ST_LOG.retry_attempt++;}        break;
             case ST_LOG_EVENT::EVENT_ACK_NOT_RECEIVED:    { ST_LOG.ack_not_received++; }    break;
             case ST_LOG_EVENT::EVENT_ACK_MISMATCH:        { ST_LOG.ack_mismatch++; }        break;
@@ -216,7 +216,7 @@ void st_print_log(){
         // Protocol errors
         PRINT_LOG_ENTRY("invalid type:..........",ST_LOG.invalid_type);
         PRINT_LOG_ENTRY("msg inhibited..........",ST_LOG.inhibited_message);
-        PRINT_LOG_ENTRY("reserved type:..........",ST_LOG.reserved_type);
+        PRINT_LOG_ENTRY("reserved type:.........",ST_LOG.reserved_type);
         // total errors
         PRINT_LOG_ENTRY("total errors:..........",ST_LOG.total_errors);
         PRINT_LOG_FOOTER(); 

@@ -120,7 +120,8 @@ void run_vehicle_state(){
         if(sys::diagnostics_active == false){ 
         DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "MAIN", "diag_active change to true.");
         // this function will need to be called by the web interface once built
-        sys::diagnostics_active = request_self_test(11); // request test 1 - 5 as this is the only test at present ***CONFIG TEST HERE***
+
+        sys::diagnostics_active = request_self_test(1); // request test 1 - 5 as this is the only test at present ***CONFIG TEST HERE***
         }
         
         selftest_state = run_test_case();

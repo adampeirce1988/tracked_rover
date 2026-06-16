@@ -3,16 +3,21 @@
 
 
 // define the files that you would like to debug here
-// #define DEBUG_FILE_MASK   (DBG_ESP_MAIN | DBG_TRANSPORT | DBG_TRANSPORT_FIFO | DBG_SELF_TEST | DBG_LOGS | DBG_SYSTEM)
-#define DEBUG_FILE_MASK   (DBG_SELF_TEST | DBG_TRANSPORT | DBG_LOGS | DBG_SYSTEM)
+#define DEBUG_FILE_MASK   (DBG_ESP_MAIN | DBG_TRANSPORT | DBG_TRANSPORT_FIFO | DBG_SELF_TEST | DBG_LOGS)
+//#define DEBUG_FILE_MASK (DBG_SELF_TEST | DBG_TRANSPORT | DBG_LOGS | DBG_SYSTEM)
+//#define DEBUG_FILE_MASK (DBG_TRANSPORT)
+
 // define the levels of debuging required here
-  //#define DEBUG_LEVEL_MASK  ( DEBUG_META | DEBUG_ERROR | DEBUG_MSG )
-  #define DEBUG_LEVEL_MASK  (DEBUG_META | DEBUG_NONE | DEBUG_ERROR | DEBUG_WARN )
+  #define DEBUG_LEVEL_MASK  (DEBUG_META | DEBUG_ERROR ) // use at runtime 
+  //#define DEBUG_LEVEL_MASK  (DEBUG_META | DEBUG_NONE | DEBUG_ERROR | DEBUG_WARN | DEBUG_STREAM )
+  //#define DEBUG_LEVEL_MASK (DEBUG_META | DEBUG_NONE | DEBUG_ERROR | DEBUG_INFO) // full debug option use only one file at a time. 
+  //#define DEBUG_LEVEL_MASK (DEBUG_META | DEBUG_NONE | DEBUG_STREAM) // use only to stram one file at a time
   //#define DEBUG_LEVEL_MASK (DEBUG_NONE)  // use with arduino uno only
 
 
 // defines which messages should be printed in full form DEBUG_PRINT_DATA_FRAME()
-  #define DEBUG_FRAME_MASK (RETURNED_FRAME | TX_FRAME | RX_FRAME | TX_PACK_MSG | ACK_FRAME | COPIED_FRAME | TX_PRIORITY)
+  //#define DEBUG_FRAME_MASK (RETURNED_FRAME | TX_FRAME | RX_FRAME | TX_PACK_MSG | ACK_FRAME | COPIED_FRAME | TX_PRIORITY)
+  #define DEBUG_FRAME_MASK (TX_FRAME)
 
 //------------ file bit mask ------------//
 #define DBG_TRANSPORT            (1UL << 0)
@@ -41,7 +46,7 @@
 #define DEBUG_INFO               (1UL << 6)
 #define DEBUG_DEBUG              (1UL << 7)
 #define DEBUG_TEST               (1UL << 8)
-// change to uint16 if more bits. are required
+
 
 //------------ debug print frame bitmask------------ //
 #define TX_FRAME                 (1UL << 0)
