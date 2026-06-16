@@ -82,6 +82,7 @@ uint8_t self_test_transport_random_packet(uint8_t no_of_packets, uint16_t delay_
         st_print_log();                                            // print selftest log ** NEW FUNCTIOON **
         
 
+        // this is the next part to test.
         // check for pass or fail 0 errors expected. ** NEW CHECK ** remove other call once tested 
         if( st_check_test_result(ST_TEST_ENTRY::ST_LOG_PACKETS_SENT, EVALUATION_TYPE::EQUAL, 100) ||
             st_check_test_result(ST_TEST_ENTRY::ST_LOG_PACKETES_RECEIVED, EVALUATION_TYPE::EQUAL, no_of_packets) ||
@@ -89,10 +90,8 @@ uint8_t self_test_transport_random_packet(uint8_t no_of_packets, uint16_t delay_
         ){
                 return SELFTEST_PASSED; 
         }
-         
-        
-        // check for pass or fail 0 errors expected.
-        if(transport_test_log.total_errors == 0 &&
+        // check for pass or fail 0 errors expected. // ** REMOVE ONCE TESTED **
+        else if(transport_test_log.total_errors == 0 &&
            transport_test_log.packets_received == no_of_packets && 
            transport_test_log.ack_sent == transport_test_log.ack_received){
             return SELFTEST_PASSED;
