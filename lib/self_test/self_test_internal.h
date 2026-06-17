@@ -10,7 +10,6 @@
 //************* global test congifg *************
 constexpr uint32_t TEST_END_COUNTDOWN_TIMER_US =     500000;   // 0.5 seconds
 constexpr uint16_t DEFAULT_PACKET_DELAY_US =         15000;
-constexpr bool TEST_VERBOUS_OUTPUT =                 false; 
 //***********************************************
 
 //********** random percentage congifg **********

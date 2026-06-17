@@ -32,6 +32,10 @@ enum class ST_LOG_EVENT{
     EVENT_CRC_ERROR,
     EVENT_MSG_TIMEOUT_ERROR,
 
+    //Test error logging 
+    EVENT_PACKECT_DELAYED,
+    EVENT_ERROR_INJECTED,
+
     //Reset logs
     EVENT_LOG_CLEAR // clear all log files.
 };

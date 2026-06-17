@@ -75,6 +75,11 @@ void st_log_event(ST_LOG_EVENT event, bool log_type){
             case ST_LOG_EVENT::EVENT_PAYLOAD_OVERFLOW:    { ST_LOG.payload_overflow++; }    break; 
             case ST_LOG_EVENT::EVENT_CRC_ERROR:           { ST_LOG.crc_error++;}            break;
             case ST_LOG_EVENT::EVENT_MSG_TIMEOUT_ERROR:   { ST_LOG.rx_timeouts++;}          break;
+
+            // test logging 
+            case ST_LOG_EVENT::EVENT_PACKECT_DELAYED:     {ST_LOG.delayed_packets ++;}      break; 
+            case ST_LOG_EVENT::EVENT_ERROR_INJECTED:      {ST_LOG.injected_error ++;}       break; 
+            
             // clear error log
             case ST_LOG_EVENT::EVENT_LOG_CLEAR:           { ST_LOG = {};}                   break;
         }   
@@ -87,6 +92,7 @@ void st_log_event(ST_LOG_EVENT event, bool log_type){
     }
 }
 
+
 uint8_t get_test_value(ST_TEST_ENTRY entry){
     switch(entry){
         // set test value here before test occours
@@ -98,6 +104,9 @@ uint8_t get_test_value(ST_TEST_ENTRY entry){
         case ST_TEST_ENTRY::ST_LOG_ACK_TIMEOUT:        {return ST_LOG.ack_timeout;}        break;
         case ST_TEST_ENTRY::ST_LOG_TX_BUFFER_OVERFLOW: {return ST_LOG.tx_buffer_overflow;} break; 
 
+        case ST_TEST_ENTRY::ST_LOG_DELAYED_PACKET:     {return ST_LOG.delayed_packets;}    break; 
+        case ST_TEST_ENTRY::ST_LOG_INJECTED_ERROR:     {return ST_LOG.injected_error;}     break; 
+
         case ST_TEST_ENTRY::ST_LOG_PACKETES_RECEIVED:  {return ST_LOG.packets_received;}   break; 
         case ST_TEST_ENTRY::ST_LOG_ACK_RECEIVED:       {return ST_LOG.ack_received;}       break;
         case ST_TEST_ENTRY::ST_LOG_NACK_RECEIVED:      {return ST_LOG.nack_received;}      break; 
@@ -107,6 +116,8 @@ uint8_t get_test_value(ST_TEST_ENTRY entry){
         case ST_TEST_ENTRY::ST_LOG_CRC_ERRORS:         {return ST_LOG.crc_error;}          break; 
         case ST_TEST_ENTRY::ST_LOG_MSG_TIMEOUT:        {return ST_LOG.rx_timeouts;}        break; 
         case ST_TEST_ENTRY::ST_LOG_TOTAL_ERRORS:       {return ST_LOG.total_errors;}       break; 
+
+
 
         default: 
             DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "LOG", "ST_TEST_ENTRY invalid entry");
@@ -187,14 +198,14 @@ void st_print_log(){
         PRINT_LOG_ENTRY("retries attempted:.....",ST_LOG.retry_attempt);
     // System metrics
         PRINT_LOG_SEPERATOR();
-        PRINT_LOG_ENTRY("tx max latancy:........", latency_get_max(tx_latency_buffer));
-        PRINT_LOG_ENTRY("tx min latancy:........", latency_get_min(tx_latency_buffer));
-        PRINT_LOG_ENTRY("tx avragelatancy:......", latency_get_average(tx_latency_buffer ));
-        PRINT_LOG_ENTRY("tx jitter:.............", latency_get_jitter(tx_latency_buffer ));
-        PRINT_LOG_ENTRY("rx max latancy:........", latency_get_max(rx_latency_buffer));
-        PRINT_LOG_ENTRY("rx min latancy:........", latency_get_min(rx_latency_buffer));
-        PRINT_LOG_ENTRY("rx avragelatancy:......", latency_get_average(rx_latency_buffer));
-        PRINT_LOG_ENTRY("rx jitter:.............", latency_get_jitter(rx_latency_buffer));      
+        PRINT_LOG_ENTRY("tx max latancy(us):....", latency_get_max(tx_latency_buffer)); 
+        PRINT_LOG_ENTRY("tx min latancy(us):....", latency_get_min(tx_latency_buffer));
+        PRINT_LOG_ENTRY("tx avragelatancy(us):..", latency_get_average(tx_latency_buffer ));
+        PRINT_LOG_ENTRY("tx jitter(us):.........", latency_get_jitter(tx_latency_buffer ));
+        PRINT_LOG_ENTRY("rx max latancy(us):....", latency_get_max(rx_latency_buffer));
+        PRINT_LOG_ENTRY("rx min latancy(us):....", latency_get_min(rx_latency_buffer));
+        PRINT_LOG_ENTRY("rx avragelatancy(us):..", latency_get_average(rx_latency_buffer));
+        PRINT_LOG_ENTRY("rx jitter(us):.........", latency_get_jitter(rx_latency_buffer));       
     // Errors metrics
         PRINT_LOG_SEPERATOR();
         PRINT_LOG_ENTRY("injected errors........",ST_LOG.injected_error);
@@ -220,4 +231,14 @@ void st_print_log(){
         // total errors
         PRINT_LOG_ENTRY("total errors:..........",ST_LOG.total_errors);
         PRINT_LOG_FOOTER(); 
+}
+
+
+// external API calls - look to intergrate into current calls
+void st_log_injected_error(){
+    st_log_event(ST_LOG_EVENT::EVENT_ERROR_INJECTED, LOG_TYPE::METRIC);
+}
+
+void st_log_delayed_packet(){
+    st_log_event(ST_LOG_EVENT::EVENT_PACKECT_DELAYED, LOG_TYPE::METRIC);
 }

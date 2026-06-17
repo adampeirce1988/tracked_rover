@@ -24,6 +24,7 @@
 // //================ ================ ================ 
 
 constexpr uint8_t ST_WDT_EXTRA_TIME =           250;   // tune to stop timout errors 
+constexpr uint8_t PROGRESS_BAR_COUNT =          25;
 //=============== gloabal variables ================
 
 //================ ================ ================ 

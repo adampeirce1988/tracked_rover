@@ -19,6 +19,8 @@ enum ST_TEST_ENTRY {
     ST_LOG_DLC_OVER_CAPACITY,
     ST_LOG_CRC_ERRORS,
     ST_LOG_MSG_TIMEOUT,
+    ST_LOG_DELAYED_PACKET, 
+    ST_LOG_INJECTED_ERROR,
     ST_LOG_TOTAL_ERRORS
 };
 
@@ -39,6 +41,9 @@ void process_protocol_return_error(uint8_t return_code); // not yet implimented
 
 void st_clear_log();
 void st_print_log();
+
+void st_log_injected_error(); 
+void st_log_delayed_packet();
 
 bool st_check_test_result(ST_TEST_ENTRY entry, EVALUATION_TYPE evaluation_type, uint8_t expected_result); // types not exposed
 bool st_compare_test_result(ST_TEST_ENTRY entry, EVALUATION_TYPE evaluation_type, ST_TEST_ENTRY expected_result);

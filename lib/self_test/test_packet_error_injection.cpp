@@ -2,6 +2,7 @@
 #include "global_config.h"
 #include "transport.h"
 #include "log.h"
+#include "logger.h"
 #include "self_test.h"
 #include "debug.h"
 #include "debug_config.h"
@@ -17,14 +18,12 @@ uint8_t self_test_error_injection(uint8_t no_of_packets, uint8_t error_count, TX
     if(self_test::current_test_packet == 0){
 
         //print test inoformartion // *** TODO: MAKE TESTING TYOE DYNAMIC AND REFLECT SELECTED TEST TYPE ***
-        DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_NONE, "TEST", "running self_test_2 corrup crc error count: ", error_count, " corupt frames.");
-        DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_NONE, "TEST", "self_test_1 tests packets transmitted speed: ", DEFAULT_PACKET_DELAY_US, " us");
-
+        DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_META, "TEST", "running self_test_2 corrup crc error count: ", error_count, " corupt frames.");
+        DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_META, "TEST", "self_test_1 tests packets transmitted speed: ", DEFAULT_PACKET_DELAY_US, " us");
         // enable progress bar  
-        if(TEST_VERBOUS_OUTPUT == false){
-            dissable_verbous_error();                 // disble verbous error reporting
-            PRINT_PROGRESS_BAR_START();               // Progress bar
-        }     
+        dissable_verbous_error();                 // disble verbous error reporting
+        PRINT_PROGRESS_BAR_START();               // Progress bar
+            
 
         // configure test functionality 
         transport_set(&fifo_io);                       // set current transport to fifo. 
@@ -43,9 +42,9 @@ uint8_t self_test_error_injection(uint8_t no_of_packets, uint8_t error_count, TX
     if(micros() > self_test::next_transmission_time){
 
         // print progress bar 
-        uint8_t one_percent = no_of_packets / 25;
+        uint8_t one_percent = no_of_packets / PROGRESS_BAR_COUNT;
 
-        if(self_test::current_test_packet % one_percent == 0){
+        if(self_test::current_test_packet < no_of_packets && self_test::current_test_packet % one_percent == 0 ){
             PRINT_PROGRESS_BAR_PROGRESS();
         }
         
@@ -55,7 +54,7 @@ uint8_t self_test_error_injection(uint8_t no_of_packets, uint8_t error_count, TX
         //run the selftest 
         if(self_test::current_test_packet < no_of_packets){
             
-            DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_TEST, "TEST", "packets sent current packet count: ", self_test::current_test_packet);
+            DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "TEST", "packets sent current packet count: ", self_test::current_test_packet);
             
             // bult data frame
             uint8_t type = random(1, 256);                    // random type 1-255 ** NO TYPE CHECK IMPLIMENTED **
@@ -68,7 +67,7 @@ uint8_t self_test_error_injection(uint8_t no_of_packets, uint8_t error_count, TX
 
             //inject the error at a random interval
             if(self_test::current_test_packet % 10 == next_injection_position){
-                ST_LOG_EVENT(EVENT_ERROR_INJECTED);
+                st_log_injected_error();  // log injected errors here
                 set_tx_fault_injection_active(fault_type, fault_value);
             }
 
@@ -82,12 +81,11 @@ uint8_t self_test_error_injection(uint8_t no_of_packets, uint8_t error_count, TX
 
             //increment current packet
             self_test::current_test_packet ++; 
-            DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_TEST, "TEST", " packets sent. current_test_packets: ", self_test::current_test_packet);
+            DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "TEST", " packets sent. current_test_packets: ", self_test::current_test_packet);
         }
 
     }
 
-    
     // run the self test for a pre defined time after the final packet is sent
     if(self_test::current_test_packet == no_of_packets && self_test::test_end_countdown_timer == false){
         self_test::test_end_countdown_timer = micros();
@@ -106,85 +104,20 @@ uint8_t self_test_error_injection(uint8_t no_of_packets, uint8_t error_count, TX
         set_transport_selftest_loging_inactive();                   // dissable loging once test is completed 
         enable_verbous_error();                                     // enable verbous logging
 
-        // move this to only print on fail for production release.
-        PRINT_TRANSPORT_SELFTEST_LOG();                             // Print metrics from self test 
+        // check test results here
+        bool test_result = true; 
         
-        // check for pass or fail 0 errors expected. 
-        if(transport_test_log.total_errors == error_count &&
-           transport_test_log.packets_received + error_count == no_of_packets){
+        test_result &= st_check_test_result(ST_TEST_ENTRY::ST_LOG_TOTAL_ERRORS, EVALUATION_TYPE::EQUAL, error_count);
+        test_result &= st_check_test_result(ST_TEST_ENTRY::ST_LOG_PACKETES_RECEIVED, EVALUATION_TYPE::EQUAL, (no_of_packets - error_count)); 
+        test_result &= st_compare_test_result(ST_TEST_ENTRY::ST_LOG_TOTAL_ERRORS, EVALUATION_TYPE::EQUAL, ST_TEST_ENTRY::ST_LOG_INJECTED_ERROR);
+
+        if(test_result == true){
             return SELFTEST_PASSED;
         }
         else{
+            st_print_log();
             return SELFTEST_FAILED;
-        }   
-    }
-    return SELFTEST_RUNNING;  
-
-
-
-    // create a non-blocking loop to only send packts after alocatred time. 
-    if(micros() > self_test::next_transmission_time){
-        
-        // set the next transmision time
-        self_test::next_transmission_time += DEFAULT_PACKET_DELAY_US;
-    
-        //run the t=selftest 
-        if(self_test::current_test_packet < no_of_packets){
-            
-            DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_TEST, "TEST", "packets sent current packet count: ", self_test::current_test_packet);
-            
-            // bult
-            uint8_t type = random(1, 256);                    // random type 1-255 ** NO TYPE CHECK IMPLIMENTED **
-            uint8_t ack  = weighted_random_ack();             // weighted ack 20% chance of ack 
-            uint8_t dlc  = random(0,(MAX_PAYLOAD_LEN + 1));   // set random dlc
-            uint8_t data[MAX_PAYLOAD_LEN]; 
-            for(int i = 0; i < dlc; i++){
-                data[i] = random(0,255);
-            }
-
-            //inject the error at a random interval
-            if(self_test::current_test_packet % 10 == next_injection_position){
-                set_tx_fault_injection_active(TX_SET_FAULT_MODE::CRC_CHANGE, 0xf9);
-            }
-
-            // set the next random packet every 10 packets 
-            if(self_test::current_test_packet % 10 == 0){
-                next_injection_position = random(0, 10);
-            }
-
-            // transmit packet
-            transport_queue_message(type, ack, dlc, data);
-
-            //increment current packet
-            self_test::current_test_packet ++; 
-            DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_TEST, "TEST", " packets sent. current_test_packets: ", self_test::current_test_packet);
-        }
-
-    }
-    
-    // run the self test for a pre defined time after the final packet is sent
-    if(self_test::current_test_packet == no_of_packets && self_test::test_end_countdown_timer == false){
-        self_test::test_end_countdown_timer = micros();
-        self_test::test_end_counter = true; 
-    }
-
-    // exit the self test runs one at the end of the test
-    if(self_test::test_end_counter == true && micros() - self_test::test_end_countdown_timer > TEST_END_COUNTDOWN_TIMER_US){
-        self_test::current_test_packet = 0;                     // reset the packet count a the end of the test 
-        //transport_set(&uart_io); //*** DISABLED FOR TESTING *** // set transport back to uart on completion of test.
-        set_transport_selftest_loging_inactive();               // dissable loging once test is completed 
-        PRINT_TRANSPORT_SELFTEST_LOG();
-        
-
-        // check for pass or fail 0 errors expected. 
-        if(transport_test_log.total_errors == 0 &&
-           transport_test_log.packets_received == no_of_packets && 
-           transport_test_log.ack_sent == transport_test_log.ack_received){
-            return SELFTEST_PASSED;
-        }
-        else{
-            return SELFTEST_FAILED;
-        }   
+        } 
     }
     return SELFTEST_RUNNING;  
 }

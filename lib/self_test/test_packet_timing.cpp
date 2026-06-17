@@ -11,7 +11,6 @@
 
 #define DEBUG_FILE DBG_SELF_TEST
 
-constexpr uint8_t divisior = 25;  // no of symbols to be desplayed on progress bar
 
 uint8_t self_test_transport_random_packet(uint8_t no_of_packets, uint16_t delay_time_us, bool random_delay_active){
     
@@ -35,21 +34,23 @@ uint8_t self_test_transport_random_packet(uint8_t no_of_packets, uint16_t delay_
 
     // create a non-blocking loop to only send packts after alocatred time. 
     if(micros() > self_test::next_transmission_time){
+
+        // print the porgress bar
+        uint8_t one_percent = no_of_packets / PROGRESS_BAR_COUNT; 
+
+        if(self_test::current_test_packet < no_of_packets && self_test::current_test_packet % one_percent == 0){
+            PRINT_PROGRESS_BAR_PROGRESS();
+        }
         
         // set the next transmision time
         self_test::next_transmission_time += delay_time_us;
 
-        // add progress print here
-        if(self_test::current_test_packet < no_of_packets && self_test::current_test_packet % (no_of_packets / divisior) == 0 ){
-            //DEBUG_PORT.print("self_test::current_test_packet: ");
-            //DEBUG_PORT.println(self_test::current_test_packet);
-            PRINT_PROGRESS_BAR_PROGRESS();
-        }
 
         // reducetime by a randon amount if random delay is requested.
         if(random_delay_active == true){
             uint16_t reduction = weighted_random_delay(delay_time_us);
             self_test::next_transmission_time = self_test::next_transmission_time - reduction; 
+            st_log_delayed_packet();
         }
     
         //build random packet 
