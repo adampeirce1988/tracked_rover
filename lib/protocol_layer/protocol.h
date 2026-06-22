@@ -13,11 +13,13 @@ namespace PROTOCOL_RX_RETURN_CODE {
 namespace PROTOCOL_TX_RETURN_CODE { 
 
 }
+
+
 // ============================================================
 
 //test move to diagnostics later. 
 
-extern uint8_t missmatche_type_received; 
+extern uint8_t mismatched_type_received; 
 
 // ========================= API ==============================
 uint8_t rx_message_task_dispatcher();

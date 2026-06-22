@@ -7,6 +7,7 @@
 #include "debug.h"
 #include "debug_config.h"
 #include "self_test_internal.h"
+#include "messages.h"
 
 #define DEBUG_FILE DBG_SELF_TEST
 
@@ -57,7 +58,7 @@ uint8_t self_test_error_injection(uint8_t no_of_packets, uint8_t error_count, TX
             DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "TEST", "packets sent current packet count: ", self_test::current_test_packet);
             
             // bult data frame
-            uint8_t type = random(1, 256);                    // random type 1-255 ** NO TYPE CHECK IMPLIMENTED **
+            uint8_t type = MSG_TEST_VALID;                                        // send all packets with a valid type
             uint8_t ack  = TRANSPORT_ACK_TYPE::NORMAL_FRAME;                      // send all packets as normal frames
             uint8_t dlc  = random(1,(MAX_PAYLOAD_LEN + 1));   // set random dlc 1 - MAX_PAYLOAD
             uint8_t data[MAX_PAYLOAD_LEN]; 
@@ -112,6 +113,7 @@ uint8_t self_test_error_injection(uint8_t no_of_packets, uint8_t error_count, TX
         test_result &= st_compare_test_result(ST_TEST_ENTRY::ST_LOG_TOTAL_ERRORS, EVALUATION_TYPE::EQUAL, ST_TEST_ENTRY::ST_LOG_INJECTED_ERROR);
 
         if(test_result == true){
+            st_print_log(); //test only 
             return SELFTEST_PASSED;
         }
         else{

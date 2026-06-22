@@ -20,7 +20,7 @@ struct _ST_LOG{
     uint8_t ack_transmitted = 0; 
     uint8_t retry_attempt = 0; 
     uint8_t ack_valid = 0;    
-    uint8_t valid_type = 0; 
+    //uint8_t valid_type = 0; 
     
     // selftet errors
     uint8_t delayed_packets = 0; // no return code implimented for this 
@@ -43,6 +43,7 @@ struct _ST_LOG{
     uint8_t invalid_type = 0; 
     uint8_t inhibited_message = 0; 
     uint8_t reserved_type = 0;
+    uint8_t valid_type = 0; 
 
     // total erro count
     uint8_t total_errors = 0;
@@ -69,19 +70,26 @@ void st_log_event(ST_LOG_EVENT event, bool log_type){
             case ST_LOG_EVENT::EVENT_PACKET_RECEIVED:     { ST_LOG.packets_received++; }    break; 
             case ST_LOG_EVENT::EVENT_ACK_RECEIVED:        { ST_LOG.ack_received++; }        break; 
             case ST_LOG_EVENT::EVENT_NACK_REVEIVED:       { ST_LOG.nack_received++; }       break; 
-            case ST_LOG_EVENT::EVENT_INVALID_TYPE:        { ST_LOG.invalid_type++; }        break; 
+            //case ST_LOG_EVENT::EVENT_INVALID_TYPE:        { ST_LOG.invalid_type++; }        break; 
             case ST_LOG_EVENT::EVENT_ACK_OUT_OF_RANGE:    { ST_LOG.ack_out_of_range++; }    break; 
-            case ST_LOG_EVENT::EVENT_DLC_OVER_CAPACITY:   { ST_LOG.dlc_exceeded_max++;}     break;
+            case ST_LOG_EVENT::EVENT_DLC_OVER_CAPACITY:   { ST_LOG.dlc_exceeded_max++; }    break;
             case ST_LOG_EVENT::EVENT_PAYLOAD_OVERFLOW:    { ST_LOG.payload_overflow++; }    break; 
             case ST_LOG_EVENT::EVENT_CRC_ERROR:           { ST_LOG.crc_error++;}            break;
             case ST_LOG_EVENT::EVENT_MSG_TIMEOUT_ERROR:   { ST_LOG.rx_timeouts++;}          break;
 
+            // protocol logging
+            case ST_LOG_EVENT::EVENT_VALID_TYPE:          {ST_LOG.valid_type++; }           break; 
+            case ST_LOG_EVENT::EVENT_INVALID_TYPE:        {ST_LOG.invalid_type++; }         break;
+            case ST_LOG_EVENT::EVENT_RESERVED_TYPE:       {ST_LOG.reserved_type++; }        break;
+            case ST_LOG_EVENT::EVENT_INHIBITED_MESSAGE:   {ST_LOG.inhibited_message++; }    break; 
+
+
             // test logging 
-            case ST_LOG_EVENT::EVENT_PACKECT_DELAYED:     {ST_LOG.delayed_packets ++;}      break; 
-            case ST_LOG_EVENT::EVENT_ERROR_INJECTED:      {ST_LOG.injected_error ++;}       break; 
+            case ST_LOG_EVENT::EVENT_PACKECT_DELAYED:     {ST_LOG.delayed_packets ++; }     break; 
+            case ST_LOG_EVENT::EVENT_ERROR_INJECTED:      {ST_LOG.injected_error ++; }      break; 
             
             // clear error log
-            case ST_LOG_EVENT::EVENT_LOG_CLEAR:           { ST_LOG = {};}                   break;
+            case ST_LOG_EVENT::EVENT_LOG_CLEAR:           { ST_LOG = {}; }                  break;
         }   
 
         // increment total error is fault flag is true
@@ -96,28 +104,32 @@ void st_log_event(ST_LOG_EVENT event, bool log_type){
 uint8_t get_test_value(ST_TEST_ENTRY entry){
     switch(entry){
         // set test value here before test occours
-        case ST_TEST_ENTRY::ST_LOG_PACKETS_SENT:       {return ST_LOG.packets_sent;}       break; 
-        case ST_TEST_ENTRY::ST_LOG_ACKS_TRANSMITTED:   {return ST_LOG.ack_transmitted;}    break; 
-        case ST_TEST_ENTRY::ST_LOG_RETRY_ATTEMPT:      {return ST_LOG.retry_attempt;}      break; 
-        case ST_TEST_ENTRY::ST_LOG_ACK_NOT_RECEIVED:   {return ST_LOG.ack_not_received;}   break; 
-        case ST_TEST_ENTRY::ST_LOG_ACK_MISMATCH:       {return ST_LOG.ack_mismatch;}       break; 
-        case ST_TEST_ENTRY::ST_LOG_ACK_TIMEOUT:        {return ST_LOG.ack_timeout;}        break;
-        case ST_TEST_ENTRY::ST_LOG_TX_BUFFER_OVERFLOW: {return ST_LOG.tx_buffer_overflow;} break; 
+        case ST_TEST_ENTRY::ST_LOG_PACKETS_SENT:       {return ST_LOG.packets_sent;}         break; 
+        case ST_TEST_ENTRY::ST_LOG_ACKS_TRANSMITTED:   {return ST_LOG.ack_transmitted;}      break; 
+        case ST_TEST_ENTRY::ST_LOG_RETRY_ATTEMPT:      {return ST_LOG.retry_attempt;}        break; 
+        case ST_TEST_ENTRY::ST_LOG_ACK_NOT_RECEIVED:   {return ST_LOG.ack_not_received;}     break; 
+        case ST_TEST_ENTRY::ST_LOG_ACK_MISMATCH:       {return ST_LOG.ack_mismatch;}         break; 
+        case ST_TEST_ENTRY::ST_LOG_ACK_TIMEOUT:        {return ST_LOG.ack_timeout;}          break;
+        case ST_TEST_ENTRY::ST_LOG_TX_BUFFER_OVERFLOW: {return ST_LOG.tx_buffer_overflow;}   break; 
 
-        case ST_TEST_ENTRY::ST_LOG_DELAYED_PACKET:     {return ST_LOG.delayed_packets;}    break; 
-        case ST_TEST_ENTRY::ST_LOG_INJECTED_ERROR:     {return ST_LOG.injected_error;}     break; 
+        case ST_TEST_ENTRY::ST_LOG_DELAYED_PACKET:     {return ST_LOG.delayed_packets;}      break; 
+        case ST_TEST_ENTRY::ST_LOG_INJECTED_ERROR:     {return ST_LOG.injected_error;}       break; 
 
-        case ST_TEST_ENTRY::ST_LOG_PACKETES_RECEIVED:  {return ST_LOG.packets_received;}   break; 
-        case ST_TEST_ENTRY::ST_LOG_ACK_RECEIVED:       {return ST_LOG.ack_received;}       break;
-        case ST_TEST_ENTRY::ST_LOG_NACK_RECEIVED:      {return ST_LOG.nack_received;}      break; 
-        case ST_TEST_ENTRY::ST_LOG_INVALID_TPYE:       {return ST_LOG.invalid_type;}       break;
-        case ST_TEST_ENTRY::ST_LOG_ACK_OUT_OF_RANGE:   {return ST_LOG.ack_out_of_range;}   break;
-        case ST_TEST_ENTRY::ST_LOG_DLC_OVER_CAPACITY:  {return ST_LOG.dlc_exceeded_max;}   break; 
-        case ST_TEST_ENTRY::ST_LOG_CRC_ERRORS:         {return ST_LOG.crc_error;}          break; 
-        case ST_TEST_ENTRY::ST_LOG_MSG_TIMEOUT:        {return ST_LOG.rx_timeouts;}        break; 
-        case ST_TEST_ENTRY::ST_LOG_TOTAL_ERRORS:       {return ST_LOG.total_errors;}       break; 
+        case ST_TEST_ENTRY::ST_LOG_PACKETES_RECEIVED:  {return ST_LOG.packets_received;}     break; 
+        case ST_TEST_ENTRY::ST_LOG_ACK_RECEIVED:       {return ST_LOG.ack_received;}         break;
+        case ST_TEST_ENTRY::ST_LOG_NACK_RECEIVED:      {return ST_LOG.nack_received;}        break; 
+        case ST_TEST_ENTRY::ST_LOG_INVALID_TPYE:       {return ST_LOG.invalid_type;}         break;
+        case ST_TEST_ENTRY::ST_LOG_ACK_OUT_OF_RANGE:   {return ST_LOG.ack_out_of_range;}     break;
+        case ST_TEST_ENTRY::ST_LOG_DLC_OVER_CAPACITY:  {return ST_LOG.dlc_exceeded_max;}     break; 
+        case ST_TEST_ENTRY::ST_LOG_CRC_ERRORS:         {return ST_LOG.crc_error;}            break; 
+        case ST_TEST_ENTRY::ST_LOG_MSG_TIMEOUT:        {return ST_LOG.rx_timeouts;}          break; 
 
+        case ST_TEST_ENTRY::ST_LOG_VALID_TYPE:         {return ST_LOG.valid_type++; }        break; 
+        case ST_TEST_ENTRY::ST_LOG_INVALID_TYPE:       {return ST_LOG.invalid_type++; }      break;
+        case ST_TEST_ENTRY::ST_LOG_RESERVED_TYPE:      {return ST_LOG.reserved_type++; }     break;
+        case ST_TEST_ENTRY::ST_LOG_INHIBITED_MESSAGE:  {return ST_LOG.inhibited_message++; } break; 
 
+        case ST_TEST_ENTRY::ST_LOG_TOTAL_ERRORS:       {return ST_LOG.total_errors;}         break; 
 
         default: 
             DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "LOG", "ST_TEST_ENTRY invalid entry");

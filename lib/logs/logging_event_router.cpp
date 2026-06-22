@@ -49,7 +49,6 @@ void  process_transport_tx_return_error(uint8_t return_code){
             // log buffer overflow 
                 st_log_event(ST_LOG_EVENT::EVENT_TX_BUFFER_OVERFLOW, LOG_TYPE::ERROR);
                 rt_log_error(rt_error_log_array[ERROR_ID_TX_BUFFER_OVERFLOW], true);
-
         break; 
 
         default: 
@@ -79,19 +78,17 @@ void process_transport_rx_return_error(uint8_t rx_return_code){
         case RX_RETURN_CODES::NACK_REQUEST_RECEIVED: 
             rx_latency_add_value(transport_get_rx_latancy());
             st_log_event(ST_LOG_EVENT::EVENT_NACK_REVEIVED, LOG_TYPE::METRIC);
-            
         break; 
         
         case RX_RETURN_CODES::INVALID_TYPE:
             // this should be loged from protocol
-            st_log_event(ST_LOG_EVENT::EVENT_INVALID_TYPE , LOG_TYPE::ERROR);
+            //st_log_event(ST_LOG_EVENT::EVENT_INVALID_TYPE , LOG_TYPE::ERROR);
         break;
 
         case RX_RETURN_CODES::ACK_OUT_OF_RANGE:
             // log error 
                 st_log_event(ST_LOG_EVENT::EVENT_ACK_OUT_OF_RANGE, LOG_TYPE::ERROR);
                 rt_log_error(rt_error_log_array[ERROR_ID_ACK_OUT_OF_RANGE], false);
-    
         break; 
 
         case RX_RETURN_CODES::DLC_OVER_CAPACITY:
@@ -116,33 +113,34 @@ void process_transport_rx_return_error(uint8_t rx_return_code){
             // log error
                 st_log_event(ST_LOG_EVENT::EVENT_MSG_TIMEOUT_ERROR, LOG_TYPE::ERROR);
                 rt_log_error(rt_error_log_array[ERROR_ID_MSG_TIMEOUT], false);
-       
         break;
 
         default:
             break; 
     }
-
 }
 
 void process_protocol_return_error(uint8_t protocol_return_code){
 
     switch(protocol_return_code){
         case PROTOCOL_RX_RETURN_CODE::PROTO_INVALID_TYPE:
-        // log error her
+            st_log_event(ST_LOG_EVENT::EVENT_INVALID_TYPE, LOG_TYPE::METRIC); // change to error for st logging
+            rt_log_error(rt_error_log_array[ERROR_ID_TYPE_INVALID], false);
         // log st here
         break; 
 
         case PROTOCOL_RX_RETURN_CODE::PROTO_RESERVED_TYPE:
-        //nlog st here
+            st_log_event(ST_LOG_EVENT::EVENT_RESERVED_TYPE, LOG_TYPE::METRIC);
+            //nlog st here
         break; 
 
         case PROTOCOL_RX_RETURN_CODE::PROTO_VALID_MSG_INHIBITED: 
-        //nlog st here 
+            st_log_event(ST_LOG_EVENT::EVENT_INHIBITED_MESSAGE, LOG_TYPE::METRIC);
+        //log st here 
         break; 
 
         case PROTOCOL_RX_RETURN_CODE::PROTO_VALID_TYPE:
-        // log st here
+            // log st here if valid packets are to be loged.
         break; 
 
         default: 

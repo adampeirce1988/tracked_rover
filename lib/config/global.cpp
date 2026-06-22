@@ -22,7 +22,7 @@ bool diagnostics_active = false;
 // system timestamp flags
 uint32_t sys_heartbeat = 0; 
 // comunication
-uint32_t tx_last_valid_packet = 0; 
+uint32_t tx_last_valid_packet = 0;
 uint32_t last_connection_attempt = 0;
 bool comunication_warn_active = false; // add for warning implimentation with auto reconnect. 
 bool bus_connectivity_status = false; 
@@ -32,6 +32,7 @@ bool i2c_connectivity_status = true; // not yet actioned test only
 //bool Transport_alive = false; 
 // error states 
 bool I2C_bus_error = false; 
+
 };
 
 // function calls to update system variabls 

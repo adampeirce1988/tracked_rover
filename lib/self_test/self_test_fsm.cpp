@@ -96,8 +96,8 @@ uint8_t run_test_case(){
         } break;
 
         case TEST_OPERATION::END_SELF_TEST:{
-            // code to close the self test gos here state not required
-            // always rest the sys variables on exit
+            // code to close the self test goes here; state not required
+            // always reset the sys variables on exit
             set_transport_selftest_loging_inactive();
             self_test_state = TEST_OPERATION::TEST_DISPACHER;
             return SELFTEST_COMPLETED;
@@ -132,8 +132,17 @@ uint8_t run_test_case(){
         } break; 
         
         /////////////////////////////// TRANSPORT TEST 3 ///////////////////////////////
-        // change the type this cannot be implimented untill the protocol fsm is built and tested
+        // change the type wil rsult in a crc error
         case TEST_OPERATION::TRANSPORT_SELF_TEST_3:{
+
+            self_test::current_test_status_code = self_test_error_injection(
+                INJECTION_PACKET_COUNT,
+                INJECTION_ERROR_COUNT,
+                TX_SET_FAULT_MODE::TYPE_CHANGE
+            );
+
+            check_self_test_resutls(self_test::current_test_status_code); 
+            return self_test::current_test_status_code; 
 
         } break; 
 
@@ -154,7 +163,15 @@ uint8_t run_test_case(){
 
         /////////////////////////////// TRANSPORT TEST 5 ///////////////////////////////
         case TEST_OPERATION::TRANSPORT_SELF_TEST_5:{
-        // change the current packet id not yet implimented as packet sequencing is not checked
+        // change the current packet id will result in a crc error
+            self_test::current_test_status_code = self_test_error_injection(
+                INJECTION_PACKET_COUNT,
+                INJECTION_ERROR_COUNT,
+                TX_SET_FAULT_MODE::ID_CHANGE
+            );
+
+            check_self_test_resutls(self_test::current_test_status_code); 
+            return self_test::current_test_status_code; 
         break; 
         }
         

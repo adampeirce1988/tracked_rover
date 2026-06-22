@@ -133,10 +133,30 @@
 #define MSG_RESERVED_4E               0x4E
 #define MSG_RESERVED_4F               0x4F
 
-
 // =========================================================
 // Protocol Markers
 // =========================================================
+
+
+
+// =========================================================
+// Protocol test variables 
+// =========================================================
+constexpr uint8_t MSG_TEST_INVALID =       0xf0; // test call will always be invalid
+constexpr uint8_t MSG_TEST_INHIBITED =     0xf1; // test call will valid but inhibited 
+constexpr uint8_t MSG_TEST_RESERVED =      0xf2; // test call will always reserved
+constexpr uint8_t MSG_TEST_VALID =         0xf3;  // test call willvalid
+#define MSG_RESERVED_F4               0xf4
+#define MSG_RESERVED_F5               0xf5
+#define MSG_RESERVED_F6               0xf6
+#define MSG_RESERVED_F7               0xf7
+#define MSG_RESERVED_F8               0xf8
+#define MSG_RESERVED_F9               0xf9
+#define MSG_RESERVED_FA               0xfA
+#define MSG_RESERVED_FB               0xfB
+#define MSG_RESERVED_FC               0xfC
+#define MSG_RESERVED_FD               0xfD
+#define MSG_RESERVED_FE               0xfE
 #define MSG_START_BYTE                0xFF  // Start of transmission packet
 
 
