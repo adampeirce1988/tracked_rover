@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "global_config.h"
 #include "transport.h"
-#include "log.h"
+#include "logger.h"
 #include "self_test.h"
 #include "debug.h"
 #include "debug_config.h"
@@ -16,14 +16,18 @@
 // progress bar variables 
 constexpr uint16_t divisor = DIAGNOSTIC_WT_TIMEOUT_MS / 25; 
 uint8_t print_counter = 1;
+//bool diagnostics_wdt_test_result = false;   // this is currntly never rest 
 
 uint8_t self_test_diagnostics_wdt(){
 
     // runs once on first loop
     if(self_test::watchdog_timer_test_active == false){
         dissable_verbous_error();                                // dissable verbous error reporting
+        st_logging_active();                                     // activate st_logging
+
         self_test::test_end_countdown_timer = millis() + (DIAGNOSTIC_WT_TIMEOUT_MS + 1);  
         self_test::watchdog_timer_test_active = true; 
+
         PRINT_PROGRESS_BAR_START(); 
     }
 
@@ -32,22 +36,26 @@ uint8_t self_test_diagnostics_wdt(){
     if(self_test::test_end_countdown_timer - millis() < (DIAGNOSTIC_WT_TIMEOUT_MS - (divisor * print_counter))){
         PRINT_PROGRESS_BAR_PROGRESS();
         print_counter ++;
+
     }
 
 
-    if(transport_test_log.diagnostics_wdt_test_result == true){
+    if(st_check_test_result(ST_TEST_ENTRY::ST_LOG_WDT_TIMEOUT,EVALUATION_TYPE::EQUAL ,1)){
         PRINT_PROGRESS_BAR_END(); 
         self_test::watchdog_timer_test_active = false; 
         print_counter = 1; 
         enable_verbous_error(); // enable verbous error reporting
+        st_logging_inactive();  // disable st_logging
 
         return SELFTEST_PASSED;
     }
     else if(self_test::watchdog_timer_test_active == true && millis() > self_test::test_end_countdown_timer){
         PRINT_PROGRESS_BAR_END(); 
+        st_print_log();
         self_test::watchdog_timer_test_active = false; 
         print_counter = 1; 
         enable_verbous_error(); // enable verbous error reporting
+        st_logging_inactive();  // disable st_logging
 
         return SELFTEST_FAILED;
     }

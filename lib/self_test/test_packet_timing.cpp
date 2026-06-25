@@ -2,8 +2,7 @@
 #include <Arduino.h>
 #include "global_config.h"
 #include "transport.h"
-#include "log.h"
-#include "logger.h" // this should inlude ST functions
+#include "logger.h" 
 #include "self_test.h"
 #include "debug.h"
 #include "debug_config.h"
@@ -19,9 +18,10 @@ uint8_t self_test_transport_random_packet(uint8_t no_of_packets, uint16_t delay_
 
         transport_set(&fifo_io);                  // set current transport to fifo. 
         // flush out fifo here
-        transport_selftest_log_clear();           // reset all previous loged data.  **DELETE ONCE LOGING IS MOVED**
+        //transport_selftest_log_clear();           // reset all previous loged data.  **DELETE ONCE LOGING IS MOVED**
         st_clear_log();                           // rest selftest error log ** NEW FUNCTIOON **
-        set_transport_selftest_loging_active();   // activate loging set to test exit 
+        //set_transport_selftest_loging_active(); // REMOVE  
+        st_logging_active();                      // activate loging set to test exit 
         dissable_verbous_error();                 // disable verbous errors during the test.
 
         self_test::next_transmission_time = micros();
@@ -101,7 +101,8 @@ uint8_t self_test_transport_random_packet(uint8_t no_of_packets, uint16_t delay_
         DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "SELF", "result of assesment for self_test. test_result: ", test_result );
 
         //transport_set(&uart_io); //*** DISABLED FOR TESTING ***  // set transport back to uart on completion of test.
-        set_transport_selftest_loging_inactive();                  // dissable loging once test is completed 
+        //set_transport_selftest_loging_inactive();                // REMOVE 
+        st_logging_inactive();                                     // dissable loging once test is completed 
         enable_verbous_error();                                    // enable verbous error  
 
         if(test_result == true){

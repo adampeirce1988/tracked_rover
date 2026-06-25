@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "global_config.h"
 #include "transport.h"
-#include "log.h"
+
 #include "logger.h"
 #include "self_test.h"
 #include "debug.h"
@@ -28,8 +28,9 @@ uint8_t self_test_error_injection(uint8_t no_of_packets, uint8_t error_count, TX
 
         // configure test functionality 
         transport_set(&fifo_io);                       // set current transport to fifo. 
-        transport_selftest_log_clear();                // reset all previous loged data.  *** MAY NEED TAYLORING TO SPECIFIC TEST TYPES **
-        set_transport_selftest_loging_active();        // activate loging
+ 
+        st_clear_log();                                  // reset all previous loged data. 
+        st_logging_active();                             // set selftest logging active
         
         // record test start time 
         self_test::next_transmission_time = micros();  // set the start time of the self test
@@ -102,7 +103,8 @@ uint8_t self_test_error_injection(uint8_t no_of_packets, uint8_t error_count, TX
         self_test::current_test_packet = 0;                         // reset the packet count a the end of the test 
 
         //transport_set(&uart_io);   //*** DISABLED FOR TESTING *** // set transport back to uart on completion of test.
-        set_transport_selftest_loging_inactive();                   // dissable loging once test is completed 
+        //set_transport_selftest_loging_inactive();                  REMOVE 
+        st_logging_inactive();                                      // dissable loging once test is completed 
         enable_verbous_error();                                     // enable verbous logging
 
         // check test results here
@@ -113,7 +115,6 @@ uint8_t self_test_error_injection(uint8_t no_of_packets, uint8_t error_count, TX
         test_result &= st_compare_test_result(ST_TEST_ENTRY::ST_LOG_TOTAL_ERRORS, EVALUATION_TYPE::EQUAL, ST_TEST_ENTRY::ST_LOG_INJECTED_ERROR);
 
         if(test_result == true){
-            st_print_log(); //test only 
             return SELFTEST_PASSED;
         }
         else{

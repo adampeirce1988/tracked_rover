@@ -2,7 +2,6 @@
 #include <Arduino.h>
 #include "transport.h"
 #include "global_config.h"
-//#include "debug_config.h"
 #include "debug.h"
 
 // define statments 

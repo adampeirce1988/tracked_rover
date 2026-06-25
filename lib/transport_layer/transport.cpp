@@ -9,7 +9,6 @@
 #include "global_config.h"
 #include "global.h"
 #include "self_test.h"
-#include "log.h"
 #include "debug.h"
 #include "messages.h"
 
@@ -489,7 +488,7 @@ uint8_t update_rx_fsm(){
             rx_return_status = RX_RETURN_CODES::FRAME_READY;  // this is not tested ***
           }
           else if(rx_packet.f.ACK == TRANSPORT_ACK_TYPE::ACK_RESPONSE){ 
-            SELFTEST_LOG_EVENT(EVENT_ACK_RECEIVED);
+            //SELFTEST_LOG_EVENT(EVENT_ACK_RECEIVED);
             DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "ACK", "received ack response. ");
             rx_ack.TYPE = rx_packet.f.TYPE;
             rx_ack.ID = rx_packet.f.ID;
@@ -497,7 +496,7 @@ uint8_t update_rx_fsm(){
             rx_return_status = RX_RETURN_CODES::ACK_READY;
           } 
           else{
-            SELFTEST_LOG_EVENT_VAL(EVENT_PACKET_RECEIVED, 0);
+            //SELFTEST_LOG_EVENT_VAL(EVENT_PACKET_RECEIVED, 0);
             DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "NORM", "normal packet received ");
             rx_packet.frame_ready = true; 
             rx_return_status = RX_RETURN_CODES::FRAME_READY; 
@@ -507,7 +506,7 @@ uint8_t update_rx_fsm(){
           total_rx_frame_time = micros() - rx_start_timestamp;
 
           // log the selftest event
-          SELFTEST_LOG_EVENT_VAL(EVENT_RX_LATANCY, total_rx_frame_time);
+          //SELFTEST_LOG_EVENT_VAL(EVENT_RX_LATANCY, total_rx_frame_time);
 
           rx_state = RX_STATE_WAIT_START;
         }  
@@ -520,23 +519,23 @@ uint8_t update_rx_fsm(){
         }
         else if(rx_packet.error_code == RX_RETURN_CODES::ACK_OUT_OF_RANGE ){
           DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "ACK", "out of range ACK: ", rx_packet.f.ACK);
-          SELFTEST_LOG_EVENT(EVENT_ACK_OUT_OF_RANGE);
+          //SELFTEST_LOG_EVENT(EVENT_ACK_OUT_OF_RANGE);
         }
         else if(rx_packet.error_code == RX_RETURN_CODES::DLC_OVER_CAPACITY){
           DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "RX", "DLC greater that payload capacity: ", ARRAY_SIZE(rx_packet.f.payload));
-          SELFTEST_LOG_EVENT(EVENT_DLC_EXCEDED_MAX);
+          //SELFTEST_LOG_EVENT(EVENT_DLC_EXCEDED_MAX);
         }
         else if(rx_packet.error_code == RX_RETURN_CODES::PAYLOAD_OVERFLOW){
           DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "DLC", "Payload exceded DLC: ", rx_packet.payload_position);
-          SELFTEST_LOG_EVENT(EVENT_PAYLOAD_OVERFLOW);
+          //SELFTEST_LOG_EVENT(EVENT_PAYLOAD_OVERFLOW);
         }
         else if(rx_packet.error_code == RX_RETURN_CODES::MSG_TIMEOUT_ERROR){
           DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_ERROR, "RX", "RX watch dog timer trigered elapsed time: ", CONVERT_US_TO_MS((rx_wdt_timestamp - last_read_byte)), "ms");
-          SELFTEST_LOG_EVENT(EVENT_RX_TIMEOUT);
+          //SELFTEST_LOG_EVENT(EVENT_RX_TIMEOUT);
         }
         else if(rx_packet.error_code == RX_RETURN_CODES::CRC_ERROR){
           DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "CRC", "CRC check NOK. calculated CRC: ", rx_packet.crc_check);
-          SELFTEST_LOG_EVENT(EVENT_CRC_ERROR);
+          //SELFTEST_LOG_EVENT(EVENT_CRC_ERROR);
         }
         
         // reset all rx packet data. 
@@ -571,7 +570,7 @@ uint8_t update_tx_fsm(){
     tx_priority_packet.waiting = false; 
     tx_state = TX_STATE_SENDING;
     tx_return_status = TX_RETURN_CODES::TX_ACK_TRANSMISION_SUCCESS; 
-    SELFTEST_LOG_EVENT(EVENT_ACK_SENT);  //log sent acks
+    //SELFTEST_LOG_EVENT(EVENT_ACK_SENT);  //log sent acks
   }
   else if((tx_state == TX_STATE_IDLE) && (tx_pending_ack.retry == true)){
     active = &tx_pending_ack.f;
@@ -584,7 +583,7 @@ uint8_t update_tx_fsm(){
     tx_normal_packet.waiting = false; 
     tx_state = TX_STATE_SENDING; 
     tx_return_status = TX_RETURN_CODES::TX_TRANSMISION_SUCCESS;
-    SELFTEST_LOG_EVENT(EVENT_PACKET_SENT);  // log sent packets 
+    //SELFTEST_LOG_EVENT(EVENT_PACKET_SENT);  // log sent packets 
   }
 
   switch(tx_state){
@@ -625,28 +624,28 @@ uint8_t update_tx_fsm(){
 
     case TX_STATE_RETRY:{ // modify this to only resend the packt and increment the retrie counter 
 
-        if(tx_pending_ack.retry_counter < TX_MAX_RETRIES){
+      if(tx_pending_ack.retry_counter < TX_MAX_RETRIES){
 
-          transmit_packet(&tx_pending_ack.f);
-          tx_pending_ack.retry_counter ++; 
-          tx_pending_ack.ack_timestamp = micros();
+        transmit_packet(&tx_pending_ack.f);
+        tx_pending_ack.retry_counter ++; 
+        tx_pending_ack.ack_timestamp = micros();
 
-          DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "TX", " ACK not receeived atteming to resend message. retry: ", tx_pending_ack.retry_counter);
-          
-          tx_state = TX_STATE_IDLE;
-          tx_return_status = TX_RETURN_CODES::RESENDING_MSG;
-          SELFTEST_LOG_EVENT(EVENT_TX_MAX_RETIRES);
-          
-        }
-        else{
-          // report ack not received
-          tx_pending_ack .failed = true;
+        DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "TX", " ACK not receeived atteming to resend message. retry: ", tx_pending_ack.retry_counter);
+        
+        tx_state = TX_STATE_IDLE;
+        tx_return_status = TX_RETURN_CODES::RESENDING_MSG;
+        //SELFTEST_LOG_EVENT(EVENT_TX_MAX_RETIRES);
+        
+      }
+      else{
+        // report ack not received
+        tx_pending_ack .failed = true;
 
-          tx_pending_ack .error_code = TX_RETURN_CODES::ACK_NOT_RECEVIED; 
-          tx_state = TX_STATE_FAILED;
-          tx_return_status = TX_RETURN_CODES::TX_TRANSMISION_ERROR;
+        tx_pending_ack .error_code = TX_RETURN_CODES::ACK_NOT_RECEVIED; 
+        tx_state = TX_STATE_FAILED;
+        tx_return_status = TX_RETURN_CODES::TX_TRANSMISION_ERROR;
 
-        }
+      }
       break;
     }
 
@@ -661,7 +660,7 @@ uint8_t update_tx_fsm(){
         total_tx_frame_time = micros() - tx_start_timestamp;
 
         // log the selftest event 
-        SELFTEST_LOG_EVENT_VAL(EVENT_TX_LATANCY, total_tx_frame_time);
+        //SELFTEST_LOG_EVENT_VAL(EVENT_TX_LATANCY, total_tx_frame_time);
 
         // return the value seected by at the inital frame seletion
 
@@ -673,16 +672,16 @@ uint8_t update_tx_fsm(){
         if(tx_pending_ack.error_code == TX_RETURN_CODES::ACK_NOT_RECEVIED){
           DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_ERROR, "TX", "No ACK receeived after ", tx_pending_ack .retry_counter, " attemps.");
           DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "TX", "packet failed to send");
-          SELFTEST_LOG_EVENT(EVENT_ACK_TIMEOUT);
+          //SELFTEST_LOG_EVENT(EVENT_ACK_TIMEOUT);
         }
         else if(tx_pending_ack.error_code == TX_RETURN_CODES::ACK_MISMATCHED){
           DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "TX", "ACK mismatched received ack ID: ", rx_packet.f.ID);
           DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "TX", "ACK mismatched received TYPE: ", rx_packet.f.TYPE);
-          SELFTEST_LOG_EVENT(EVENT_ACK_MISMATCH);
+          //SELFTEST_LOG_EVENT(EVENT_ACK_MISMATCH);
         }
         else if(tx_pending_ack.error_code == TX_RETURN_CODES::TX_BUFFER_OVERFLOW || tx_priority_packet.error_code == TX_RETURN_CODES::TX_BUFFER_OVERFLOW || tx_normal_packet.error_code == TX_RETURN_CODES::TX_BUFFER_OVERFLOW){
           DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "TX", "failed to send packet due to serial bufer overflow. ");
-          SELFTEST_LOG_EVENT(EVENT_TX_BUFF_OVERFLOW);
+          //SELFTEST_LOG_EVENT(EVENT_TX_BUFF_OVERFLOW);
         }
 
         tx_state = TX_STATE_IDLE;

@@ -4,7 +4,6 @@
 #include <Arduino.h>
 #include <HardwareSerial.h>
 #include "self_test.h"
-#include "log.h"  // remove at the end of refactor
 #include "logger.h"
 #include "transport.h"
 #include "debug.h"
@@ -16,7 +15,7 @@
 
 #define DEBUG_FILE DBG_ESP_MAIN
 
-// return code variable 
+// return code variable ** these are also stored in system.h** 
 uint8_t rx_transport_status = 0;  
 uint8_t tx_transport_status = 0;
 uint8_t rx_protocol_status = 0; 
@@ -46,17 +45,15 @@ void loop() {
 
   // check for avaliable packets and run the dispacher - [TODO]: add a bit wise check for valid type 
   if(frame_avaliable() > 0){
-    rx_protocol_status = rx_message_task_dispatcher();
+    rx_protocol_status = rx_message_task_dispatcher(); 
   }
 
   // process returned codes & log if an error is received
   process_transport_rx_return_error(rx_transport_status); 
   process_transport_tx_return_error(tx_transport_status); 
-  process_protocol_return_error(rx_protocol_status);      
-
-
+  process_protocol_return_error(rx_protocol_status); 
+      
   fifo_io_uart_engine_update();                                  // this only needs to run if transport diagnostics occours. 
-  
   
   run_vehicle_state();                                           // run vehicle requested FSM. 
 }

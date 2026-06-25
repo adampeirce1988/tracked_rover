@@ -15,20 +15,32 @@ bool check_system_health_flags();
 /////////////////////////////////////////
 
 namespace sys {
+
+    // timing 
     extern uint32_t sys_heartbeat;
     extern uint32_t tx_last_valid_packet; 
     extern uint32_t last_connection_attempt;
+
+    // comunication 
+    extern bool communication_warn_active;
+
+    // system status 
     extern bool bus_connectivity_status; 
     extern bool i2c_connectivity_status;
 
+    // modes
     extern bool diagnostics_active;
 
     // system alive flags.
+    extern bool bus_connectivity_status; 
+    extern bool i2c_connectivity_status; 
     extern bool I2C_bus_alive;
-    extern bool tranport_alive; 
-
-    // error states
-    extern bool I2C_bus_error;
+    extern bool transport_alive; 
 }
+
+
+// function declerations 
+void transport_alive_check();
+
 
 #endif 

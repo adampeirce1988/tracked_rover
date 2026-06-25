@@ -9,7 +9,6 @@
 #include "global.h"      // TODO: Move sys:: variables into system module
 #include "debug.h"
 #include "self_test.h"
-#include "log.h"
 
 
 ///////////////////////////////////////////////////////////////////////////////

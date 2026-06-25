@@ -16,16 +16,22 @@ test status:
 
 
 [FIXED]: 
-- Implimented tyoe check and logic in protocol.ccp 
-- Updated ST_LOG to log protcol error codes 
-- Updated RT_LOG to log invalid type
-- tested self_test 2 & 5 on esp_32 
-- Added a build log tree to the github page requires pull request merging
+- Implimented idle based on ID to ensure messages messages only read once by rx_protcol 
+- fixed bug that stoped WDT test from logging 
+- fixed bug that stoped test_active from clearing
+- tested WDT test again 
+- removed wdt_test_result parmeter as it was no longer used
+- strip out and remove all old self test calls.
+- removd log.h & log.cpp 
+- removed all instances of log.h
+- chanfged messages.h to constexpr for improved error handling
+- removed log display if a test passes
+- all files marked with a ✅ have been reveiwed 
+
 
 
 [TODO]: 
 - clean up commented out functions and code.
-- strip out and remove all old self test calls.
 - repalce #defines for constexpr where posible.
 - run a ccode reveiw all files and refractor.
 
@@ -44,17 +50,13 @@ tracked_rover-built-in-trasmission-self-test/
     │
     ├── config/
     │   ├── global.cpp
-    │   ├── global.h
-    │   └── global_config.h
+    │   ├── global.h. ✅
+    │   └── global_config.h. ✅ 
     │
     ├── debug/
     │   ├── debug.cpp
     │   ├── debug.h
     │   └── debug_config.h
-    │
-    ├── logging/
-    │   ├── log.h
-    │   └── logs.cpp
     │
     ├── logs/
     │   ├── logger.h

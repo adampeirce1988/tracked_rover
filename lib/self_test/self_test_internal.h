@@ -4,7 +4,6 @@
 #pragma once
 
 #include <stdint.h>
-#include "debug.h"
 #include "transport.h"
 
 //************* global test congifg *************

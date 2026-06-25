@@ -5,7 +5,6 @@
 #include "transport.h"
 #include "self_test.h" 
 #include "debug.h"
-#include "log.h"
 
 
 #define DEBUG_FILE DBG_SELF_TEST 
@@ -98,7 +97,9 @@ uint8_t run_test_case(){
         case TEST_OPERATION::END_SELF_TEST:{
             // code to close the self test goes here; state not required
             // always reset the sys variables on exit
-            set_transport_selftest_loging_inactive();
+     
+            //st_logging_inactive();  // set ST logging inactive here 
+            
             self_test_state = TEST_OPERATION::TEST_DISPACHER;
             return SELFTEST_COMPLETED;
         } break;

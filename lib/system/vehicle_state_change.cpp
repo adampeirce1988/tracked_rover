@@ -4,7 +4,6 @@
 #include "global.h" // move sys:: these to the system folder. 
 #include "debug.h"
 #include "self_test.h"
-#include "log.h"
 
 #define DEBUG_FILE DBG_SYSTEM
 

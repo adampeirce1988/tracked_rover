@@ -25,6 +25,7 @@ enum ST_TEST_ENTRY {
     ST_LOG_INVALID_TYPE,
     ST_LOG_RESERVED_TYPE,  
     ST_LOG_INHIBITED_MESSAGE,
+    ST_LOG_WDT_TIMEOUT,
     ST_LOG_TOTAL_ERRORS
 };
 
@@ -42,15 +43,22 @@ enum EVALUATION_TYPE{
 void process_transport_rx_return_error(uint8_t return_code);
 void process_transport_tx_return_error(uint8_t return_code);
 void process_protocol_return_error(uint8_t return_code); // not yet implimented 
+void st_log_wdt_event(); // not implimented 
 
 void st_clear_log();
 void st_print_log();
 
+void st_logging_active();      
+void st_logging_inactive();    
+
 void st_log_injected_error(); 
 void st_log_delayed_packet();
+void st_log_wdt_trigered(); // not implimented 
+
 
 bool st_check_test_result(ST_TEST_ENTRY entry, EVALUATION_TYPE evaluation_type, uint8_t expected_result); // types not exposed
 bool st_compare_test_result(ST_TEST_ENTRY entry, EVALUATION_TYPE evaluation_type, ST_TEST_ENTRY expected_result);
+
 void rt_erase_error_codes(); 
 
 

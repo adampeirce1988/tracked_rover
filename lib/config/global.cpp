@@ -21,17 +21,16 @@ bool diagnostics_active = false;
 
 // system timestamp flags
 uint32_t sys_heartbeat = 0; 
-// comunication
+
+// communication
 uint32_t tx_last_valid_packet = 0;
 uint32_t last_connection_attempt = 0;
-bool comunication_warn_active = false; // add for warning implimentation with auto reconnect. 
+bool communication_warn_active = false; // add for warning implimentation with auto reconnect. 
+
+// Alive flag
 bool bus_connectivity_status = false; 
-bool i2c_connectivity_status = true; // not yet actioned test only 
-// Alive flags
-//bool I2C_bus_alive = false; 
-//bool Transport_alive = false; 
+bool i2c_connectivity_status = false; 
 // error states 
-bool I2C_bus_error = false; 
 
 };
 
@@ -57,26 +56,26 @@ void transport_alive_check(){
 
         uint32_t time_since_last_packet = millis() - sys::tx_last_valid_packet; 
 
-        if (time_since_last_packet  > COMUNICATION_IDLE_TIMEOUT){
+        if (time_since_last_packet  > COMMUNICATION_IDLE_TIMEOUT){
             sys::bus_connectivity_status = false;
-            DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_ERROR, "GLOB", "comunication timeout error no messages received for ", COMUNICATION_IDLE_TIMEOUT, "ms");
+            DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_ERROR, "GLOB", "communication timeout error no messages received for ", COMMUNICATION_IDLE_TIMEOUT, "ms");
         }
-        else if(time_since_last_packet > COMUNICATION_IDLE_WARN){
-            if(sys::comunication_warn_active == false){
-                establish_coms();   // send out a message establish coms to confirm comunication message is active. 
-                sys::comunication_warn_active = true; 
-                DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_WARN, "GLOB", "communication timeout warning no messages received for ", COMUNICATION_IDLE_WARN, "ms"); 
+        else if(time_since_last_packet > COMMUNICATION_IDLE_WARN){
+            if(sys::communication_warn_active == false){
+                establish_coms();   // send out a message establish coms to confirm communication message is active. 
+                sys::communication_warn_active = true; 
+                DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_WARN, "GLOB", "communication timeout warning no messages received for ", COMMUNICATION_IDLE_WARN, "ms"); 
             }
         }
         else{
-            //rest the comunication warn flag on sucsesfull transmisssion
-            sys::comunication_warn_active = false;
+            //rest the communication warn flag on sucsesful transmisssion
+            sys::communication_warn_active = false;
         }
     }
 }
 
 
-// olny system alive checks to be added here. 
+// only system alive checks to be added here. 
 bool check_system_health_flags(){
     if(sys::bus_connectivity_status == true && sys::i2c_connectivity_status == true ){
         return true;

@@ -7,11 +7,10 @@
 //#define TARGET_PLATFORM MEGA2650
 
 //=================== main config ====================
-
-#define DIAGNOSTIC_WT_TIMEOUT_MS  5000                   // max diagnostic test run time before a timeout error
-#define SYSTEM_NOT_ALIVE_TIMEOUT  2000                   // start with 500ms (tune value once tested)
-#define COMUNICATION_IDLE_WARN    1000
-#define COMUNICATION_IDLE_TIMEOUT 2000
+constexpr uint32_t DIAGNOSTIC_WT_TIMEOUT_MS =   5000;                   // max diagnostic test run time before a timeout error
+constexpr uint32_t SYSTEM_NOT_ALIVE_TIMEOUT =   2000;                   // start with 500ms (tune value once tested)
+constexpr uint32_t COMMUNICATION_IDLE_WARN =     1000;
+constexpr uint32_t COMMUNICATION_IDLE_TIMEOUT =  2000;
 //===================================================
 
 
@@ -22,38 +21,34 @@
 #define DEFAULT_TRANSPORT          &uart_io              // used for simualting a link this will delive the tx to the rx port
 #define DEFAULT_TRANSPORT_STR      uart_io               // naming convention used for debug should match the default transport          
 
-//////////////////////////////////////
-#define QUEUE_SIZE                 3
-#define PENDING_ACK_QUEUE_SIZE     2
-//////////////////////////////////////
 
-//#define START_BYTE                 0xFF                  // default start byte 0xFF
-#define MSG_WDT_TIMEOUT_US         35000                 // message watchdog time for bytes received updated after evey read in RX (us)  
-#define ACK_WDT_TIMEOUT_US         65000                 // watch dog timer for ack (us)
-#define MAX_PAYLOAD_LEN            6                     // maximum payload of message frame 
-#define PACKET_INCREMENT           1                     // used for debug only
-#define TX_MAX_RETRIES             3                     // number of message send retries before reproting a failure
-
+constexpr uint32_t MSG_WDT_TIMEOUT_US =        35000;    // message watchdog time for bytes received updated after evey read in RX (us)  
+constexpr uint32_t ACK_WDT_TIMEOUT_US =        65000;    // watch dog timer for ack (us) (slightly longer than one packet)
+constexpr uint8_t MAX_PAYLOAD_LEN =            6;        // maximum payload of message frame 
+constexpr uint8_t TX_MAX_RETRIES =             3;        // number of message send retries before reproting a failure
+constexpr uint8_t PENDING_ACK_QUEUE_SIZE =     2;        // size for the pending ackq queue 
 
 //=====================================================
 
 #if TARGET_PLATFORM == ESP32
 
-    #define SW_VERSION             "Software version 1.10.1"
-    #define HARDWARE_VERSION       "ESP32 WROOM DEV board"
+    constexpr char SW_VERSION[] =        "Software version 1.10.1";
+    constexpr char HARDWARE_VERSION[] =  "ESP32 WROOM DEV board";
+
+    // to be removed 
     #define RELEASE_NOTES          "-latest version of software contains a software uart simulator \n- *currently in development* this will allow a full slef test of the transport lay allowing testing of all failure types"
                              
 
-    #define DEBUG_PORT_RX_PIN      16
-    #define DEBUG_PORT_TX_PIN      17
-    #define MSG_FORMAT             SERIAL_8N1
-    #define MAX_SERIAL_BUFFER_SIZE 128
+    constexpr uint8_t DEBUG_PORT_RX_PIN =      16;
+    constexpr uint8_t DEBUG_PORT_TX_PIN =      17;
+    constexpr uint8_t MAX_SERIAL_BUFFER_SIZE = 128;
 
-    #define DEBUG_PORT             Serial
+    #define MSG_FORMAT             SERIAL_8N1
+    #define DEBUG_PORT             Serial 
     #define COMS_PORT              Serial1   
 
-    #define DEBUG_PORT_BAUD        115200
-    #define COMS_PORT_BAUD         115200
+    constexpr uint32_t DEBUG_PORT_BAUD =        115200;
+    constexpr uint32_t COMS_PORT_BAUD =         115200;
 
 #elif TARGET_PLATFORM == MEGA2650
 
@@ -73,7 +68,7 @@
     #error "TARGET_PLATFORM not defined or not supported. Please define TARGET_PLATFORM as either 'ESP32' or 'MEGA'."
 #endif  
 
-#define VERSION_ESP32    "1.10.0"
-#define VERSION_MEGA     "1.10.0"
+// constexpr char* SW_VERSION_ESP32 =   "2.00.0"
+// #define VERSION_MEGA     "1.10.0"
 
 #endif // GLOBAL_CONFIG_H

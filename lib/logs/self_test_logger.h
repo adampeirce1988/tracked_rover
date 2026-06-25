@@ -41,6 +41,9 @@ enum class ST_LOG_EVENT{
     EVENT_PACKECT_DELAYED,
     EVENT_ERROR_INJECTED,
 
+    //Test wdt error 
+    DIAG_WDT_TRIGERED,
+
     //Reset logs
     EVENT_LOG_CLEAR // clear all log files.
 };

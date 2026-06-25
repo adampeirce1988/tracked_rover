@@ -3,10 +3,11 @@
 
 // ================= RX PROTOCOL RETURN CODES =================
 namespace PROTOCOL_RX_RETURN_CODE {
-    constexpr uint8_t PROTO_INVALID_TYPE = 0;
-    constexpr uint8_t PROTO_VALID_TYPE = 1;
-    constexpr uint8_t PROTO_VALID_MSG_INHIBITED = 2;  
-    constexpr uint8_t PROTO_RESERVED_TYPE = 3;    
+    constexpr uint8_t PROTO_IDLE = 0;
+    constexpr uint8_t PROTO_INVALID_TYPE = 1;
+    constexpr uint8_t PROTO_VALID_TYPE = 2;
+    constexpr uint8_t PROTO_VALID_MSG_INHIBITED = 3;  
+    constexpr uint8_t PROTO_RESERVED_TYPE = 4;    
 }
 
 // ================= RX PROTOCOL RETURN CODES =================
