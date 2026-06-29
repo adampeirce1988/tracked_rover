@@ -59,7 +59,7 @@ static _ST_LOG ST_LOG;
 
 
 // functions 
-void st_log_event(ST_LOG_EVENT event, bool log_type){ 
+void st_log_event(ST_LOG_EVENT event, LOG_TYPE log_type){ 
     if(selftest_loging_status == true){
         switch(event){
             // TX Logging 
@@ -95,7 +95,12 @@ void st_log_event(ST_LOG_EVENT event, bool log_type){
             case ST_LOG_EVENT::DIAG_WDT_TRIGERED:         {ST_LOG.diagnostic_wdt_count ++; } break; 
 
             // clear error log
-            case ST_LOG_EVENT::EVENT_LOG_CLEAR:           { ST_LOG = {}; }                   break;
+            case ST_LOG_EVENT::EVENT_LOG_CLEAR:           { ST_LOG = {}; }                   break; // remove this from a state
+
+            default: 
+                DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "LOG", "get_test_value(ST_TEST_ENTRY entry) invalid or undefined");
+            break; 
+
         }   
 
         // increment total error is fault flag is true
@@ -110,38 +115,32 @@ void st_log_event(ST_LOG_EVENT event, bool log_type){
 uint8_t get_test_value(ST_TEST_ENTRY entry){
     switch(entry){
         // set test value here before test occours
-        case ST_TEST_ENTRY::ST_LOG_PACKETS_SENT:       {return ST_LOG.packets_sent;}          break; 
-        case ST_TEST_ENTRY::ST_LOG_ACKS_TRANSMITTED:   {return ST_LOG.ack_transmitted;}       break; 
-        case ST_TEST_ENTRY::ST_LOG_RETRY_ATTEMPT:      {return ST_LOG.retry_attempt;}         break; 
-        case ST_TEST_ENTRY::ST_LOG_ACK_NOT_RECEIVED:   {return ST_LOG.ack_not_received;}      break; 
-        case ST_TEST_ENTRY::ST_LOG_ACK_MISMATCH:       {return ST_LOG.ack_mismatch;}          break; 
-        case ST_TEST_ENTRY::ST_LOG_ACK_TIMEOUT:        {return ST_LOG.ack_timeout;}           break;
-        case ST_TEST_ENTRY::ST_LOG_TX_BUFFER_OVERFLOW: {return ST_LOG.tx_buffer_overflow;}    break; 
-
-        case ST_TEST_ENTRY::ST_LOG_DELAYED_PACKET:     {return ST_LOG.delayed_packets;}       break; 
-        case ST_TEST_ENTRY::ST_LOG_INJECTED_ERROR:     {return ST_LOG.injected_error;}        break; 
-
-        case ST_TEST_ENTRY::ST_LOG_PACKETES_RECEIVED:  {return ST_LOG.packets_received;}      break; 
-        case ST_TEST_ENTRY::ST_LOG_ACK_RECEIVED:       {return ST_LOG.ack_received;}          break;
-        case ST_TEST_ENTRY::ST_LOG_NACK_RECEIVED:      {return ST_LOG.nack_received;}         break; 
-        case ST_TEST_ENTRY::ST_LOG_INVALID_TPYE:       {return ST_LOG.invalid_type;}          break;
-        case ST_TEST_ENTRY::ST_LOG_ACK_OUT_OF_RANGE:   {return ST_LOG.ack_out_of_range;}      break;
-        case ST_TEST_ENTRY::ST_LOG_DLC_OVER_CAPACITY:  {return ST_LOG.dlc_exceeded_max;}      break; 
-        case ST_TEST_ENTRY::ST_LOG_CRC_ERRORS:         {return ST_LOG.crc_error;}             break; 
-        case ST_TEST_ENTRY::ST_LOG_MSG_TIMEOUT:        {return ST_LOG.rx_timeouts;}           break; 
-
-        case ST_TEST_ENTRY::ST_LOG_VALID_TYPE:         {return ST_LOG.valid_type; }           break; 
-        case ST_TEST_ENTRY::ST_LOG_INVALID_TYPE:       {return ST_LOG.invalid_type; }         break;
-        case ST_TEST_ENTRY::ST_LOG_RESERVED_TYPE:      {return ST_LOG.reserved_type; }        break;
-        case ST_TEST_ENTRY::ST_LOG_INHIBITED_MESSAGE:  {return ST_LOG.inhibited_message; }    break; 
-
-        case ST_TEST_ENTRY::ST_LOG_WDT_TIMEOUT:        {return ST_LOG.diagnostic_wdt_count; } break; 
-     
-        case ST_TEST_ENTRY::ST_LOG_TOTAL_ERRORS:       {return ST_LOG.total_errors;}          break; 
+        case ST_TEST_ENTRY::PACKETS_SENT:       {return ST_LOG.packets_sent;}          break; 
+        case ST_TEST_ENTRY::ACKS_TRANSMITTED:   {return ST_LOG.ack_transmitted;}       break; 
+        case ST_TEST_ENTRY::RETRY_ATTEMPT:      {return ST_LOG.retry_attempt;}         break; 
+        case ST_TEST_ENTRY::ACK_NOT_RECEIVED:   {return ST_LOG.ack_not_received;}      break; 
+        case ST_TEST_ENTRY::ACK_MISMATCH:       {return ST_LOG.ack_mismatch;}          break; 
+        case ST_TEST_ENTRY::ACK_TIMEOUT:        {return ST_LOG.ack_timeout;}           break;
+        case ST_TEST_ENTRY::TX_BUFFER_OVERFLOW: {return ST_LOG.tx_buffer_overflow;}    break; 
+        case ST_TEST_ENTRY::DELAYED_PACKET:     {return ST_LOG.delayed_packets;}       break; 
+        case ST_TEST_ENTRY::INJECTED_ERROR:     {return ST_LOG.injected_error;}        break; 
+        case ST_TEST_ENTRY::PACKETS_RECEIVED:   {return ST_LOG.packets_received;}      break; 
+        case ST_TEST_ENTRY::ACK_RECEIVED:       {return ST_LOG.ack_received;}          break;
+        case ST_TEST_ENTRY::NACK_RECEIVED:      {return ST_LOG.nack_received;}         break; 
+        case ST_TEST_ENTRY::ACK_OUT_OF_RANGE:   {return ST_LOG.ack_out_of_range;}      break;
+        case ST_TEST_ENTRY::DLC_OVER_CAPACITY:  {return ST_LOG.dlc_exceeded_max;}      break; 
+        case ST_TEST_ENTRY::CRC_ERRORS:         {return ST_LOG.crc_error;}             break; 
+        case ST_TEST_ENTRY::MSG_TIMEOUT:        {return ST_LOG.rx_timeouts;}           break; 
+        case ST_TEST_ENTRY::VALID_TYPE:         {return ST_LOG.valid_type; }           break; 
+        case ST_TEST_ENTRY::INVALID_TYPE:       {return ST_LOG.invalid_type; }         break;
+        case ST_TEST_ENTRY::RESERVED_TYPE:      {return ST_LOG.reserved_type; }        break;
+        case ST_TEST_ENTRY::INHIBITED_MESSAGE:  {return ST_LOG.inhibited_message; }    break;
+        case ST_TEST_ENTRY::WDT_TIMEOUT:        {return ST_LOG.diagnostic_wdt_count; } break; 
+        case ST_TEST_ENTRY::TOTAL_ERRORS:       {return ST_LOG.total_errors;}          break; 
 
         default: 
-            DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "LOG", "ST_TEST_ENTRY invalid entry");
-            break; 
+            DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "LOG", "st_log_event(ST_LOG_EVENT event, LOG_TYPE log_type) invalid or undefined");
+        break; 
     }
     return UINT8_MAX;
 }
@@ -218,14 +217,14 @@ void st_print_log(){
         PRINT_LOG_ENTRY("retries attempted:.....",ST_LOG.retry_attempt);
     // System metrics
         PRINT_LOG_SEPERATOR();
-        PRINT_LOG_ENTRY("tx max latancy(us):....", latency_get_max(tx_latency_buffer)); 
-        PRINT_LOG_ENTRY("tx min latancy(us):....", latency_get_min(tx_latency_buffer));
-        PRINT_LOG_ENTRY("tx avragelatancy(us):..", latency_get_average(tx_latency_buffer ));
-        PRINT_LOG_ENTRY("tx jitter(us):.........", latency_get_jitter(tx_latency_buffer ));
-        PRINT_LOG_ENTRY("rx max latancy(us):....", latency_get_max(rx_latency_buffer));
-        PRINT_LOG_ENTRY("rx min latancy(us):....", latency_get_min(rx_latency_buffer));
-        PRINT_LOG_ENTRY("rx avragelatancy(us):..", latency_get_average(rx_latency_buffer));
-        PRINT_LOG_ENTRY("rx jitter(us):.........", latency_get_jitter(rx_latency_buffer));       
+        PRINT_LOG_ENTRY("tx max latancy(us):....", tx_latency_get_max()); 
+        PRINT_LOG_ENTRY("tx min latancy(us):....", tx_latency_get_min());
+        PRINT_LOG_ENTRY("tx avragelatancy(us):..", tx_latency_get_average());
+        PRINT_LOG_ENTRY("tx jitter(us):.........", tx_latency_get_jitter());
+        PRINT_LOG_ENTRY("rx max latancy(us):....", rx_latency_get_max());
+        PRINT_LOG_ENTRY("rx min latancy(us):....", rx_latency_get_min());
+        PRINT_LOG_ENTRY("rx avragelatancy(us):..", rx_latency_get_average());
+        PRINT_LOG_ENTRY("rx jitter(us):.........", rx_latency_get_jitter());      
     // Errors metrics
         PRINT_LOG_SEPERATOR();
         PRINT_LOG_ENTRY("injected errors........",ST_LOG.injected_error);
@@ -257,11 +256,11 @@ void st_print_log(){
 
 
 // set logging status REPALCES set_st
-void st_logging_active(){
+void st_enable_logging(){
     selftest_loging_status = true;
 }
 
-void st_logging_inactive(){
+void st_disable_logging(){
     selftest_loging_status = false; 
 }
 
@@ -275,7 +274,7 @@ void st_log_delayed_packet(){
     st_log_event(ST_LOG_EVENT::EVENT_PACKECT_DELAYED, LOG_TYPE::METRIC);
 }
 
-void st_log_wdt_trigered(){
+void st_log_wdt_triggered(){
     st_log_event(ST_LOG_EVENT::DIAG_WDT_TRIGERED, LOG_TYPE::ERROR);
 }
 

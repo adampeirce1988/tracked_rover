@@ -22,8 +22,8 @@ uint8_t self_test_diagnostics_wdt(){
 
     // runs once on first loop
     if(self_test::watchdog_timer_test_active == false){
-        dissable_verbous_error();                                // dissable verbous error reporting
-        st_logging_active();                                     // activate st_logging
+        disable_verbose_error();                                // dissable verbous error reporting
+        st_enable_logging();                                     // activate st_logging
 
         self_test::test_end_countdown_timer = millis() + (DIAGNOSTIC_WT_TIMEOUT_MS + 1);  
         self_test::watchdog_timer_test_active = true; 
@@ -40,12 +40,12 @@ uint8_t self_test_diagnostics_wdt(){
     }
 
 
-    if(st_check_test_result(ST_TEST_ENTRY::ST_LOG_WDT_TIMEOUT,EVALUATION_TYPE::EQUAL ,1)){
+    if(st_check_test_result(ST_TEST_ENTRY::WDT_TIMEOUT,EVALUATION_TYPE::EQUAL ,1)){
         PRINT_PROGRESS_BAR_END(); 
         self_test::watchdog_timer_test_active = false; 
         print_counter = 1; 
-        enable_verbous_error(); // enable verbous error reporting
-        st_logging_inactive();  // disable st_logging
+        enable_verbose_error(); // enable verbous error reporting
+        st_disable_logging();  // disable st_logging
 
         return SELFTEST_PASSED;
     }
@@ -54,13 +54,11 @@ uint8_t self_test_diagnostics_wdt(){
         st_print_log();
         self_test::watchdog_timer_test_active = false; 
         print_counter = 1; 
-        enable_verbous_error(); // enable verbous error reporting
-        st_logging_inactive();  // disable st_logging
+        enable_verbose_error(); // enable verbous error reporting
+        st_disable_logging();  // disable st_logging
 
         return SELFTEST_FAILED;
     }
-    else{
 
-        return SELFTEST_RUNNING;
-    }
+    return SELFTEST_RUNNING;
 }

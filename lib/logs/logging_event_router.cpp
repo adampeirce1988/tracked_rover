@@ -31,23 +31,23 @@ void  process_transport_tx_return_error(uint8_t return_code){
 
         case TX_RETURN_CODES::ACK_NOT_RECEVIED:
                 st_log_event(ST_LOG_EVENT::EVENT_ACK_NOT_RECEIVED, LOG_TYPE::ERROR); 
-                rt_log_error(rt_error_log_array[ERROR_ID_ACK_NOT_RECEIVED], false);
+                rt_log_error(rt_error_log_array[ERROR_ID::ACK_NOT_RECEIVED], false);
         break; 
 
         case TX_RETURN_CODES::ACK_WDT_TIMEOUT:
                 st_log_event(ST_LOG_EVENT::EVENT_ACK_WDT_TIEOUT, LOG_TYPE::ERROR);
-                rt_log_error(rt_error_log_array[ERROR_ID_ACK_WDT_TIMEOUT], true);
+                rt_log_error(rt_error_log_array[ERROR_ID::ACK_WDT_TIMEOUT], true);
         break; 
     
         case TX_RETURN_CODES::ACK_MISMATCHED: 
                 st_log_event(ST_LOG_EVENT::EVENT_ACK_MISMATCH, LOG_TYPE::ERROR);
-                rt_log_error(rt_error_log_array[ERROR_ID_ACK_MISMATCH], false);
+                rt_log_error(rt_error_log_array[ERROR_ID::ACK_MISMATCH], false);
         break; 
 
         case TX_RETURN_CODES::TX_BUFFER_OVERFLOW:
             // log buffer overflow 
                 st_log_event(ST_LOG_EVENT::EVENT_TX_BUFFER_OVERFLOW, LOG_TYPE::ERROR);
-                rt_log_error(rt_error_log_array[ERROR_ID_TX_BUFFER_OVERFLOW], true);
+                rt_log_error(rt_error_log_array[ERROR_ID::TX_BUFFER_OVERFLOW], true);
         break; 
 
         default: 
@@ -71,7 +71,7 @@ void process_transport_rx_return_error(uint8_t rx_return_code){
             rx_latency_add_value(transport_get_rx_latancy());
             st_log_event(ST_LOG_EVENT::EVENT_ACK_RECEIVED , LOG_TYPE::METRIC);
             // reset tx and rx ack related error flags 
-            rt_clear_latch(rt_error_log_array[ERROR_ID_ACK_WDT_TIMEOUT]); 
+            rt_clear_latch(rt_error_log_array[ERROR_ID::ACK_WDT_TIMEOUT]); 
             
         break; 
 
@@ -87,28 +87,28 @@ void process_transport_rx_return_error(uint8_t rx_return_code){
 
         case RX_RETURN_CODES::ACK_OUT_OF_RANGE:
                 st_log_event(ST_LOG_EVENT::EVENT_ACK_OUT_OF_RANGE, LOG_TYPE::ERROR);
-                rt_log_error(rt_error_log_array[ERROR_ID_ACK_OUT_OF_RANGE], false);
+                rt_log_error(rt_error_log_array[ERROR_ID::ACK_OUT_OF_RANGE], false);
         break; 
 
         case RX_RETURN_CODES::DLC_OVER_CAPACITY:
 
                 st_log_event(ST_LOG_EVENT::EVENT_DLC_OVER_CAPACITY , LOG_TYPE::ERROR);
-                rt_log_error(rt_error_log_array[ERROR_ID_DLC_OVER_CAPACITY], false);
+                rt_log_error(rt_error_log_array[ERROR_ID::DLC_OVER_CAPACITY], false);
         break;
 
         case RX_RETURN_CODES::PAYLOAD_OVERFLOW:
                 st_log_event(ST_LOG_EVENT::EVENT_PAYLOAD_OVERFLOW, LOG_TYPE::ERROR);
-                rt_log_error(rt_error_log_array[ERROR_ID_PAYLOAD_OVERFLOW], false);
+                rt_log_error(rt_error_log_array[ERROR_ID::PAYLOAD_OVERFLOW], false);
         break; 
 
         case RX_RETURN_CODES::CRC_ERROR:
                 st_log_event(ST_LOG_EVENT::EVENT_CRC_ERROR, LOG_TYPE::ERROR);
-                rt_log_error(rt_error_log_array[ERROR_ID_CRC_ERROR], false);
+                rt_log_error(rt_error_log_array[ERROR_ID::CRC_ERROR], false);
         break; 
 
         case RX_RETURN_CODES::MSG_TIMEOUT_ERROR:
                 st_log_event(ST_LOG_EVENT::EVENT_MSG_TIMEOUT_ERROR, LOG_TYPE::ERROR);
-                rt_log_error(rt_error_log_array[ERROR_ID_MSG_TIMEOUT], false);
+                rt_log_error(rt_error_log_array[ERROR_ID::MSG_TIMEOUT], false);
         break;
 
         default:
@@ -125,7 +125,7 @@ void process_protocol_return_error(uint8_t protocol_return_code){
 
         case PROTOCOL_RX_RETURN_CODE::PROTO_INVALID_TYPE:
             st_log_event(ST_LOG_EVENT::EVENT_INVALID_TYPE, LOG_TYPE::METRIC); // change to error for st logging
-            rt_log_error(rt_error_log_array[ERROR_ID_TYPE_INVALID], false);
+            rt_log_error(rt_error_log_array[ERROR_ID::TYPE_INVALID], false);
         break; 
 
         case PROTOCOL_RX_RETURN_CODE::PROTO_RESERVED_TYPE:

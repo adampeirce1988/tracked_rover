@@ -4,12 +4,12 @@
 
 #include <stdint.h>
 
-// TODO EXPOSE THESE ENUM FOR USAGE IN GLOBAL SPACE
 
-namespace LOG_TYPE{
-    constexpr bool ERROR = true; 
-    constexpr bool METRIC = false; 
-}
+enum class LOG_TYPE : bool
+{
+    ERROR = true,
+    METRIC = false
+};
 
 enum class ST_LOG_EVENT{
     // TX EVENT
@@ -50,6 +50,6 @@ enum class ST_LOG_EVENT{
 
 
 // forward declerations
-void st_log_event (ST_LOG_EVENT event, bool log_type);
+void st_log_event (ST_LOG_EVENT event, LOG_TYPE log_type);
 
 #endif

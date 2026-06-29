@@ -141,7 +141,7 @@ void run_vehicle_state(){
         if(millis() - diagnostics_WDT > DIAGNOSTIC_WT_TIMEOUT_MS){
         
             if(watchdog_test_active()){
-              st_log_wdt_trigered(); // log trigered event  
+              st_log_wdt_triggered(); // log trigered event  
               DEBUG_PORT.println("WDT TEST ACTIVE");
               diagnostics_WDT += ST_WDT_EXTRA_TIME; 
               DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "WDT", "event_wdt_trigered activated.");

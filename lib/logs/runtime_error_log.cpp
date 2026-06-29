@@ -4,49 +4,52 @@
 #include "global.h"
 #include "runtime_error_log.h"
 
+
+RUNTIME_ERROR rt_error_log_array[ERROR_ID::COUNT]; 
+
+
 // internal forward declerations
-static void rt_log_entry_clear(ERROR_STRUCT &s); 
+static void rt_log_entry_clear(RUNTIME_ERROR &s); 
 
-
-//ERROR_STRUCT RT_ERROR_LOG[ERROR_ID_COUNT]; 
-ERROR_STRUCT rt_error_log_array[ERROR_ID_COUNT]; 
    
-void rt_log_error(ERROR_STRUCT &s, bool latch_error = false){
+void rt_log_error(RUNTIME_ERROR &s, bool latch_error = false){
     if(sys::diagnostics_active || s.latch){ // if diagnostics test active do not log or the fault is latched
         return; 
     }
 
     const uint32_t timestamp = millis();
-    s.last_occurrence = timestamp; // change to numreicl time and date stamp
+    s.timestamp_last = timestamp; // change to numreicl time and date stamp
 
     if(s.count == 0){
-        s.first_occurrence = timestamp; // change to numreicl time and date stamp
+        s.timesramp_first = timestamp; // change to numreicl time and date stamp
     }
 
+    // Saturating handler. Once 255 is reached it remains at 255.
     if(s.count < UINT8_MAX){
         s.count ++;  
     }
 
-    if(latch_error){ // latch the error untill a good packet is received. 
+    // latch the error untill a good packet is received or rest occours. ** TODO: ADD CLEAR ALL LATCHES ON BOOT **
+    if(latch_error){ 
         s.latch = true; 
     }
 }
 
-void rt_log_entry_clear(ERROR_STRUCT &s){
+void rt_log_entry_clear(RUNTIME_ERROR &s){
     if(s.count > 0){
         s.count = 0; 
-        s.first_occurrence = 0;
-        s.last_occurrence = 0; 
+        s.timesramp_first = 0;
+        s.timestamp_last = 0; 
         s.latch = false;
     }
 }
 
-void rt_clear_latch(ERROR_STRUCT &s){
+void rt_clear_latch(RUNTIME_ERROR &s){
     s.latch = false; 
 }
 
-void rt_erase_error_codes(){
-    for(uint8_t i = 0; i < ERROR_ID_COUNT; i ++){
+void rt_clear_error_log(){
+    for(uint8_t i = 0; i < ERROR_ID::COUNT; i ++){
         rt_log_entry_clear(rt_error_log_array[i]); 
     }
 }

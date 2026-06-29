@@ -16,27 +16,28 @@
 
 namespace sys {
 
-//test 
-bool diagnostics_active = false; 
-
-// system timestamp flags
-uint32_t sys_heartbeat = 0; 
-
-// communication
+// timing
+uint32_t sys_heartbeat = 0;
 uint32_t tx_last_valid_packet = 0;
 uint32_t last_connection_attempt = 0;
-bool communication_warn_active = false; // add for warning implimentation with auto reconnect. 
+
+// communication
+bool communication_warn_active = false; // add for warning implimentation with auto reconnect.
 
 // Alive flag
 bool bus_connectivity_status = false; 
 bool i2c_connectivity_status = false; 
+
+//test 
+bool diagnostics_active = false; 
+
+
 // error states 
 
 };
-
+    
 // function calls to update system variabls 
 
-//update on a valid ack. 
 void update_last_valid_comms(){
     sys::tx_last_valid_packet = millis();
     sys::bus_connectivity_status = true;  // this is never set false 
@@ -51,7 +52,7 @@ void update_system_heartbeat(){
     sys::sys_heartbeat = millis();
 }
 
-void transport_alive_check(){
+void check_transport_alive(){
     if(sys::bus_connectivity_status == true){
 
         uint32_t time_since_last_packet = millis() - sys::tx_last_valid_packet; 

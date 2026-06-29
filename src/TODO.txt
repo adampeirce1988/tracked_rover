@@ -16,21 +16,19 @@ test status:
 
 
 [FIXED]: 
-- Implimented idle based on ID to ensure messages messages only read once by rx_protcol 
-- fixed bug that stoped WDT test from logging 
-- fixed bug that stoped test_active from clearing
-- tested WDT test again 
-- removed wdt_test_result parmeter as it was no longer used
-- strip out and remove all old self test calls.
-- removd log.h & log.cpp 
-- removed all instances of log.h
-- chanfged messages.h to constexpr for improved error handling
-- removed log display if a test passes
 - all files marked with a ✅ have been reveiwed 
+- added new files to the build tree 
+- fixed bug that never handled return code for PERMISSION_RETURN_CODE::MSG_VALID_ALLOWED. 
+- completed code reiew of config
+- completed code reveiw of debug 
+- completed code reviw of logs
+- completed code review of protocol_layer
+
 
 
 
 [TODO]: 
+- resolve all bugs in run time error log as per the reveiw! 
 - clean up commented out functions and code.
 - repalce #defines for constexpr where posible.
 - run a ccode reveiw all files and refractor.
@@ -49,30 +47,32 @@ tracked_rover-built-in-trasmission-self-test/
 └── lib/
     │
     ├── config/
-    │   ├── global.cpp
+    │   ├── global.cpp ✅
     │   ├── global.h. ✅
     │   └── global_config.h. ✅ 
     │
     ├── debug/
-    │   ├── debug.cpp
-    │   ├── debug.h
-    │   └── debug_config.h
+    │   ├── debug.cpp ✅
+    │   ├── debug.h ✅
+    │   └── debug_config.h ✅
     │
     ├── logs/
-    │   ├── logger.h
-    │   ├── logging_event_router.cpp
-    │   ├── metrics.cpp
-    │   ├── metrics.h
-    │   ├── runtime_error_log.cpp
-    │   ├── runtime_error_log.h
-    │   ├── self_test_logger.cpp
-    │   └── self_test_logger.h
+    │   ├── logger.h ✅ (9.2/10)
+    │   ├── logging_event_router.cpp ✅ (9.6/10) 
+    │   ├── metrics.cpp ✅ (9.8/10)
+    │   ├── metrics.h ✅ (9.5/10)
+    │   ├── runtime_error_log.cpp ✅ (9.3/10)  
+    │   ├── runtime_error_log.h ✅ (9.3/10)
+    │   ├── self_test_logger.cpp ✅ (9.0/10)
+    │   └── self_test_logger.h ✅ (9.2/10)
     │
-    ├── protocol_layer/
-    │   ├── messages.h
-    │   ├── protocol.h
-    │   ├── rx_protocol.cpp
-    │   └── tx_protocol.cpp
+    ├── protocol_layer
+    │   ├── messages.h ✅ (9.4/10)
+    │   ├── permissions.cpp ✅ (9.4/10)
+    │   ├── permissions.h ✅ (9.7/10)
+    │   ├── protocol.h ✅ (9.0/10)
+    │   ├── rx_protocol.cpp ✅ (9.6/10)
+    │   └── tx_protocol.cpp ✅ (9.6/10)
     │
     ├── self_test/
     │   ├── self_test.h

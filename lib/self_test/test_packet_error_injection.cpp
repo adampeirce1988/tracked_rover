@@ -22,7 +22,7 @@ uint8_t self_test_error_injection(uint8_t no_of_packets, uint8_t error_count, TX
         DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_META, "TEST", "running self_test_2 corrup crc error count: ", error_count, " corupt frames.");
         DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_META, "TEST", "self_test_1 tests packets transmitted speed: ", DEFAULT_PACKET_DELAY_US, " us");
         // enable progress bar  
-        dissable_verbous_error();                 // disble verbous error reporting
+        disable_verbose_error();                 // disble verbous error reporting
         PRINT_PROGRESS_BAR_START();               // Progress bar
             
 
@@ -30,7 +30,7 @@ uint8_t self_test_error_injection(uint8_t no_of_packets, uint8_t error_count, TX
         transport_set(&fifo_io);                       // set current transport to fifo. 
  
         st_clear_log();                                  // reset all previous loged data. 
-        st_logging_active();                             // set selftest logging active
+        st_enable_logging();                             // set selftest logging active
         
         // record test start time 
         self_test::next_transmission_time = micros();  // set the start time of the self test
@@ -104,15 +104,15 @@ uint8_t self_test_error_injection(uint8_t no_of_packets, uint8_t error_count, TX
 
         //transport_set(&uart_io);   //*** DISABLED FOR TESTING *** // set transport back to uart on completion of test.
         //set_transport_selftest_loging_inactive();                  REMOVE 
-        st_logging_inactive();                                      // dissable loging once test is completed 
-        enable_verbous_error();                                     // enable verbous logging
+        st_disable_logging();                                      // dissable loging once test is completed 
+        enable_verbose_error();                                     // enable verbous logging
 
         // check test results here
         bool test_result = true; 
         
-        test_result &= st_check_test_result(ST_TEST_ENTRY::ST_LOG_TOTAL_ERRORS, EVALUATION_TYPE::EQUAL, error_count);
-        test_result &= st_check_test_result(ST_TEST_ENTRY::ST_LOG_PACKETES_RECEIVED, EVALUATION_TYPE::EQUAL, (no_of_packets - error_count)); 
-        test_result &= st_compare_test_result(ST_TEST_ENTRY::ST_LOG_TOTAL_ERRORS, EVALUATION_TYPE::EQUAL, ST_TEST_ENTRY::ST_LOG_INJECTED_ERROR);
+        test_result &= st_check_test_result(ST_TEST_ENTRY::TOTAL_ERRORS, EVALUATION_TYPE::EQUAL, error_count);
+        test_result &= st_check_test_result(ST_TEST_ENTRY::PACKETS_RECEIVED, EVALUATION_TYPE::EQUAL, (no_of_packets - error_count)); 
+        test_result &= st_compare_test_result(ST_TEST_ENTRY::TOTAL_ERRORS, EVALUATION_TYPE::EQUAL, ST_TEST_ENTRY::INJECTED_ERROR);
 
         if(test_result == true){
             return SELFTEST_PASSED;

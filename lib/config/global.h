@@ -8,7 +8,7 @@ void update_system_heartbeat();
 void update_last_valid_comms();
 void update_last_connection_attempt();
 bool check_system_health_flags();
-
+void check_transport_alive();
 
 /////////////////////////////////////////
 //          SYSTEM GLOBALS             // 
@@ -31,16 +31,16 @@ namespace sys {
     // modes
     extern bool diagnostics_active;
 
-    // system alive flags.
-    extern bool bus_connectivity_status; 
-    extern bool i2c_connectivity_status; 
-    extern bool I2C_bus_alive;
-    extern bool transport_alive; 
 }
 
 
 // function declerations 
-void transport_alive_check();
+void update_system_heartbeat();
+void update_last_valid_comms();
+void update_last_connection_attempt();
+
+void check_transport_alive();  // not currently used in vehicle fsm
+bool check_system_health_flags(); 
 
 
 #endif 

@@ -21,8 +21,8 @@ uint8_t self_test_transport_random_packet(uint8_t no_of_packets, uint16_t delay_
         //transport_selftest_log_clear();           // reset all previous loged data.  **DELETE ONCE LOGING IS MOVED**
         st_clear_log();                           // rest selftest error log ** NEW FUNCTIOON **
         //set_transport_selftest_loging_active(); // REMOVE  
-        st_logging_active();                      // activate loging set to test exit 
-        dissable_verbous_error();                 // disable verbous errors during the test.
+        st_enable_logging();                      // activate loging set to test exit 
+        disable_verbose_error();                 // disable verbous errors during the test.
 
         self_test::next_transmission_time = micros();
 
@@ -92,18 +92,18 @@ uint8_t self_test_transport_random_packet(uint8_t no_of_packets, uint16_t delay_
                
         // Test results agianst pass critera  
         bool test_result = true; 
-        test_result &= st_compare_test_result(ST_TEST_ENTRY::ST_LOG_PACKETS_SENT, EVALUATION_TYPE::EQUAL, ST_TEST_ENTRY::ST_LOG_PACKETES_RECEIVED); 
-        test_result &= st_check_test_result(ST_TEST_ENTRY::ST_LOG_PACKETES_RECEIVED, EVALUATION_TYPE::EQUAL, no_of_packets);
-        test_result &= st_check_test_result(ST_TEST_ENTRY::ST_LOG_PACKETS_SENT, EVALUATION_TYPE::EQUAL, no_of_packets);
-        test_result &= st_compare_test_result(ST_TEST_ENTRY::ST_LOG_ACKS_TRANSMITTED, EVALUATION_TYPE::EQUAL, ST_TEST_ENTRY::ST_LOG_ACK_RECEIVED);
+        test_result &= st_compare_test_result(ST_TEST_ENTRY::PACKETS_SENT, EVALUATION_TYPE::EQUAL, ST_TEST_ENTRY::PACKETS_RECEIVED); 
+        test_result &= st_check_test_result(ST_TEST_ENTRY::PACKETS_RECEIVED, EVALUATION_TYPE::EQUAL, no_of_packets);
+        test_result &= st_check_test_result(ST_TEST_ENTRY::PACKETS_SENT, EVALUATION_TYPE::EQUAL, no_of_packets);
+        test_result &= st_compare_test_result(ST_TEST_ENTRY::ACKS_TRANSMITTED, EVALUATION_TYPE::EQUAL, ST_TEST_ENTRY::ACK_RECEIVED);
 
         PRINT_PROGRESS_BAR_END();
         DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "SELF", "result of assesment for self_test. test_result: ", test_result );
 
         //transport_set(&uart_io); //*** DISABLED FOR TESTING ***  // set transport back to uart on completion of test.
         //set_transport_selftest_loging_inactive();                // REMOVE 
-        st_logging_inactive();                                     // dissable loging once test is completed 
-        enable_verbous_error();                                    // enable verbous error  
+        st_disable_logging();                                     // dissable loging once test is completed 
+        enable_verbose_error();                                    // enable verbous error  
 
         if(test_result == true){
             return SELFTEST_PASSED; 

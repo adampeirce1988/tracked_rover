@@ -16,14 +16,18 @@ extern uint8_t rx_protocol_status;              // stores status code for the pr
 extern bool TEST_call_diag_once;  // test only code delete once refactored.
 //*******************************
   
+// FAIL_SAFE_MODE:
+// - only allow MSG_EMERGENCY_STOP
+// - allow communication recovery messages only
+// - block all motor commands
 
 enum class VEHICLE_STATE{
-  SAFE_STATE, 
+  SAFE_STATE,     // used only for carrying out OTA software updates
   IDLE, 
   MANUAL,
   AUTONOMOUS, 
   DIAGNOSTICS, 
-  FAIL_SAFE 
+  FAIL_SAFE       // allow communication recovery messages only & block all control and motor commands
 };
 
 //decalir variables and set starting vehicle state. 

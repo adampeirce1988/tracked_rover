@@ -3,32 +3,50 @@
 
 #include <stdint.h>
 
-struct ERROR_STRUCT{
+//////////////////////////////////////////////////////
+//                    structs                       //
+//////////////////////////////////////////////////////
+
+// error struct 
+struct RUNTIME_ERROR{
     uint8_t count = 0;
-    uint32_t first_occurrence = 0;
-    uint32_t last_occurrence = 0;
+    uint32_t timesramp_first = 0;
+    uint32_t timestamp_last = 0;
     bool latch = false;
 };
 
-enum ERROR_ID{
-    ERROR_ID_ACK_OUT_OF_RANGE,
-    ERROR_ID_ACK_NOT_RECEIVED, // ack not received 
-    ERROR_ID_ACK_WDT_TIMEOUT, // retry set active latch
-    ERROR_ID_DLC_OVER_CAPACITY, 
-    ERROR_ID_PAYLOAD_OVERFLOW, 
-    ERROR_ID_ACK_MISMATCH,
-    ERROR_ID_CRC_ERROR, 
-    ERROR_ID_TX_BUFFER_OVERFLOW,
-    ERROR_ID_MSG_TIMEOUT, 
-    ERROR_ID_TYPE_INVALID,
-    ERROR_ID_COUNT
-};
+// error index
+namespace ERROR_ID{ 
+    enum ID : uint16_t{
+        ACK_OUT_OF_RANGE,
+        ACK_NOT_RECEIVED, // ack not received 
+        ACK_WDT_TIMEOUT, // retry set active latch
+        DLC_OVER_CAPACITY, 
+        PAYLOAD_OVERFLOW, 
+        ACK_MISMATCH,
+        CRC_ERROR, 
+        TX_BUFFER_OVERFLOW,
+        MSG_TIMEOUT, 
+        TYPE_INVALID,
+        COUNT
+    };
+}
 
-extern ERROR_STRUCT rt_error_log_array[ERROR_ID_COUNT];
+
+//////////////////////////////////////////////////////
+//                extern declarations               //
+//////////////////////////////////////////////////////
+
+// array holding error structs
+extern RUNTIME_ERROR rt_error_log_array[ERROR_ID::COUNT];
+
+
+//////////////////////////////////////////////////////
+//                forward declarations              //
+//////////////////////////////////////////////////////
 
 // forward declerations 
-void rt_log_error(ERROR_STRUCT &s, bool latch_active_error); 
-void rt_clear_latch(ERROR_STRUCT &s);
-
+void rt_log_error(RUNTIME_ERROR &s, bool latch_active_error); 
+void rt_clear_latch(RUNTIME_ERROR &s);
 
 #endif

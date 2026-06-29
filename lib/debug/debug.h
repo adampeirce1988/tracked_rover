@@ -7,8 +7,8 @@
 
 // function prototypes 
 extern void debug_port_begin();
-extern void dissable_verbous_error();
-extern void enable_verbous_error();
+extern void disable_verbose_error();
+extern void enable_verbose_error();
 
 //variabls 
 extern bool verbous_debug_enabled; 
