@@ -21,19 +21,19 @@ uint8_t print_counter = 1;
 uint8_t self_test_diagnostics_wdt(){
 
     // runs once on first loop
-    if(self_test::watchdog_timer_test_active == false){
+    if(self_test::ctx.watchdog_timer_test_active == false){
         disable_verbose_error();                                // dissable verbous error reporting
         st_enable_logging();                                     // activate st_logging
 
-        self_test::test_end_countdown_timer = millis() + (DIAGNOSTIC_WT_TIMEOUT_MS + 1);  
-        self_test::watchdog_timer_test_active = true; 
+        self_test::ctx.test_end_countdown_timer = millis() + (DIAGNOSTIC_WT_TIMEOUT_MS + 1);  
+        self_test::ctx.watchdog_timer_test_active = true; 
 
         PRINT_PROGRESS_BAR_START(); 
     }
 
 
     // print a progress bar to show progress i
-    if(self_test::test_end_countdown_timer - millis() < (DIAGNOSTIC_WT_TIMEOUT_MS - (divisor * print_counter))){
+    if(self_test::ctx.test_end_countdown_timer - millis() < (DIAGNOSTIC_WT_TIMEOUT_MS - (divisor * print_counter))){
         PRINT_PROGRESS_BAR_PROGRESS();
         print_counter ++;
 
@@ -42,17 +42,17 @@ uint8_t self_test_diagnostics_wdt(){
 
     if(st_check_test_result(ST_TEST_ENTRY::WDT_TIMEOUT,EVALUATION_TYPE::EQUAL ,1)){
         PRINT_PROGRESS_BAR_END(); 
-        self_test::watchdog_timer_test_active = false; 
+        self_test::ctx.watchdog_timer_test_active = false; 
         print_counter = 1; 
         enable_verbose_error(); // enable verbous error reporting
         st_disable_logging();  // disable st_logging
 
         return SELFTEST_PASSED;
     }
-    else if(self_test::watchdog_timer_test_active == true && millis() > self_test::test_end_countdown_timer){
+    else if(self_test::ctx.watchdog_timer_test_active == true && millis() > self_test::ctx.test_end_countdown_timer){
         PRINT_PROGRESS_BAR_END(); 
         st_print_log();
-        self_test::watchdog_timer_test_active = false; 
+        self_test::ctx.watchdog_timer_test_active = false; 
         print_counter = 1; 
         enable_verbose_error(); // enable verbous error reporting
         st_disable_logging();  // disable st_logging

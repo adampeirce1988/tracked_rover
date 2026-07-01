@@ -42,6 +42,7 @@
     }
 }
 
+// calculate inline crc using polynominoa 0x80
  uint8_t self_test_inline_crc_calc(uint8_t CRC, uint8_t byte){
   CRC ^= byte;
 
@@ -54,4 +55,8 @@
     }
   }
   return CRC;
+}
+
+void flush_self_test_struct(){
+    // use this to flush the stuct.
 }

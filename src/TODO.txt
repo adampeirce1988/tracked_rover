@@ -1,4 +1,4 @@
-test status:
+test status: code compiles with 0 errors & tested with 0 errors. 
 
 [verified]:
 - 100 good packet test:..........OK PROGRESS: ######################### 100%
@@ -16,15 +16,6 @@ test status:
 
 
 [FIXED]: 
-- all files marked with a ✅ have been reveiwed 
-- added new files to the build tree 
-- fixed bug that never handled return code for PERMISSION_RETURN_CODE::MSG_VALID_ALLOWED. 
-- completed code reiew of config
-- completed code reveiw of debug 
-- completed code reviw of logs
-- completed code review of protocol_layer
-
-
 
 
 [TODO]: 

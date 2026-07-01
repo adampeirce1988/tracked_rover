@@ -68,17 +68,27 @@ extern TEST_OPERATION self_test_state;
 
 
 //******************** variables *********************
+
+struct SelfTestContext {
+    uint32_t next_transmission_time;
+    uint32_t test_end_countdown_timer;
+
+    uint8_t requested_test_id;
+    uint8_t current_active_test;
+    uint8_t current_test_status_code;
+    uint8_t current_test_packet;
+
+    bool diagnostics_active;
+    bool test_end_counter;
+    bool watchdog_timer_test_active;
+
+    TEST_OPERATION state;
+};
+
 namespace self_test {
-    extern uint32_t next_transmission_time;
-    extern uint32_t test_end_countdown_timer;
-    extern uint8_t requested_test_id; 
-    extern uint8_t current_active_test;  
-    extern uint8_t current_test_packet;
-    extern uint8_t current_test_status_code;
-    extern bool diagnostics_active; 
-    extern bool test_end_counter;  
-    extern bool watchdog_timer_test_active; 
+  extern SelfTestContext ctx;
 }
+
 //****************************************************
 
 #endif 

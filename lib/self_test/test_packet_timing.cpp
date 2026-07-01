@@ -14,17 +14,14 @@
 uint8_t self_test_transport_random_packet(uint8_t no_of_packets, uint16_t delay_time_us, bool random_delay_active){
     
     // test setup(runs only once)
-    if(self_test::current_test_packet == 0){
+    if(self_test::ctx.current_test_packet == 0){
 
         transport_set(&fifo_io);                  // set current transport to fifo. 
-        // flush out fifo here
-        //transport_selftest_log_clear();           // reset all previous loged data.  **DELETE ONCE LOGING IS MOVED**
         st_clear_log();                           // rest selftest error log ** NEW FUNCTIOON **
-        //set_transport_selftest_loging_active(); // REMOVE  
         st_enable_logging();                      // activate loging set to test exit 
         disable_verbose_error();                 // disable verbous errors during the test.
 
-        self_test::next_transmission_time = micros();
+        self_test::ctx.next_transmission_time = micros();
 
         // print information (only at the sart of the test)
         DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_META, "TEST", "running self_test_1 good packet test: ", no_of_packets, " msgs.");
@@ -33,30 +30,33 @@ uint8_t self_test_transport_random_packet(uint8_t no_of_packets, uint16_t delay_
     }
 
     // create a non-blocking loop to only send packts after alocatred time. 
-    if(micros() > self_test::next_transmission_time){
+    if(micros() > self_test::ctx.next_transmission_time){
 
         // print the porgress bar
         uint8_t one_percent = no_of_packets / PROGRESS_BAR_COUNT; 
+        if(one_percent == 0){ // protect from 0 devision 
+            one_percent = 1; 
+        }
+         
 
-        if(self_test::current_test_packet < no_of_packets && self_test::current_test_packet % one_percent == 0){
+        if(self_test::ctx.current_test_packet < no_of_packets && self_test::ctx.current_test_packet % one_percent == 0){
             PRINT_PROGRESS_BAR_PROGRESS();
         }
         
         // set the next transmision time
-        self_test::next_transmission_time += delay_time_us;
+        self_test::ctx.next_transmission_time += delay_time_us;
 
 
         // reducetime by a randon amount if random delay is requested.
         if(random_delay_active == true){
             uint16_t reduction = weighted_random_delay(delay_time_us);
-            self_test::next_transmission_time = self_test::next_transmission_time - reduction; 
+            self_test::ctx.next_transmission_time = self_test::ctx.next_transmission_time - reduction; 
             st_log_delayed_packet();
         }
     
         //build random packet 
-        if(self_test::current_test_packet < no_of_packets){
+        if(self_test::ctx.current_test_packet < no_of_packets){
             
-
             uint8_t type = random(1, 256);                    // random type 1-255 ** NO TYPE CHECK IMPLIMENTED **
             uint8_t ack  = weighted_random_ack();             // weighted ack 20% chance of ack 
             uint8_t dlc  = random(0,(MAX_PAYLOAD_LEN + 1));   // set random dlc
@@ -74,21 +74,21 @@ uint8_t self_test_transport_random_packet(uint8_t no_of_packets, uint16_t delay_
             transport_queue_message(type, ack, dlc, data);
 
             //increment current packet
-            self_test::current_test_packet ++; 
-            DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "TEST", " packets sent current packet count: ", self_test::current_test_packet);
+            self_test::ctx.current_test_packet ++; 
+            DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "TEST", " packets sent current packet count: ", self_test::ctx.current_test_packet);
         }
     }  
 
-    // run the self test for a pre defined time after the final packet is sent
-    if(self_test::current_test_packet == no_of_packets && self_test::test_end_countdown_timer == false){
-        self_test::test_end_countdown_timer = micros();
-        self_test::test_end_counter = true; 
+    // run the self test for a pre defined time after the final packet is sent to clear the fifo buffer
+    if(self_test::ctx.current_test_packet == no_of_packets && self_test::ctx.test_end_countdown_timer == false){
+        self_test::ctx.test_end_countdown_timer = micros();
+        self_test::ctx.test_end_counter = true; 
     }
 
     // exit the self test runs one at the end of the test
-    if(self_test::test_end_counter == true && micros() - self_test::test_end_countdown_timer > TEST_END_COUNTDOWN_TIMER_US){
+    if(self_test::ctx.test_end_counter == true && micros() - self_test::ctx.test_end_countdown_timer > TEST_END_COUNTDOWN_TIMER_US){
 
-        self_test::current_test_packet = 0;                        // reset the packet count a the end of the test 
+        self_test::ctx.current_active_test = 0;                        // reset the packet count a the end of the test 
                
         // Test results agianst pass critera  
         bool test_result = true; 
@@ -101,9 +101,9 @@ uint8_t self_test_transport_random_packet(uint8_t no_of_packets, uint16_t delay_
         DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "SELF", "result of assesment for self_test. test_result: ", test_result );
 
         //transport_set(&uart_io); //*** DISABLED FOR TESTING ***  // set transport back to uart on completion of test.
-        //set_transport_selftest_loging_inactive();                // REMOVE 
+    
         st_disable_logging();                                     // dissable loging once test is completed 
-        enable_verbose_error();                                    // enable verbous error  
+        enable_verbose_error();                                    // enable verbous error 
 
         if(test_result == true){
             return SELFTEST_PASSED; 
