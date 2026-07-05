@@ -11,7 +11,7 @@
 #define DEBUG_FILE DBG_SELF_TEST
 
 
-uint8_t self_test_transport_random_packet(uint8_t no_of_packets, uint16_t delay_time_us, bool random_delay_active){
+TEST_RETURN_STATUS self_test_transport_random_packet(uint8_t no_of_packets, uint16_t delay_time_us, bool random_delay_active){
     
     // test setup(runs only once)
     if(self_test::ctx.current_test_packet == 0){
@@ -106,13 +106,13 @@ uint8_t self_test_transport_random_packet(uint8_t no_of_packets, uint16_t delay_
         enable_verbose_error();                                    // enable verbous error 
 
         if(test_result == true){
-            return SELFTEST_PASSED; 
+            return TEST_RETURN_STATUS::TEST_PASSED; 
         }
         else{
             st_print_log(); 
-            return SELFTEST_FAILED;  
+            return TEST_RETURN_STATUS::TEST_FAILED;  
         }   
     }
-    return SELFTEST_RUNNING; 
+    return TEST_RETURN_STATUS::TEST_RUNNING; 
 }
 

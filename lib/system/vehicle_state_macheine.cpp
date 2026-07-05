@@ -8,8 +8,8 @@
 #include "protocol.h"
 #include "global.h"      // TODO: Move sys:: variables into system module
 #include "debug.h"
-#include "self_test.h"
 #include "logger.h"
+#include "self_test.h"
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -31,6 +31,9 @@ VEHICLE_STATE last_vehicle_state = VEHICLE_STATE::FAIL_SAFE;
 
 // Used when temporarily entering another state
 VEHICLE_STATE return_state  = VEHICLE_STATE::SAFE_STATE;
+
+// new test var 
+TEST_RETURN_STATUS selftest_state = TEST_RETURN_STATUS::NO_TEST_RUNNING; 
 
 ///////////////////////////////////////////////////////////////////////////////
 // Vehicle State Machine
@@ -108,6 +111,16 @@ void run_vehicle_state(){
       // if no commands received
     break;
 
+
+    ///////////////////////////////////////////////////////////////////////////
+    // AUTONOMOUS
+    ///////////////////////////////////////////////////////////////////////////
+    case VEHICLE_STATE::AUTONOMOUS: 
+      // Vehicle operation in atonomuse mode
+      // Not yet implimented
+    break;
+
+    
     ///////////////////////////////////////////////////////////////////////////
     // DIAGNOSTICS 
     ///////////////////////////////////////////////////////////////////////////
@@ -117,17 +130,17 @@ void run_vehicle_state(){
       //fifo_io_uart_engine_update(); // later change thsi to only run when FIFO is set in a test. 
 
       // this will need to be changed to a call from https: 
-
+      //if(diagnostic_test_inprogress() == false ){} // will repalce the bellow. 
       if(sys::diagnostics_active == false){ 
         DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "MAIN", "diag_active change to true.");
         // this function will need to be called by the web interface once built
 
-        sys::diagnostics_active = request_self_test(3); // request test 1 - 5 as this is the only test at present ***CONFIG TEST HERE***  
+        sys::diagnostics_active = request_self_test(TEST_ID::DIAGNOSTIC_WATCHDOG_TIMEOUT); // request test 1 - 5 as this is the only test at present ***CONFIG TEST HERE***  
       }
         
         selftest_state = run_test_case();
 
-        if(selftest_state == SELFTEST_COMPLETED){
+        if(selftest_state == TEST_RETURN_STATUS::TEST_COMPLETED){
 
           DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "MAIN", "SELF_TEST COMPLETED!.");
           
@@ -138,6 +151,7 @@ void run_vehicle_state(){
         }
         
         //WDT timer check for diagnostics runs for total test time ensure this id longer than the longest test of calibration. 
+        // ** this must only run when a test is active **. 
         if(millis() - diagnostics_WDT > DIAGNOSTIC_WT_TIMEOUT_MS){
         
             if(watchdog_test_active()){
@@ -149,9 +163,9 @@ void run_vehicle_state(){
             }
         DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "MAIN", "VEHICLE_STATE::DIAGNOSTICS Watchdog timer triggered.");
         request_vehicle_state_change(VEHICLE_STATE::IDLE);
-        }
+      }
         
-        break;
+    break;
     
     ///////////////////////////////////////////////////////////////////////////
     // DEFAULT

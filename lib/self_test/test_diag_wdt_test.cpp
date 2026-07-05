@@ -18,7 +18,7 @@ constexpr uint16_t divisor = DIAGNOSTIC_WT_TIMEOUT_MS / 25;
 uint8_t print_counter = 1;
 //bool diagnostics_wdt_test_result = false;   // this is currntly never rest 
 
-uint8_t self_test_diagnostics_wdt(){
+TEST_RETURN_STATUS self_test_diagnostics_wdt(){
 
     // runs once on first loop
     if(self_test::ctx.watchdog_timer_test_active == false){
@@ -47,7 +47,7 @@ uint8_t self_test_diagnostics_wdt(){
         enable_verbose_error(); // enable verbous error reporting
         st_disable_logging();  // disable st_logging
 
-        return SELFTEST_PASSED;
+        return TEST_RETURN_STATUS::TEST_PASSED;
     }
     else if(self_test::ctx.watchdog_timer_test_active == true && millis() > self_test::ctx.test_end_countdown_timer){
         PRINT_PROGRESS_BAR_END(); 
@@ -57,8 +57,8 @@ uint8_t self_test_diagnostics_wdt(){
         enable_verbose_error(); // enable verbous error reporting
         st_disable_logging();  // disable st_logging
 
-        return SELFTEST_FAILED;
+        return TEST_RETURN_STATUS::TEST_FAILED;
     }
 
-    return SELFTEST_RUNNING;
+    return TEST_RETURN_STATUS::TEST_RUNNING;
 }

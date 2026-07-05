@@ -26,7 +26,7 @@
 bool health_test_status = true;
 
 // Diagnostic / self-test state
-uint8_t selftest_state      = 0;
+//TEST_RETURN_STATUS selftest_state = TEST_RETURN_STATUS::NO_TEST_RUNNING;
 uint32_t diagnostics_WDT    = 0;
 
 // Protocol / dispatcher status

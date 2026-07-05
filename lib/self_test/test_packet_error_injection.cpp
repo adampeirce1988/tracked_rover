@@ -13,7 +13,7 @@
 
 uint8_t next_injection_position = 0; 
 
-uint8_t self_test_error_injection(uint8_t no_of_packets, uint8_t error_count, TX_SET_FAULT_MODE fault_type, uint8_t fault_value){
+TEST_RETURN_STATUS self_test_error_injection(uint8_t no_of_packets, uint8_t error_count, TX_SET_FAULT_MODE fault_type, uint8_t fault_value){
 
     // test setup(runs only once)
     if(self_test::ctx.current_test_packet == 0){
@@ -104,7 +104,7 @@ uint8_t self_test_error_injection(uint8_t no_of_packets, uint8_t error_count, TX
 
         //transport_set(&uart_io);   //*** DISABLED FOR TESTING *** // set transport back to uart on completion of test.
         //set_transport_selftest_loging_inactive();                  REMOVE 
-        st_disable_logging();                                      // dissable loging once test is completed 
+        st_disable_logging();                                       // dissable loging once test is completed 
         enable_verbose_error();                                     // enable verbous logging
 
         // check test results here
@@ -115,12 +115,12 @@ uint8_t self_test_error_injection(uint8_t no_of_packets, uint8_t error_count, TX
         test_result &= st_compare_test_result(ST_TEST_ENTRY::TOTAL_ERRORS, EVALUATION_TYPE::EQUAL, ST_TEST_ENTRY::INJECTED_ERROR);
 
         if(test_result == true){
-            return SELFTEST_PASSED;
+            return TEST_RETURN_STATUS::TEST_PASSED;
         }
         else{
             st_print_log();
-            return SELFTEST_FAILED;
+            return TEST_RETURN_STATUS::TEST_FAILED;
         } 
     }
-    return SELFTEST_RUNNING;  
+    return TEST_RETURN_STATUS::TEST_RUNNING;  
 }
