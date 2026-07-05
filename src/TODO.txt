@@ -1,4 +1,4 @@
-test status: code compiles with 0 errors & tested with 0 errors. 
+test status: code compiles with 0 errors & untested on ESP.  
 
 [verified]:
 - 100 good packet test:..........OK PROGRESS: ######################### 100%
@@ -16,6 +16,14 @@ test status: code compiles with 0 errors & tested with 0 errors.
 
 
 [FIXED]: 
+- added enum to make calling tests user freindly 
+- added a return for test status will later repalace sys:: variable
+- Added seperate switch case for dispaching tests. 
+- seperated the interal test calls with enum class with named requests. 
+- added self_test_apis.cpp to house all externaly exposed functions.
+- renamed self_test_helpers.cpp to self_test_internal.cpp 
+- added enum class to the test results and made the result public (repalced uint8_t)
+- updates test functions with the new enum class. 
 
 
 [TODO]: 
