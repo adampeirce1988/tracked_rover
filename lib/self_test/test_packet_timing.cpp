@@ -87,9 +87,7 @@ TEST_RETURN_STATUS self_test_transport_random_packet(uint8_t no_of_packets, uint
 
     // exit the self test runs one at the end of the test
     if(self_test::ctx.test_end_counter == true && micros() - self_test::ctx.test_end_countdown_timer > TEST_END_COUNTDOWN_TIMER_US){
-
-        self_test::ctx.current_active_test = 0;                        // reset the packet count a the end of the test 
-               
+    
         // Test results agianst pass critera  
         bool test_result = true; 
         test_result &= st_compare_test_result(ST_TEST_ENTRY::PACKETS_SENT, EVALUATION_TYPE::EQUAL, ST_TEST_ENTRY::PACKETS_RECEIVED); 

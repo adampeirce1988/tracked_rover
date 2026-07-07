@@ -18,7 +18,7 @@ namespace self_test{
 
  //self_test::ctx.state = TEST_OPERATION::TEST_DISPATCHER;  // THIS DOESNT WORK FIX THIS NEXT
 
-TEST_OPERATION self_test_state = TEST_OPERATION::IDLE; 
+//TEST_OPERATION self_test::ctx.state = TEST_OPERATION::IDLE; 
 
 //=========================================================
 
@@ -36,23 +36,24 @@ TEST_OPERATION self_test_state = TEST_OPERATION::IDLE;
 
 TEST_RETURN_STATUS run_test_case(){ 
 
-    switch(self_test::ctx.active_test){
+    switch(self_test::ctx.state){
         
         case TEST_OPERATION::IDLE:{
+            
             // do nothing until a test case is selected via request test casee 
         } break; 
 
         // Should there be a case START_SELF_TEST: ?? **********************
 
         case TEST_OPERATION::TEST_RESULT_PASSED:{
-            DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_META, "TEST", "self_test_", self_test::ctx.current_active_test, ": PASSED.");
-            self_test_state = TEST_OPERATION::END_SELF_TEST; 
+            DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_META, "TEST", "self_test_", get_test_name(self_test::ctx.current_active_test_id), ": PASSED.");
+            self_test::ctx.state = TEST_OPERATION::END_SELF_TEST; 
             // rest all st_variables here 
         } break;
 
         case TEST_OPERATION::TEST_RESULT_FAILED:{
-            DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_META, "TEST", "self_test_", self_test::ctx.current_active_test, ": FAILED.");
-            self_test_state = TEST_OPERATION::END_SELF_TEST;
+            DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_META, "TEST", "self_test_", get_test_name(self_test::ctx.current_active_test_id), ": FAILED.");
+            self_test::ctx.state = TEST_OPERATION::END_SELF_TEST;
             // rest all st_variables here 
         } break;
 
@@ -62,7 +63,7 @@ TEST_RETURN_STATUS run_test_case(){
      
             //st_logging_inactive();  // set ST logging inactive here 
             
-            self_test_state = TEST_OPERATION::IDLE;
+            self_test::ctx.state = TEST_OPERATION::IDLE;
             return TEST_RETURN_STATUS::TEST_COMPLETED;
         } break;
 
@@ -71,8 +72,8 @@ TEST_RETURN_STATUS run_test_case(){
         case TEST_OPERATION::TRANSPORT_GOOD_PACKET:{
 
             self_test::ctx.current_test_status_code = self_test_transport_random_packet(
-                TEST_1_PACKET_COUNT, 
-                STANDARD_PACKET_DEALY_US, 
+                STANDARD_TEST_PACKET_COUNT, 
+                STANDARD_PACKET_DELAY_US, 
                 DISABLE_RANDOM_PACKET_TIMING_DELAY
             ); 
 
@@ -85,7 +86,7 @@ TEST_RETURN_STATUS run_test_case(){
         case TEST_OPERATION::TRANSPORT_STRESS_PACKET:{ 
 
             self_test::ctx.current_test_status_code = self_test_transport_random_packet(
-                TEST_1_PACKET_COUNT, 
+                STRESS_TEST_PACKET_COUNT, 
                 STRESS_TEST_PACKET_DELAY_US, 
                 ENABLE_RANDOM_PACKET_TIMING_DELAY
             ); 
@@ -191,7 +192,7 @@ TEST_RETURN_STATUS run_test_case(){
                 INJECTION_PACKET_COUNT, 
                 INJECTION_ERROR_COUNT, 
                 TX_SET_FAULT_MODE::CRC_CHANGE,
-                TEST_9_ERROR_VALUE
+                CRC_RANDOM_REPLACEMENT_VALUE
             );
 
             check_self_test_resutls(self_test::ctx.current_test_status_code); 
