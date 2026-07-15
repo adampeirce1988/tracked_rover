@@ -16,13 +16,15 @@ test status: code compiles with 0 errors & untested on ESP.
 
 
 [FIXED]: 
-- fixed typo 
-- replaced arduino.h with stdint.h
-- removed #pragma once with include gaurds
-- move progress bar global config variable to self_test_interal.h
-- refactoed check_self_test_results() to use self_test::ctx.active_test
-- added get_test_name() to allow dynamic test meta data printing via debug
-- deleted unsed variables
+- Deleted self_test_fsm()
+- added self_test_types.h to prevent circular dependency 
+- renamed flush_self_test_struct() to reset_self_test_context() 
+- self test manager state macheine 
+- added a small switch case for switching to PASSED / FAILED 
+- moved the WDT in to the state machine 
+- added an abort flag to the fsm to allow user about from the web interface
+- spplit ctx into runtime_ctx & manager_ctx to alow clearing of runtime_ctx 
+  without changing the fsm state 
 
 
 [TODO]: 
@@ -77,9 +79,10 @@ tracked_rover-built-in-trasmission-self-test/
     ├── self_test/
     │   ├── self_test_apis.h
     │   ├── self_test_fsm.cpp
-    │   ├── self_test_internal.cpp
-    │   ├── self_test_internal.h
-    │   ├── self_test.h ✅ (9.5/10)
+    │   ├── self_test_internal.cpp  
+    │   ├── self_test_internal.h ✅ (9.5/10)
+    │   ├── self_test_types.h ✅ (9.6/10)   
+    │   ├── self_test.h ✅ (10/10)
     │   ├── test_diag_wdt_test.cpp
     │   ├── test_packet_error_injection.cpp
     │   └── test_packet_timing.cpp

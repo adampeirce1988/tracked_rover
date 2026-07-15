@@ -5,12 +5,13 @@
 
 // system variables 
 extern bool health_test_status;                 // defines if the health_Test has passes or failed
-//extern TEST_RETURN_STATUS selftest_state;       // status code for diagnostic self test 
+//extern TEST_RETURN_STATUS selftest_state;     // status code for diagnostic self test 
 extern uint32_t diagnostics_WDT;                // WDT diagnostics test timeout
 
 extern uint8_t tx_transport_status;             // stores status code for the transport tx state macheince
 extern uint8_t rx_transport_status;             // stores status code for the transport rx state macheince
 extern uint8_t rx_protocol_status;              // stores status code for the protocol state macheince
+extern uint8_t test_manager_status;             // stores status code for the self test manager
 
 //********** TEST ONLY **********
 extern bool TEST_call_diag_once;  // test only code delete once refactored.

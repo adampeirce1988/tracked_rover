@@ -19,9 +19,10 @@
 uint8_t rx_transport_status = 0;  
 uint8_t tx_transport_status = 0;
 uint8_t rx_protocol_status = 0; 
+SELF_TEST_MANAGER_RETURN_CODE self_testmanager_status = SELF_TEST_MANAGER_RETURN_CODE::ERROR;
 
 void setup(){
-  // open debug port and print version data. 
+  // open debug port and print version data.
   debug_port_begin();                                                    // open the debug port
   delay(3000);                                                           // run 1s delay before transmitting data 
   PRINT_VERSION_DATA(SW_VERSION, HARDWARE_VERSION, RELEASE_NOTES);       // print version and meta data 

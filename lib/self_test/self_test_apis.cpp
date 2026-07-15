@@ -13,25 +13,16 @@
 
 // used to request a selftest to start
 bool request_self_test(TEST_ID test_id){
-    if(self_test_active() == true){
+    //if(self_test_active() == true){
         // report that a test is in pogress. 
         // also handle in the web ui by block test selection once a test is stated
-        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "TEST", "self-test currntly in progres."); 
-    }
-    else{
+        //DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "TEST", "self-test currntly in progres."); 
+    //}
+   // else{
         test_request_dispatcher(test_id);
-    }
+    //}
 
     return true; 
 }
 
-// returns ture if a test is in progess
-bool self_test_active(){
-    return self_test::ctx.diagnostics_active; 
-}
-
-// returns true if a watchdog timer test is active 
-bool watchdog_test_active(){
-    return self_test::ctx.watchdog_timer_test_active;
-}
 //=========================================================

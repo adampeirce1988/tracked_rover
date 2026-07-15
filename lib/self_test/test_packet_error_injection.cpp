@@ -16,7 +16,7 @@ uint8_t next_injection_position = 0;
 TEST_RETURN_STATUS self_test_error_injection(uint8_t no_of_packets, uint8_t error_count, TX_SET_FAULT_MODE fault_type, uint8_t fault_value){
 
     // test setup(runs only once)
-    if(self_test::ctx.current_test_packet == 0){
+    if(self_test::runtime_ctx.current_test_packet == 0){
 
         //print test inoformartion // *** TODO: MAKE TESTING TYOE DYNAMIC AND REFLECT SELECTED TEST TYPE ***
         DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_META, "TEST", "running self_test_2 corrup crc error count: ", error_count, " corupt frames.");
@@ -33,7 +33,7 @@ TEST_RETURN_STATUS self_test_error_injection(uint8_t no_of_packets, uint8_t erro
         st_enable_logging();                             // set selftest logging active
         
         // record test start time 
-        self_test::ctx.next_transmission_time = micros();  // set the start time of the self test
+        self_test::runtime_ctx.next_transmission_time = micros();  // set the start time of the self test
 
         // get first random injection position
         next_injection_position = random(0, 10);       // set the random injection possition
@@ -41,22 +41,22 @@ TEST_RETURN_STATUS self_test_error_injection(uint8_t no_of_packets, uint8_t erro
 
 
     // create a non-blocking loop to only send packts after alocatred time. 
-    if(micros() > self_test::ctx.next_transmission_time){
+    if(micros() > self_test::runtime_ctx.next_transmission_time){
 
         // print progress bar 
         uint8_t one_percent = no_of_packets / PROGRESS_BAR_COUNT;
 
-        if(self_test::ctx.current_test_packet < no_of_packets && self_test::ctx.current_test_packet % one_percent == 0 ){
+        if(self_test::runtime_ctx.current_test_packet < no_of_packets && self_test::runtime_ctx.current_test_packet % one_percent == 0 ){
             PRINT_PROGRESS_BAR_PROGRESS();
         }
         
         // set the next transmision time
-        self_test::ctx.next_transmission_time += DEFAULT_PACKET_DELAY_US;
+        self_test::runtime_ctx.next_transmission_time += DEFAULT_PACKET_DELAY_US;
     
         //run the selftest 
-        if(self_test::ctx.current_test_packet < no_of_packets){
+        if(self_test::runtime_ctx.current_test_packet < no_of_packets){
             
-            DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "TEST", "packets sent current packet count: ", self_test::ctx.current_test_packet);
+            DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "TEST", "packets sent current packet count: ", self_test::runtime_ctx.current_test_packet);
             
             // bult data frame
             uint8_t type = MSG_TEST_VALID;                                        // send all packets with a valid type
@@ -68,13 +68,13 @@ TEST_RETURN_STATUS self_test_error_injection(uint8_t no_of_packets, uint8_t erro
             }
 
             //inject the error at a random interval
-            if(self_test::ctx.current_test_packet % 10 == next_injection_position){
+            if(self_test::runtime_ctx.current_test_packet % 10 == next_injection_position){
                 st_log_injected_error();  // log injected errors here
                 set_tx_fault_injection_active(fault_type, fault_value);
             }
 
             // set the next random packet every 10 packets 
-            if(self_test::ctx.current_test_packet % 10 == 0){
+            if(self_test::runtime_ctx.current_test_packet % 10 == 0){
                 next_injection_position = random(0, 10);
             }
 
@@ -82,25 +82,25 @@ TEST_RETURN_STATUS self_test_error_injection(uint8_t no_of_packets, uint8_t erro
             transport_queue_message(type, ack, dlc, data);
 
             //increment current packet
-            self_test::ctx.current_test_packet ++; 
-            DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "TEST", " packets sent. current_test_packets: ", self_test::ctx.current_test_packet);
+            self_test::runtime_ctx.current_test_packet ++; 
+            DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "TEST", " packets sent. current_test_packets: ", self_test::runtime_ctx.current_test_packet);
         }
 
     }
 
     // run the self test for a pre defined time after the final packet is sent
-    if(self_test::ctx.current_test_packet == no_of_packets && self_test::ctx.test_end_countdown_timer == false){
-        self_test::ctx.test_end_countdown_timer = micros();
-        self_test::ctx.test_end_counter = true; 
+    if(self_test::runtime_ctx.current_test_packet == no_of_packets && self_test::runtime_ctx.test_end_countdown_timer == false){
+        self_test::runtime_ctx.test_end_countdown_timer = micros();
+        self_test::runtime_ctx.test_end_countdown_ative = true; 
     }
 
 
     // exit the self test runs one at the end of the test
-    if(self_test::ctx.test_end_counter == true && micros() - self_test::ctx.test_end_countdown_timer > TEST_END_COUNTDOWN_TIMER_US){
+    if(self_test::runtime_ctx.test_end_countdown_ative == true && micros() - self_test::runtime_ctx.test_end_countdown_timer > TEST_END_COUNTDOWN_TIMER_US){
 
         PRINT_PROGRESS_BAR_END();                                   // Progress bar
 
-        self_test::ctx.current_test_packet = 0;                         // reset the packet count a the end of the test 
+        self_test::runtime_ctx.current_test_packet = 0;                         // reset the packet count a the end of the test 
 
         //transport_set(&uart_io);   //*** DISABLED FOR TESTING *** // set transport back to uart on completion of test.
         //set_transport_selftest_loging_inactive();                  REMOVE 
@@ -115,12 +115,12 @@ TEST_RETURN_STATUS self_test_error_injection(uint8_t no_of_packets, uint8_t erro
         test_result &= st_compare_test_result(ST_TEST_ENTRY::TOTAL_ERRORS, EVALUATION_TYPE::EQUAL, ST_TEST_ENTRY::INJECTED_ERROR);
 
         if(test_result == true){
-            return TEST_RETURN_STATUS::TEST_PASSED;
+            return TEST_RETURN_STATUS::PASSED;
         }
         else{
             st_print_log();
-            return TEST_RETURN_STATUS::TEST_FAILED;
+            return TEST_RETURN_STATUS::FAILED;
         } 
     }
-    return TEST_RETURN_STATUS::TEST_RUNNING;  
+    return TEST_RETURN_STATUS::RUNNING;  
 }

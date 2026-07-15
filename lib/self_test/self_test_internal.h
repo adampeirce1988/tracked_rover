@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include "transport.h"
-#include "self_test.h"
+#include "self_test_types.h"
 
 // ===============globl self test config ================
 constexpr uint8_t PROGRESS_BAR_COUNT =              25;
@@ -29,23 +29,27 @@ constexpr bool DISABLE_RANDOM_PACKET_TIMING_DELAY =  false;
 //****************************************************** 
 
 //**************** injection test config ***************** 
-constexpr uint8_t INJECTION_PACKET_COUNT =            100;
-constexpr uint16_t INJECTION_PACKET_DELAY_US =        20000;
-constexpr uint8_t INJECTION_ERROR_COUNT =             INJECTION_PACKET_COUNT / 10; // 10% errors 
-constexpr uint8_t CRC_RANDOM_REPLACEMENT_VALUE =      0xFE;  // change this to random and handle duplics/ matching 
+constexpr uint8_t INJECTION_TEST_PACKET_COUNT =            100;
+constexpr uint16_t INJECTION_TEST_PACKET_DELAY_US =        20000;
+constexpr uint8_t INJECTION_TEST_ERROR_COUNT =             INJECTION_TEST_PACKET_COUNT / 10; // 10% errors 
+constexpr uint8_t CRC_RANDOM_REPLACEMENT_VALUE =           0xFE;  // change this to random and handle duplics/ matching 
 //************************************************
 
+//**************** Watchdog timer test config ***************** 
+constexpr uint32_t WDT_EXTENSION = 250; 
+//************************************************************* 
 
 //********* internal function prototypes ************
 
-const char* get_test_name(TEST_ID active_test);
-void test_request_dispatcher(TEST_ID requested_test_id); // to be implimented still in selftest internal 
-void check_self_test_resutls(TEST_RETURN_STATUS status_code);
-
-uint8_t weighted_random_ack();
-uint16_t weighted_random_delay(uint16_t std_delay); 
-uint8_t self_test_inline_crc_calc(uint8_t CRC, uint8_t byte);
-
+//moved to internal from public
+TEST_RETURN_STATUS run_test_case();                            // advances selftest state macheine. stest state machine needs to be called every loop during a test
+void clear_self_test_runtime_context();                        // flush the struct for self_test::ctx
+const char* get_test_name(TEST_ID active_test);                // returns a string containing the test name
+void test_request_dispatcher(TEST_ID requested_test_id);       // to be implimented still in selftest internal 
+uint8_t weighted_random_ack();                                 // returns either NORMAL_FRAME or 20% chance of ACK_FRAME  
+uint16_t weighted_random_delay(uint16_t std_delay);            // Creates random delay between packets for packet testing
+void manager_runtime_monitor();
+// Core test functions 
 TEST_RETURN_STATUS self_test_transport_random_packet(uint8_t no_of_packets, uint16_t delay_time_us, bool random_delay_active);
 TEST_RETURN_STATUS self_test_error_injection(uint8_t no_of_packets, uint8_t error_count, TX_SET_FAULT_MODE fault_type, uint8_t fault_value = 0);
 TEST_RETURN_STATUS self_test_diagnostics_wdt(); 
@@ -53,58 +57,48 @@ TEST_RETURN_STATUS self_test_diagnostics_wdt();
 //****************************************************
 
 
-//***************** test enums class ***************** 
-
-enum class TEST_OPERATION{
-    IDLE,  
-    TRANSPORT_GOOD_PACKET,
-    TRANSPORT_STRESS_PACKET,
-    TRANSPORT_TYPE_CHANGE,
-    TRANSPORT_ACK_CHANGE,
-    TRANSPORT_ID_CHANGE,
-    TRANSPORT_DLC_CHANGE,
-    TRANSPORT_DLC_OVERFLOW,
-    TRANSPORT_CRC_BIT_FLIP,
-    TRANSPORT_CRC_RANDOM_CHANGE,
-    TRANSPORT_DATA_BIT_FLIP,
-    TRANSPORT_DATA_BYTE_CHANGE,
-    DIAGNOSTIC_WDT_TIMEOUT,
-    TEST_RESULT_PASSED, 
-    TEST_RESULT_FAILED, 
-    END_SELF_TEST
-};
- 
-//****************************************************
-
-
 //******************** variables *********************
 
-struct SelfTestContext {
-    // Timing
-    uint32_t next_transmission_time;
-    uint32_t test_end_countdown_timer;
+struct SelfTestManagerContext {
+  
+    // test manager fsm variables 
+    SELF_TEST_MANAGER_RETURN_CODE manager_return_code = SELF_TEST_MANAGER_RETURN_CODE::ERROR; // use in final version    // default to ERROR
+    SELF_TEST_MANAGER manager_state = SELF_TEST_MANAGER::IDLE;
 
     // Progress reporting
-    TEST_RETURN_STATUS current_test_status_code;
-    uint8_t current_test_packet;
-
-    // Flags 
-    bool diagnostics_active;
-    bool test_end_counter;
-    bool watchdog_timer_test_active;
-
-    // FSM state
-    TEST_OPERATION state; // deleted enum 
-  
-    // Test id
-    TEST_ID current_active_test_id;
+    TEST_RETURN_STATUS current_test_status_code = TEST_RETURN_STATUS::IDLE;
 };
 
+struct SelfTestRuntimeContect{
+
+    // Timing
+    uint32_t next_transmission_time = 0;
+    uint32_t test_end_countdown_timer = 0;
+    uint32_t watchdog_timestamp = 0; 
+    
+    // Progress reporting
+    uint8_t current_test_packet = 0;
+
+    // control flags 
+    bool diagnostics_active = false;
+    bool test_end_countdown_ative = false;
+    bool watchdog_timer_test_active = false;
+    bool watchdog_timer_trigered = false;
+    bool watchdog_event_verified = false; 
+    bool user_aborted_test = false; 
+
+    // Test selection  
+    TEST_ID requested_test_id = TEST_ID::NO_TEST_SELECTED;  
+    TEST_ID current_active_test_id = TEST_ID::NO_TEST_SELECTED; 
+
+    // Test result 
+    TEST_RETURN_STATUS current_test_status_code = TEST_RETURN_STATUS::IDLE;
+};
 
 namespace self_test {
-  extern SelfTestContext ctx;
+  extern SelfTestManagerContext manager_ctx;
+  extern SelfTestRuntimeContect runtime_ctx;
 }
-
 //****************************************************
 
 #endif 

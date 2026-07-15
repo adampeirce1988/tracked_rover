@@ -28,6 +28,7 @@ namespace ERROR_ID{
         TX_BUFFER_OVERFLOW,
         MSG_TIMEOUT, 
         TYPE_INVALID,
+        DIAG_WDT_TRIGERED, 
         COUNT
     };
 }

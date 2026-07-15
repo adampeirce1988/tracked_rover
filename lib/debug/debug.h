@@ -3,7 +3,8 @@
 #define DEBUG_H 
 
 #include <Arduino.h>
-#include "debug_config.h" 
+#include "debug_config.h"
+#include "global_config.h" 
 
 // function prototypes 
 extern void debug_port_begin();
