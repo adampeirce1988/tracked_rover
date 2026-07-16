@@ -16,24 +16,21 @@ test status: code compiles with 0 errors & untested on ESP.
 
 
 [FIXED]: 
-- Deleted self_test_fsm()
-- added self_test_types.h to prevent circular dependency 
-- renamed flush_self_test_struct() to reset_self_test_context() 
-- self test manager state macheine 
-- added a small switch case for switching to PASSED / FAILED 
-- moved the WDT in to the state machine 
-- added an abort flag to the fsm to allow user about from the web interface
-- spplit ctx into runtime_ctx & manager_ctx to alow clearing of runtime_ctx 
-  without changing the fsm state 
+- fixed typos in all self_test modules 
+- moved test global variables in the runtime_ctx
+- moved progress bar variables into runtime_ctx
+- fixed request_self_test() added return values true/false
+- cached micro() for all test to reduce CUP cylces calculating and ensure loop 
+  complets on one time stamp
+- added confg for rand() functions to all test to allow easy and clear config
+- renamed test_runner.cpp to self_test_executor.cpp 
 
 
 [TODO]: 
-- create a test FSM START, RUNNING, PASSED, FAILED, END_TEST
-- move WDT into the FSM 
-- resolve all bugs in run time error log as per the reveiw! 
 - clean up commented out functions and code.
 - repalce #defines for constexpr where posible.
 - run a ccode reveiw all files and refractor.
+
 
 [BUILD TREE]:
 tracked_rover-built-in-trasmission-self-test/
@@ -78,9 +75,10 @@ tracked_rover-built-in-trasmission-self-test/
     │
     ├── self_test/
     │   ├── self_test_apis.h
-    │   ├── self_test_fsm.cpp
+    │   ├── self_test_ececutor.cpp 
     │   ├── self_test_internal.cpp  
     │   ├── self_test_internal.h ✅ (9.5/10)
+    │   ├── self_test_manager.cpp
     │   ├── self_test_types.h ✅ (9.6/10)   
     │   ├── self_test.h ✅ (10/10)
     │   ├── test_diag_wdt_test.cpp

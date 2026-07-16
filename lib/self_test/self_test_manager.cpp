@@ -13,7 +13,7 @@
 // change over fromt the name space to namespace & struct 
 namespace self_test{
     SelfTestManagerContext manager_ctx;
-    SelfTestRuntimeContect runtime_ctx;
+    SelfTestRuntimeContext runtime_ctx;
 }
 
 /*-------------------------------------------------------

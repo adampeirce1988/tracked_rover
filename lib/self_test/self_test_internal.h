@@ -69,7 +69,7 @@ struct SelfTestManagerContext {
     TEST_RETURN_STATUS current_test_status_code = TEST_RETURN_STATUS::IDLE;
 };
 
-struct SelfTestRuntimeContect{
+struct SelfTestRuntimeContext{
 
     // Timing
     uint32_t next_transmission_time = 0;
@@ -78,12 +78,16 @@ struct SelfTestRuntimeContect{
     
     // Progress reporting
     uint8_t current_test_packet = 0;
+    uint8_t Progress_bar_position = 1; // impliment in all vtests
+    uint8_t progress_bar_one_percent = 0; //impliment in all tests
+
+    // test variables
+    uint8_t next_injection_position = 0;  // impliment in tests 
 
     // control flags 
     bool diagnostics_active = false;
-    bool test_end_countdown_ative = false;
+    bool test_end_countdown_active = false;
     bool watchdog_timer_test_active = false;
-    bool watchdog_timer_trigered = false;
     bool watchdog_event_verified = false; 
     bool user_aborted_test = false; 
 
@@ -97,7 +101,7 @@ struct SelfTestRuntimeContect{
 
 namespace self_test {
   extern SelfTestManagerContext manager_ctx;
-  extern SelfTestRuntimeContect runtime_ctx;
+  extern SelfTestRuntimeContext runtime_ctx;
 }
 //****************************************************
 
