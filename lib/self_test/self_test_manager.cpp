@@ -1,5 +1,4 @@
 
-#include<stdint.h>
 #include <Arduino.h>
 #include "self_test_internal.h"
 #include "global_config.h"
@@ -8,13 +7,16 @@
 #include "logger.h"
 #include "debug.h"
 
-#define DEBUG_FILE DBG_SELF_TEST // defines the debug logging file (defined in debug_config.h)
+// defines the debug logging file (defined in debug_config.h)
+#define DEBUG_FILE DBG_SELF_TEST 
 
-// change over fromt the name space to namespace & struct 
+//====================== Variables  ======================
 namespace self_test{
     SelfTestManagerContext manager_ctx;
     SelfTestRuntimeContext runtime_ctx;
 }
+//=========================================================
+
 
 /*-------------------------------------------------------
 Self Test Manager
@@ -73,8 +75,8 @@ SELF_TEST_MANAGER_RETURN_CODE run_test_manager(){
 
         case SELF_TEST_MANAGER::RUNNING:{
 
-            // run the test case here untill pass/ fail/ abort/ timeout. 
-            self_test::runtime_ctx.current_test_status_code = run_test_case(); 
+            // Execute one iteration of the active self-test.
+            self_test::runtime_ctx.current_test_status_code = execute_self_test(); 
 
             if(self_test::runtime_ctx.current_test_status_code != TEST_RETURN_STATUS::RUNNING){ // check this never returns IDLE. 
                 self_test::manager_ctx.manager_state = SELF_TEST_MANAGER::FINALIZING; 
@@ -153,7 +155,7 @@ SELF_TEST_MANAGER_RETURN_CODE run_test_manager(){
             }
             else{
 
-                DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "WDT", "Self test watch dog timer timed out");
+                DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "WDT", "Self-test watchdog timer timed out");
 
                 self_test::manager_ctx.manager_state = SELF_TEST_MANAGER::CLEANUP; 
                 self_test::manager_ctx.manager_return_code = SELF_TEST_MANAGER_RETURN_CODE::TEST_TIMEOUT;

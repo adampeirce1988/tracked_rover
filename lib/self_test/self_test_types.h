@@ -70,7 +70,8 @@ enum class TEST_RETURN_STATUS : uint8_t
     IDLE,          // No test active
     RUNNING,       // Test still executing
     PASSED,        // Test completed successfully
-    FAILED         // Test completed but with errors
+    FAILED,        // Test completed but with errors
+    ERROR         // default return type
 };
 
 

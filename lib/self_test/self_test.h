@@ -1,7 +1,7 @@
 #ifndef SELF_TEST_H 
 #define SELF_TEST_H
 
-
+#include <stdbool.h>
 #include "self_test_types.h"
 
 //====================== API function calls  ======================

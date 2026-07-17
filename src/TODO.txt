@@ -16,15 +16,6 @@ test status: code compiles with 0 errors & untested on ESP.
 
 
 [FIXED]: 
-- fixed typos in all self_test modules 
-- moved test global variables in the runtime_ctx
-- moved progress bar variables into runtime_ctx
-- fixed request_self_test() added return values true/false
-- cached micro() for all test to reduce CUP cylces calculating and ensure loop 
-  complets on one time stamp
-- added confg for rand() functions to all test to allow easy and clear config
-- renamed test_runner.cpp to self_test_executor.cpp 
-
 
 [TODO]: 
 - clean up commented out functions and code.
@@ -74,14 +65,14 @@ tracked_rover-built-in-trasmission-self-test/
     │   └── tx_protocol.cpp ✅ (9.6/10)
     │
     ├── self_test/
-    │   ├── self_test_apis.h
-    │   ├── self_test_ececutor.cpp 
-    │   ├── self_test_internal.cpp  
-    │   ├── self_test_internal.h ✅ (9.5/10)
-    │   ├── self_test_manager.cpp
+    │   ├── self_test_apis.h ✅ (9.4/10)
+    │   ├── self_test_executor.cpp ✅ (9.9/10)
+    │   ├── self_test_internal.cpp  ✅ (10/10)
+    │   ├── self_test_internal.h ✅ (9.3/10)
+    │   ├── self_test_manager.cpp ✅ (10/10)
     │   ├── self_test_types.h ✅ (9.6/10)   
-    │   ├── self_test.h ✅ (10/10)
-    │   ├── test_diag_wdt_test.cpp
+    │   ├── self_test.h ✅ (9.3/10)
+    │   ├── test_diag_wdt_test.cpp ✅ (??/10) // recheck the reveiw for score 
     │   ├── test_packet_error_injection.cpp
     │   └── test_packet_timing.cpp
     │

@@ -9,8 +9,14 @@
 
 #define DEBUG_FILE DBG_SELF_TEST
 
-// this test will check that the timeout function of transport is correctly functioning this will not report a pass or fall 
-// onlly indication of a sucsesfullt test is the main entering SAFE_STATR and ERROR being displayed. 
+/*
+ * Verifies that the Diagnostic watchdog timeout is detected correctly.
+ *
+ * The manager intentionally allows the watchdog to expire during this
+ * test and then resumes execution once the timeout event has been
+ * recorded. The test passes when the watchdog event is successfully
+ * logged before the timeout window expires.
+ */ 
 
 
 TEST_RETURN_STATUS self_test_diagnostics_wdt(){
@@ -19,9 +25,9 @@ TEST_RETURN_STATUS self_test_diagnostics_wdt(){
     uint32_t cached_millis = millis(); 
 
     // runs once on first loop
-    if(self_test::runtime_ctx.watchdog_timer_test_active == false){
+    if(!self_test::runtime_ctx.watchdog_timer_test_active){
         
-        self_test::runtime_ctx.progress_bar_one_percent = DIAGNOSTIC_WT_TIMEOUT_MS / 25;
+        self_test::runtime_ctx.progress_bar_one_percent = DIAGNOSTIC_WT_TIMEOUT_MS / PROGRESS_BAR_COUNT;
 
         self_test::runtime_ctx.test_end_countdown_timer = cached_millis + (DIAGNOSTIC_WT_TIMEOUT_MS + 1);  
         self_test::runtime_ctx.watchdog_timer_test_active = true; 
@@ -32,9 +38,9 @@ TEST_RETURN_STATUS self_test_diagnostics_wdt(){
 
 
     // print a progress bar to show progress i
-    if(self_test::runtime_ctx.test_end_countdown_timer - cached_millis < (DIAGNOSTIC_WT_TIMEOUT_MS - (self_test::runtime_ctx.progress_bar_one_percent * self_test::runtime_ctx.Progress_bar_position))){
+    if(self_test::runtime_ctx.test_end_countdown_timer - cached_millis < (DIAGNOSTIC_WT_TIMEOUT_MS - (self_test::runtime_ctx.progress_bar_one_percent * self_test::runtime_ctx.progress_bar_position))){
         PRINT_PROGRESS_BAR_PROGRESS();
-        self_test::runtime_ctx.Progress_bar_position ++; 
+        self_test::runtime_ctx.progress_bar_position ++; 
 
     }
 
@@ -49,7 +55,7 @@ TEST_RETURN_STATUS self_test_diagnostics_wdt(){
         
         return TEST_RETURN_STATUS::PASSED;
     }
-    else if(self_test::runtime_ctx.watchdog_timer_test_active == true && cached_millis > self_test::runtime_ctx.test_end_countdown_timer){
+    else if(self_test::runtime_ctx.watchdog_timer_test_active && cached_millis > self_test::runtime_ctx.test_end_countdown_timer){
         
         // print the end of the progress bar & rest the counter. 
         PRINT_PROGRESS_BAR_END(); 

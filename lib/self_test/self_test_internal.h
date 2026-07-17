@@ -42,7 +42,7 @@ constexpr uint32_t WDT_EXTENSION = 250;
 //********* internal function prototypes ************
 
 //moved to internal from public
-TEST_RETURN_STATUS run_test_case();                            // advances selftest state macheine. stest state machine needs to be called every loop during a test
+TEST_RETURN_STATUS execute_self_test();                            // advances selftest state macheine. stest state machine needs to be called every loop during a test
 void clear_self_test_runtime_context();                        // flush the struct for self_test::ctx
 const char* get_test_name(TEST_ID active_test);                // returns a string containing the test name
 void test_request_dispatcher(TEST_ID requested_test_id);       // to be implimented still in selftest internal 
@@ -78,7 +78,7 @@ struct SelfTestRuntimeContext{
     
     // Progress reporting
     uint8_t current_test_packet = 0;
-    uint8_t Progress_bar_position = 1; // impliment in all vtests
+    uint8_t progress_bar_position = 1; // impliment in all vtests
     uint8_t progress_bar_one_percent = 0; //impliment in all tests
 
     // test variables
