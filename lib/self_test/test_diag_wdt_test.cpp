@@ -21,15 +21,16 @@
 
 TEST_RETURN_STATUS self_test_diagnostics_wdt(){
 
-    // Cache millis to prvent recalling agian in function
-    uint32_t cached_millis = millis(); 
+    // Cache the current time for this iteration.
+    const uint32_t cached_millis = millis(); 
 
-    // runs once on first loop
+    // One-time test initialisation.
     if(!self_test::runtime_ctx.watchdog_timer_test_active){
         
         self_test::runtime_ctx.progress_bar_one_percent = DIAGNOSTIC_WT_TIMEOUT_MS / PROGRESS_BAR_COUNT;
-
-        self_test::runtime_ctx.test_end_countdown_timer = cached_millis + (DIAGNOSTIC_WT_TIMEOUT_MS + 1);  
+        
+        // Add 1 ms to the test end counter to cause the watchdog timer to triger
+        self_test::runtime_ctx.test_end_countdown_timer = cached_millis + (DIAGNOSTIC_WT_TIMEOUT_MS + 1); 
         self_test::runtime_ctx.watchdog_timer_test_active = true; 
 
         // print the start of the progress bar

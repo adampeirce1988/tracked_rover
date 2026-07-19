@@ -16,11 +16,17 @@ test status: code compiles with 0 errors & untested on ESP.
 
 
 [FIXED]: 
+- fixed typo in wdt test 
+- added coments explaining +1 to the timer
+- fixed typo in test_packet_timing.cpp 
+- cached test name to reduce time looking it
+
 
 [TODO]: 
-- clean up commented out functions and code.
-- repalce #defines for constexpr where posible.
-- run a ccode reveiw all files and refractor.
+- code review all current module 
+- run a full case test on hardware
+- merge code into main(only once the above are completed)
+- create a new fork and impliment a HTML based controler, diagnostic port as ota updater(esp32)
 
 
 [BUILD TREE]:
@@ -72,9 +78,9 @@ tracked_rover-built-in-trasmission-self-test/
     │   ├── self_test_manager.cpp ✅ (10/10)
     │   ├── self_test_types.h ✅ (9.6/10)   
     │   ├── self_test.h ✅ (9.3/10)
-    │   ├── test_diag_wdt_test.cpp ✅ (??/10) // recheck the reveiw for score 
-    │   ├── test_packet_error_injection.cpp
-    │   └── test_packet_timing.cpp
+    │   ├── test_diag_wdt_test.cpp ✅ (10/10)
+    │   ├── test_packet_error_injection.cpp ✅ (10/10)
+    │   └── test_packet_timing.cpp ✅ (9.9/10)
     │
     ├── system/
     │   ├── system.cpp
