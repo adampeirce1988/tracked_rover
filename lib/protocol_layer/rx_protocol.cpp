@@ -88,6 +88,7 @@ uint8_t rx_message_task_dispatcher(){
                 mismatched_type_received = protocol_frame.TYPE; 
                 return PROTOCOL_RX_RETURN_CODE::PROTO_INVALID_TYPE; // invalid message received. log an error here. 
         }
+
     }
     
     return PROTOCOL_RX_RETURN_CODE::PROTO_VALID_TYPE;

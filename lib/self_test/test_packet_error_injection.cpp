@@ -6,6 +6,7 @@
 #include "debug_config.h"
 #include "self_test_internal.h"
 #include "messages.h"
+#include "simulation.h"
 
 #define DEBUG_FILE DBG_SELF_TEST
 
@@ -42,8 +43,9 @@ TEST_RETURN_STATUS self_test_error_injection(uint8_t no_of_packets, uint8_t erro
         PRINT_PROGRESS_BAR_START();             
             
         // set current transport to fifo. 
-        transport_set(&fifo_io);                       
-        
+        //transport_set(&fifo_io);                       
+        request_fifo_test_simulation(); // NEW requests fifo activated
+
         // record test start time 
         self_test::runtime_ctx.next_transmission_time = cached_micros;  // set the start time of the self test
 
@@ -51,6 +53,9 @@ TEST_RETURN_STATUS self_test_error_injection(uint8_t no_of_packets, uint8_t erro
         self_test::runtime_ctx.next_injection_position = random(MIN_INJECTION_POSITION, MAX_INJECTION_POSITION);       
     }
 
+    if(!fifo_simulation_active()){
+        return TEST_RETURN_STATUS::RUNNING; // wiat for setup add INITILIZING as a state
+    }
 
     // create a non-blocking loop to only send packts after alocatred time. 
     if(cached_micros > self_test::runtime_ctx.next_transmission_time){

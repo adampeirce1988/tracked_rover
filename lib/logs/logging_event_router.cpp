@@ -65,6 +65,7 @@ void process_transport_rx_return_error(uint8_t rx_return_code){
             // store the latancy of the last received frame
             rx_latency_add_value(transport_get_rx_latancy());
             st_log_event(ST_LOG_EVENT::EVENT_PACKET_RECEIVED, LOG_TYPE::METRIC);
+            // log the last received frame here 
         break;
         
         case RX_RETURN_CODES::ACK_READY:
@@ -81,8 +82,7 @@ void process_transport_rx_return_error(uint8_t rx_return_code){
         break; 
         
         case RX_RETURN_CODES::INVALID_TYPE:
-            // this should be loged from protocol
-            //st_log_event(ST_LOG_EVENT::EVENT_INVALID_TYPE , LOG_TYPE::ERROR);
+            // this is loged from protocol
         break;
 
         case RX_RETURN_CODES::ACK_OUT_OF_RANGE:

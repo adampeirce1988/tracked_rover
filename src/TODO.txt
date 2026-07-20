@@ -16,13 +16,13 @@ test status: code compiles with 0 errors & untested on ESP.
 
 
 [FIXED]: 
-- fixed typo in wdt test 
-- added coments explaining +1 to the timer
-- fixed typo in test_packet_timing.cpp 
-- cached test name to reduce time looking it
+
 
 
 [TODO]: 
+- refactor transport due ti additon of 2x new functions
+    transport_set_fifo();
+    transport_set_uart();
 - code review all current module 
 - run a full case test on hardware
 - merge code into main(only once the above are completed)

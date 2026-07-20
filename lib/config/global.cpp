@@ -76,12 +76,13 @@ void check_transport_alive(){
 }
 
 
-// only system alive checks to be added here. 
-bool check_system_health_flags(){
-    if(sys::bus_connectivity_status == true && sys::i2c_connectivity_status == true ){
-        return true;
-    }  
-    else{
-        return false;
-    }
-}
+// // only system alive checks to be added here. 
+// bool check_system_health_flags(){
+//     if(sys::bus_connectivity_status == true && 
+//         sys::i2c_connectivity_status == true ){
+//         return true;
+//     }  
+//     else{
+//         return false;
+//     }
+// }

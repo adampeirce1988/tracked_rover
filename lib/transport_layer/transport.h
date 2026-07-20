@@ -125,6 +125,8 @@ uint16_t transport_get_rx_latancy(); // should only be called once TX_TRANSMISSI
 // transport 
 void com_port_open();
 bool transport_set(Transport_IO *io);
+bool transport_set_fifo(); // ADDED to remove exposure of Transport_IO in simulation.h
+bool transport_set_uart(); // ADDED to remove exposure of Transport_IO in simulation.h
 void transport_queue_message(uint8_t type, uint8_t ack, uint8_t dlc, uint8_t *data);
 void transport_get_frame(struct frame *out);
 uint8_t frame_avaliable(); 
@@ -132,5 +134,7 @@ uint8_t frame_avaliable();
 // update state machines must be called in order each loop 
 uint8_t update_rx_fsm();
 uint8_t update_tx_fsm();
+
+
 
 #endif

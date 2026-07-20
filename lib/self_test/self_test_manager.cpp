@@ -2,10 +2,12 @@
 #include <Arduino.h>
 #include "self_test_internal.h"
 #include "global_config.h"
+#include "simulation.h"
 #include "self_test.h"
 #include "transport.h"
 #include "logger.h"
 #include "debug.h"
+
 
 // defines the debug logging file (defined in debug_config.h)
 #define DEBUG_FILE DBG_SELF_TEST 
@@ -179,7 +181,8 @@ SELF_TEST_MANAGER_RETURN_CODE run_test_manager(){
             clear_self_test_runtime_context();
 
             // return to uart comunication 
-            transport_set(&uart_io);  // return to uart communication (Disable for testing)
+            //transport_set(&uart_io);  // return to uart communication (Disable for testing)
+            release_fifo_test_simulation(); // NEW will only set fifo inactive if no user request is present
             
             // return the self_test manager to idle 
             self_test::manager_ctx.manager_state = SELF_TEST_MANAGER::IDLE; 

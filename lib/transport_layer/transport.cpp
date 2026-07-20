@@ -128,6 +128,15 @@ bool transport_set(Transport_IO *io){
   current_transport = io;
   return true;
 }
+// TEST to stop exposure of the set vairiables //
+bool transport_set_fifo(){
+  return transport_set(&fifo_io);
+}
+
+bool transport_set_uart(){
+  return transport_set(&uart_io);
+}
+////////////////////////////////////////////////
 
 void fifo_io_uart_engine_update(){
    current_transport->update();
