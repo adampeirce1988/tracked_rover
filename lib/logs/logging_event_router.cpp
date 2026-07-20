@@ -64,8 +64,7 @@ void process_transport_rx_return_error(uint8_t rx_return_code){
         case RX_RETURN_CODES::FRAME_READY:
             // store the latancy of the last received frame
             rx_latency_add_value(transport_get_rx_latancy());
-            st_log_event(ST_LOG_EVENT::EVENT_PACKET_RECEIVED, LOG_TYPE::METRIC);
-            // log the last received frame here 
+            st_log_event(ST_LOG_EVENT::EVENT_PACKET_RECEIVED, LOG_TYPE::METRIC); 
         break;
         
         case RX_RETURN_CODES::ACK_READY:

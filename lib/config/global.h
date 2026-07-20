@@ -36,7 +36,7 @@ namespace sys {
 
 // function declerations 
 void update_system_heartbeat();
-void update_last_valid_comms();
+void update_last_valid_comms();  // called by trasport.cpp on sucsessfully receiving a packet.
 void update_last_connection_attempt();
 
 void check_transport_alive();  // not currently used in vehicle fsm
