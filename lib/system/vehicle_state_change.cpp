@@ -5,6 +5,7 @@
 #include "debug.h"
 
 
+
 #define DEBUG_FILE DBG_SYSTEM
 
 bool request_vehicle_state_change(VEHICLE_STATE requested){
@@ -12,15 +13,17 @@ bool request_vehicle_state_change(VEHICLE_STATE requested){
   switch(active_vehicle_state){
 
     case VEHICLE_STATE::BOOTING:
+
       if(requested == VEHICLE_STATE::SAFE_STATE){
         DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "MAIN", "Boot completed sucssfuly! request state: VEHICLE_STATE::SAFE_STATE");
+        active_vehicle_state = VEHICLE_STATE::SAFE_STATE;
         return true;
+
       }
       else{
         DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "MAIN","Unable to transition to requsted state from VEHICEL_STATE::BOOTING"); 
         return false; 
       }
-
     break; 
 
     case VEHICLE_STATE::SAFE_STATE:

@@ -24,11 +24,8 @@ void run_core_functions(){
 
   rx_transport_status = update_rx_fsm(); 
   tx_transport_status = update_tx_fsm();
-
-  // check for avaliable packets and run the dispacher
-  if(frame_avaliable() > 0){
-    rx_protocol_status = rx_message_task_dispatcher(); 
-  }
+  rx_protocol_status = rx_message_task_dispatcher(); 
+ 
 
   // process returned codes & log if an error is received
   process_transport_rx_return_error(rx_transport_status); 

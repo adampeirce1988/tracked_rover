@@ -71,3 +71,7 @@ bool check_system_health_flags(){
         return false;
     }
 }
+
+void set_comunication_bus_alive(){
+    sys::bus_connectivity_status = true; 
+}

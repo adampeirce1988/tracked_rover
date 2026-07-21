@@ -49,4 +49,7 @@ void run_core_functions();
 // moved from global.h 
 bool check_system_health_flags();
 
+// flag setters
+void set_comunication_bus_alive();
+
 #endif 

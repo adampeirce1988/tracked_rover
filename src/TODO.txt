@@ -18,9 +18,11 @@ test status: code compiles with 0 errors & untested on ESP.
 [FIXED]: 
 
 
-
 [TODO]: 
-- refactor transport due ti additon of 2x new functions
+- fix packet tests 
+- clean up debug print statments from debugging 
+- split the transport RX and TX FSM to sepreate files
+- refactor transport due to additon of 2x new functions
     transport_set_fifo();
     transport_set_uart();
 - code review all current module 

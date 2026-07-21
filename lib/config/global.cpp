@@ -26,7 +26,7 @@ bool communication_warn_active = false; // add for warning implimentation with a
 
 // Alive flag
 bool bus_connectivity_status = false; 
-bool i2c_connectivity_status = false; 
+bool i2c_connectivity_status = true; // leave true untill bus check implimented
 
 //test 
 bool diagnostics_active = false; 

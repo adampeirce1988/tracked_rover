@@ -1,7 +1,8 @@
 
 #include "transport.h"
 #include "global_config.h"
-
+#include "debug.h" // remove once fsm bug resolved 
+#define DEBUG_FILE DBG_SYSTEM
 
 // Simulation variables
 namespace simulation{
@@ -56,8 +57,9 @@ void run_simulations(){
             transport_set_uart();
        }
     }
-
-    if(simulation::fifo_active){
+    
+    // run the fifo engine if fifo_active: true.
+    if(simulation::fifo_active){ 
         fifo_io_uart_engine_update(); 
     }
 }

@@ -28,7 +28,7 @@ void setup(){
 }
 
 void loop() {
-    
+
   run_vehicle_state();                                           // run vehicle requested FSM. 
-  
+
 }

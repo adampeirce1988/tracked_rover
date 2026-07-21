@@ -14,6 +14,7 @@
 #include "simulation.h"
 
 
+
 ///////////////////////////////////////////////////////////////////////////////
 // Configuration
 ///////////////////////////////////////////////////////////////////////////////
@@ -36,7 +37,7 @@ bool TEST_call_diag_once = true;
 VEHICLE_STATE active_vehicle_state = VEHICLE_STATE::BOOTING;
 
 // previous active state this should be diffrent from above.
-VEHICLE_STATE last_vehicle_state = VEHICLE_STATE::FAIL_SAFE; 
+VEHICLE_STATE last_vehicle_state = VEHICLE_STATE::BOOTING; 
 
 // Used when temporarily entering another state
 VEHICLE_STATE return_state  = VEHICLE_STATE::SAFE_STATE;
@@ -49,9 +50,11 @@ VEHICLE_STATE return_state  = VEHICLE_STATE::SAFE_STATE;
 
 VEHICLE_STATE_RETURN_CODE run_vehicle_state(){
 
-  switch(active_vehicle_state){
+    
+  run_core_functions(); // this line runs all the core functions that need to run in all states 
+  
 
-    run_core_functions(); // this line runs all the core funstions that need to run in all states 
+  switch(active_vehicle_state){
 
     //setup code will go here not in main.cpp void setup();
     case VEHICLE_STATE::BOOTING: 
@@ -60,6 +63,7 @@ VEHICLE_STATE_RETURN_CODE run_vehicle_state(){
       debug_port_begin();                                                    // open the debug port
       delay(1000);                                                           // run 1s delay before transmitting data 
       PRINT_VERSION_DATA(SW_VERSION, HARDWARE_VERSION, RELEASE_NOTES);       // print version and meta data 
+      delay(1000);
 
       // set the current transport & baud rate. 
       transport_set(&uart_io);                                               // set transport method default to be serial (&uart_io / &fifo_io)
@@ -70,6 +74,7 @@ VEHICLE_STATE_RETURN_CODE run_vehicle_state(){
       
 
       // configure wifi handle ap fall back. 
+      //WiFi.mode(WIFI_AP);
 
       // leave booting always transition to SAFE_STATE
       request_vehicle_state_change(VEHICLE_STATE::SAFE_STATE);               // move to safe state. 
@@ -80,17 +85,27 @@ VEHICLE_STATE_RETURN_CODE run_vehicle_state(){
     ///////////////////////////////////////////////////////////////////////////
      case VEHICLE_STATE::SAFE_STATE:
 
-      //send out a request for confirmation of receiving node
+      
+      //send out a request for confirmation of receiving node ** THIS ONLY EVER RUNS ONCE **
       if(!sys::bus_connectivity_status && millis() - sys::last_connection_attempt > 1000){
         update_last_connection_attempt(); 
         establish_coms();
+
+      // debug only delete onece used 
+      DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "MAIN SAFE_STATE", "active_vehicle_state: ", vehicle_state_to_string(active_vehicle_state));
+      DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "MAIN SAFE_STATE", "fifo status: ", fifo_simulation_active());
+      DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "MAIN SAFE_STATE", "bus_conectivity: ", sys::bus_connectivity_status);
       }
+
+      DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "MAIN SAFE_STATE", "health_check: ", check_system_health_flags());
       
       // check all system flags move to idle
       if(check_system_health_flags()){ // I2C check not needed for ESP. Arduino will return an error if the bus is offline.
         request_vehicle_state_change(VEHICLE_STATE::IDLE);
+        DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "MAIN", "VEHICLE_STATE: ", vehicle_state_to_string(active_vehicle_state) );
       } 
       else{
+    
       // no commands are accepted or executed. 
       // I2C bus and sensor communication will stop. rund device check to confirm the bus status then halt transmission 
       // any errors that caused the safe state to occur will be logged.
@@ -108,7 +123,7 @@ VEHICLE_STATE_RETURN_CODE run_vehicle_state(){
       if(TEST_call_diag_once == true){
       DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "MAIN", "diagnostics called.");
       request_vehicle_state_change(VEHICLE_STATE::DIAGNOSTICS);
-      request_self_test(TEST_ID::DIAGNOSTIC_WATCHDOG_TIMEOUT);
+      request_self_test(TEST_ID::TRANSPORT_PACKET_NORMAL);
       TEST_call_diag_once = false;
       }
 

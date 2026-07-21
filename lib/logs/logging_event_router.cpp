@@ -133,7 +133,7 @@ void process_protocol_return_error(uint8_t protocol_return_code){
 
         case PROTOCOL_RX_RETURN_CODE::PROTO_VALID_MSG_INHIBITED: 
             st_log_event(ST_LOG_EVENT::EVENT_INHIBITED_MESSAGE, LOG_TYPE::METRIC);
-        //log st here 
+            //log st here 
         break; 
 
         case PROTOCOL_RX_RETURN_CODE::PROTO_VALID_TYPE:
