@@ -4,11 +4,11 @@
 
 // define the files that you would like to debug here
 //#define DEBUG_FILE_MASK   (DBG_ESP_MAIN | DBG_TRANSPORT | DBG_TRANSPORT_FIFO | DBG_SELF_TEST | DBG_LOGS)
-  #define DEBUG_FILE_MASK (DBG_SYSTEM | DBG_TRANSPORT | DBG_PROTOCOL | DBG_TRANSPORT_FIFO | DBG_SELF_TEST)
+  #define DEBUG_FILE_MASK (DBG_SYSTEM | DBG_TRANSPORT | DBG_PROTOCOL | DBG_TRANSPORT_FIFO | DBG_SELF_TEST )
 
 // define the levels of debuging required here
-  #define DEBUG_LEVEL_MASK  (DEBUG_META | DEBUG_MSG | DEBUG_ERROR) // use at runtime 
-  //#define DEBUG_LEVEL_MASK  (DEBUG_META | DEBUG_NONE | DEBUG_ERROR | DEBUG_WARN | DEBUG_STREAM )
+  #define DEBUG_LEVEL_MASK  (DEBUG_META | DEBUG_ERROR) // use at runtime 
+  
 
 // defines which messages should be printed in full form DEBUG_PRINT_DATA_FRAME()
   //  #define DEBUG_FRAME_MASK (RETURNED_FRAME | TX_FRAME | RX_FRAME | TX_PACK_MSG | ACK_FRAME | COPIED_FRAME | TX_PRIORITY)

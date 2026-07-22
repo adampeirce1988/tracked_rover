@@ -1,17 +1,17 @@
 test status: code compiles with 0 errors & untested on ESP.  
 
 [verified]:
-- 100 good packet test:..........OK PROGRESS: ######################### 100%
-- 100 good packet stress test:...OK PROGRESS: ######################### 100%
-- TYPE_CHANGE....................OK PROGRESS: ######################### 100%
-- ACK_CHANGE.....................OK PROGRESS: ######################### 100%
-- ID_CHANGE......................OK PROGRESS: ######################### 100%
-- DLC_CHANGE.....................OK PROGRESS: ######################### 100%
-- DLC_OVER_MAX_CAPACITY..........OK PROGRESS: ######################### 100%
-- CRC_RAND_FLIP_BIT..............OK PROGRESS: ######################### 100%
-- CRC_CHANGE.....................OK PROGRESS: ######################### 100%
-- RAND_DATA_FLIP_BIT.............OK PROGRESS: ######################### 100%
-- RAND_DATA_CHANGE...............OK PROGRESS: ######################### 100%
+- 200 good packet test:..........ok PROGRESS: ######################### 100%
+- 200 good packet stress test:...ok PROGRESS: ######################### 100%
+- TYPE_CHANGE....................NOK PROGRESS: ######################### 100%
+- ACK_CHANGE.....................NOT_TESTED PROGRESS: ######################### 100%
+- ID_CHANGE......................NOT_TESTED PROGRESS: ######################### 100%
+- DLC_CHANGE.....................NOT_TESTED PROGRESS: ######################### 100%
+- DLC_OVER_MAX_CAPACITY..........NOT_TESTED PROGRESS: ######################### 100%
+- CRC_RAND_FLIP_BIT..............NOT_TESTED PROGRESS: ######################### 100%
+- CRC_CHANGE.....................NOT_TESTED PROGRESS: ######################### 100%
+- RAND_DATA_FLIP_BIT.............NOT_TESTED PROGRESS: ######################### 100%
+- RAND_DATA_CHANGE...............NOT_TESTED PROGRESS: ######################### 100%
 - Diagnostics WDT test:..........OK PROGRESS: ######################## 100%
 
 
@@ -19,7 +19,7 @@ test status: code compiles with 0 errors & untested on ESP.
 
 
 [TODO]: 
-- fix packet tests 
+- fix packet error_injection()
 - clean up debug print statments from debugging 
 - split the transport RX and TX FSM to sepreate files
 - refactor transport due to additon of 2x new functions

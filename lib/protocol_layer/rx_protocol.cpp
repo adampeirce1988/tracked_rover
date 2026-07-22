@@ -21,28 +21,28 @@ uint8_t rx_message_task_dispatcher(){
     
     // return if no frames are avaliable
     if(frame_avaliable() == 0){ 
-        //DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "PROTO", "NO frames avaliable");
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "PROTO", "NO frames avaliable");
         return PROTOCOL_RX_RETURN_CODE::PROTO_IDLE;
     }
     
 
     // get the received frame and clear rx_packet.frame_ready
     transport_get_frame(&protocol_frame); 
-    DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "PROTO", "frame copied from Transport to protocol");
+    DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "PROTO", "frame copied from Transport to protocol");
 
     // check if this packet is inhibited 
     PERMISSION_RETURN_CODE result = is_message_allowed_in_current_state(protocol_frame.TYPE);
 
     if(result == PERMISSION_RETURN_CODE::MSG_VALID_INHIBITED){
-        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "PROTO", "message status: MSG_VALID_INHIBITED");
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "PROTO", "message status: MSG_VALID_INHIBITED");
         return PROTOCOL_RX_RETURN_CODE::PROTO_VALID_MSG_INHIBITED;
     }
     else if(result == PERMISSION_RETURN_CODE::MSG_INVALID){
-        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "PROTO", "message status: MSG_INVALID");
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "PROTO", "message status: MSG_INVALID");
         return PROTOCOL_RX_RETURN_CODE::PROTO_INVALID_TYPE;
     }
     else if(result == PERMISSION_RETURN_CODE::MSG_VALID_ALLOWED){
-        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "PROTO", "message status: MSG_VALID_ALLOWED");
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "PROTO", "message status: MSG_VALID_ALLOWED");
 
         
         switch(protocol_frame.TYPE){
@@ -52,7 +52,7 @@ uint8_t rx_message_task_dispatcher(){
             break;  
         
             case MSG_ESTABLISH_COMMUNICATION:
-                DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "PROTO", "Running: MSG_ESTABLISH_COMMUNICATION");
+                DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "PROTO", "Running: MSG_ESTABLISH_COMMUNICATION");
                 set_comunication_bus_alive(); 
             break;
 

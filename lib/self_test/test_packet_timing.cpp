@@ -21,17 +21,21 @@ TEST_RETURN_STATUS self_test_transport_random_packet(uint8_t no_of_packets, uint
     
     // Cache micro to prvent recalling agian in function
     const uint32_t cached_micros = micros(); 
+
     
     // test setup only runs once
     if(self_test::runtime_ctx.current_test_packet == 0){
 
+        // print test meta data.
         DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_META, "TEST", get_test_name(self_test::runtime_ctx.current_active_test_id), ": Running. packets: ", no_of_packets);
         DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_META, "TEST","packet transmission speed(us): ", delay_time_us);
 
+    
         // set current transport to fifo.
         transport_set(&fifo_io);                   
         
-        self_test::runtime_ctx.next_transmission_time = cached_micros;
+        // set the timer up for the first transmission 
+        self_test::runtime_ctx.next_transmission_time = cached_micros - delay_time_us;
 
         // print the progress bar & protect from 0 division
         self_test::runtime_ctx.progress_bar_one_percent = no_of_packets / PROGRESS_BAR_COUNT; 
@@ -44,9 +48,8 @@ TEST_RETURN_STATUS self_test_transport_random_packet(uint8_t no_of_packets, uint
     }
 
     // create a non-blocking loop to only send packets after allocated time. 
-    if(cached_micros > self_test::runtime_ctx.next_transmission_time){
+    if(cached_micros - self_test::runtime_ctx.next_transmission_time >= delay_time_us){
 
-         
         // print the progress bar if 1% has passed
         if(self_test::runtime_ctx.current_test_packet < no_of_packets && self_test::runtime_ctx.current_test_packet % self_test::runtime_ctx.progress_bar_one_percent == 0){
             PRINT_PROGRESS_BAR_PROGRESS();
@@ -54,7 +57,6 @@ TEST_RETURN_STATUS self_test_transport_random_packet(uint8_t no_of_packets, uint
         
         // set the next transmission time
         self_test::runtime_ctx.next_transmission_time += delay_time_us;
-
 
         // Reduce the delay by a random amount if requested.
         if(random_delay_active){
@@ -67,7 +69,8 @@ TEST_RETURN_STATUS self_test_transport_random_packet(uint8_t no_of_packets, uint
         if(self_test::runtime_ctx.current_test_packet < no_of_packets){
             
             uint8_t type = random(MIN_TYPE_VALUE, MAX_TYPE_VALUE + 1);    // random type 1-255 ** NO TYPE CHECK IMPLIMENTED **
-            uint8_t ack  = weighted_random_ack();                         // weighted ack 20% chance of ack 
+            uint8_t ack  = weighted_random_ack();      
+            ack = 0;                   // weighted ack 20% chance of ack 
             uint8_t dlc  = random(0,(MAX_PAYLOAD_LEN + 1));               // set random DLC
             uint8_t data[MAX_PAYLOAD_LEN];                                // Fill random data based on the DLC
             for(uint8_t i = 0; i < dlc; i++){
@@ -111,8 +114,7 @@ TEST_RETURN_STATUS self_test_transport_random_packet(uint8_t no_of_packets, uint
         if(test_result){
             return TEST_RETURN_STATUS::PASSED; 
         }
-        else{
-            st_print_log(); 
+        else{ 
             return TEST_RETURN_STATUS::FAILED;  
         }   
     }

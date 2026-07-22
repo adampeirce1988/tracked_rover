@@ -92,12 +92,12 @@ VEHICLE_STATE_RETURN_CODE run_vehicle_state(){
         establish_coms();
 
       // debug only delete onece used 
-      DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "MAIN SAFE_STATE", "active_vehicle_state: ", vehicle_state_to_string(active_vehicle_state));
-      DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "MAIN SAFE_STATE", "fifo status: ", fifo_simulation_active());
-      DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "MAIN SAFE_STATE", "bus_conectivity: ", sys::bus_connectivity_status);
+      //DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "MAIN SAFE_STATE", "active_vehicle_state: ", vehicle_state_to_string(active_vehicle_state));
+      //DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "MAIN SAFE_STATE", "fifo status: ", fifo_simulation_active());
+      //DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "MAIN SAFE_STATE", "bus_conectivity: ", sys::bus_connectivity_status);
       }
 
-      DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "MAIN SAFE_STATE", "health_check: ", check_system_health_flags());
+      //DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "MAIN SAFE_STATE", "health_check: ", check_system_health_flags());
       
       // check all system flags move to idle
       if(check_system_health_flags()){ // I2C check not needed for ESP. Arduino will return an error if the bus is offline.
@@ -123,7 +123,7 @@ VEHICLE_STATE_RETURN_CODE run_vehicle_state(){
       if(TEST_call_diag_once == true){
       DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "MAIN", "diagnostics called.");
       request_vehicle_state_change(VEHICLE_STATE::DIAGNOSTICS);
-      request_self_test(TEST_ID::TRANSPORT_PACKET_NORMAL);
+      request_self_test(TEST_ID::TRANSPORT_TYPE_CHANGE);
       TEST_call_diag_once = false;
       }
 

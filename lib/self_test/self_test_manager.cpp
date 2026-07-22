@@ -63,6 +63,23 @@ SELF_TEST_MANAGER_RETURN_CODE run_test_manager(){
         } break;
 
         case SELF_TEST_MANAGER::STARTING:{
+            
+
+            // wait 1s for ther fifo buffer to drain before starting a test
+            if(!self_test::runtime_ctx.test_start_countdown_active){
+                self_test::runtime_ctx.test_start_countdown_timer = micros();
+                self_test::runtime_ctx.test_start_countdown_active = true;
+            }
+
+            // test ot see if the start delay has expired
+            if(micros() - self_test::runtime_ctx.test_start_countdown_timer < TEST_START_COUNTDOWN_TIMER_US){
+                self_test::manager_ctx.manager_return_code = SELF_TEST_MANAGER_RETURN_CODE::TEST_STARTING;
+                break;
+            }
+
+            // print current test name 
+            const char* cache_test_name = get_test_name(self_test::runtime_ctx.current_active_test_id);
+            DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_META, "TEST", "starting self test: ", cache_test_name );
 
             st_clear_log();            // clear logs
             disable_verbose_error();   // disable verbose error reporting             

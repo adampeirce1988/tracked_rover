@@ -11,6 +11,7 @@ constexpr uint8_t PROGRESS_BAR_COUNT =              25;
 
 //************* global test congifg *************
 constexpr uint32_t TEST_END_COUNTDOWN_TIMER_US =     500000;   // 0.5 seconds
+constexpr uint32_t TEST_START_COUNTDOWN_TIMER_US =   500000;   // 0.5 seconds 
 constexpr uint16_t DEFAULT_PACKET_DELAY_US =         15000;
 //***********************************************
 
@@ -20,8 +21,8 @@ constexpr uint8_t RANDOM_DELAY_PERCENTAGE =          20; //% chance
 //***********************************************
 
 //***************** packet timing test ***************** 
-constexpr uint8_t STANDARD_TEST_PACKET_COUNT =       100;
-constexpr uint8_t STRESS_TEST_PACKET_COUNT =         100;
+constexpr uint8_t STANDARD_TEST_PACKET_COUNT =       200;
+constexpr uint8_t STRESS_TEST_PACKET_COUNT =         200;
 constexpr uint16_t STANDARD_PACKET_DELAY_US =        DEFAULT_PACKET_DELAY_US; 
 constexpr uint16_t STRESS_TEST_PACKET_DELAY_US =     5000;
 constexpr bool ENABLE_RANDOM_PACKET_TIMING_DELAY =   true;
@@ -62,7 +63,7 @@ TEST_RETURN_STATUS self_test_diagnostics_wdt();
 struct SelfTestManagerContext {
   
     // test manager fsm variables 
-    SELF_TEST_MANAGER_RETURN_CODE manager_return_code = SELF_TEST_MANAGER_RETURN_CODE::ERROR; // use in final version    // default to ERROR
+    SELF_TEST_MANAGER_RETURN_CODE manager_return_code = SELF_TEST_MANAGER_RETURN_CODE::ERROR;  // default to ERROR
     SELF_TEST_MANAGER manager_state = SELF_TEST_MANAGER::IDLE;
 
     // Progress reporting
@@ -73,12 +74,13 @@ struct SelfTestRuntimeContext{
 
     // Timing
     uint32_t next_transmission_time = 0;
+    uint32_t test_start_countdown_timer = 0; 
     uint32_t test_end_countdown_timer = 0;
     uint32_t watchdog_timestamp = 0; 
     
     // Progress reporting
     uint8_t current_test_packet = 0;
-    uint8_t progress_bar_position = 1; // impliment in all vtests
+    uint8_t progress_bar_position = 1; // impliment in all tests
     uint8_t progress_bar_one_percent = 0; //impliment in all tests
 
     // test variables
@@ -86,6 +88,7 @@ struct SelfTestRuntimeContext{
 
     // control flags 
     bool diagnostics_active = false;
+    bool test_start_countdown_active = false; 
     bool test_end_countdown_active = false;
     bool watchdog_timer_test_active = false;
     bool watchdog_event_verified = false; 

@@ -26,13 +26,6 @@ TEST_RETURN_STATUS self_test_error_injection(uint8_t no_of_packets, uint8_t erro
     // test setup(runs only once)
     if(self_test::runtime_ctx.current_test_packet == 0){
 
-        // cache test name for setup
-        const char* cached_test_name = get_test_name(self_test::runtime_ctx.current_active_test_id); 
-
-        // Print test information.
-        DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_META, "TEST", cached_test_name, ": Running. Error count: ", error_count);
-        DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_META, "TEST", cached_test_name, "packets transmitted speed(us): ", DEFAULT_PACKET_DELAY_US); 
-    
         // configure progress bar 1% and protect against 0 devision
         self_test::runtime_ctx.progress_bar_one_percent = no_of_packets / PROGRESS_BAR_COUNT;
         if(self_test::runtime_ctx.progress_bar_one_percent == 0){
