@@ -31,28 +31,22 @@ TEST_RETURN_STATUS self_test_error_injection(uint8_t no_of_packets, uint8_t erro
         if(self_test::runtime_ctx.progress_bar_one_percent == 0){
             self_test::runtime_ctx.progress_bar_one_percent = 1; 
         }
-
-        // print the start of the progress bar
-        PRINT_PROGRESS_BAR_START();             
-            
-        // set current transport to fifo. 
-        //transport_set(&fifo_io);                       
+  
+        // set current transport to fifo.                       
         request_fifo_test_simulation(); // NEW requests fifo activated
 
-        // record test start time 
-        self_test::runtime_ctx.next_transmission_time = cached_micros;  // set the start time of the self test
+        // print the start of the progress bar
+        PRINT_PROGRESS_BAR_START();     
 
-        // get first random injection position
+        // Set the start time of the self test - delay. 
+        self_test::runtime_ctx.next_transmission_time = cached_micros - DEFAULT_PACKET_DELAY_US;
+
+        // Get first random injection position
         self_test::runtime_ctx.next_injection_position = random(MIN_INJECTION_POSITION, MAX_INJECTION_POSITION);       
     }
 
-    if(!fifo_simulation_active()){
-        return TEST_RETURN_STATUS::RUNNING; // wiat for setup add INITILIZING as a state
-    }
-
     // create a non-blocking loop to only send packts after alocatred time. 
-    if(cached_micros > self_test::runtime_ctx.next_transmission_time){
-
+    if(cached_micros - self_test::runtime_ctx.next_transmission_time >= DEFAULT_PACKET_DELAY_US){
 
         // print the progress bar counter if 1% has passed
         if(self_test::runtime_ctx.current_test_packet < no_of_packets && self_test::runtime_ctx.current_test_packet % self_test::runtime_ctx.progress_bar_one_percent == 0 ){

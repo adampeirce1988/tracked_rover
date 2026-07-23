@@ -7,6 +7,8 @@
 #include "self_test.h"
 #include "debug.h"
 #include "messages.h"
+#include "transport_types_internal.h"
+
 
 ///////////////// SEND DATA FRAME ////////////////////
  

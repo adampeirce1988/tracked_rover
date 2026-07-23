@@ -115,8 +115,6 @@ static uint8_t packet_id = 0x01;
   uint32_t total_rx_frame_time = 0;
   uint32_t total_tx_frame_time = 0;
 
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool transport_set(Transport_IO *io){
@@ -714,3 +712,4 @@ uint8_t update_tx_fsm(){
 
   return tx_return_status;
 }
+

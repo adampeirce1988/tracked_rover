@@ -7,6 +7,7 @@
 #include "debug.h"
 #include "debug_config.h"
 #include "self_test_internal.h"
+#include "simulation.h"
 
 #define DEBUG_FILE DBG_SELF_TEST
 
@@ -26,13 +27,8 @@ TEST_RETURN_STATUS self_test_transport_random_packet(uint8_t no_of_packets, uint
     // test setup only runs once
     if(self_test::runtime_ctx.current_test_packet == 0){
 
-        // print test meta data.
-        DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_META, "TEST", get_test_name(self_test::runtime_ctx.current_active_test_id), ": Running. packets: ", no_of_packets);
-        DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_META, "TEST","packet transmission speed(us): ", delay_time_us);
-
-    
         // set current transport to fifo.
-        transport_set(&fifo_io);                   
+        request_fifo_test_simulation();                   
         
         // set the timer up for the first transmission 
         self_test::runtime_ctx.next_transmission_time = cached_micros - delay_time_us;
