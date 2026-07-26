@@ -1,8 +1,6 @@
 
 #include "transport.h"
 #include "global_config.h"
-#include "debug.h" // remove once fsm bug resolved 
-#define DEBUG_FILE DBG_SYSTEM
 
 // Simulation variables
 namespace simulation{

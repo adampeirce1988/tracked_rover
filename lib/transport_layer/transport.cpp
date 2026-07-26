@@ -64,7 +64,7 @@ enum RX_STATE{
 struct transmit_packet{
   struct frame f;  
   bool waiting = false;
-  uint8_t error_code = 0;
+  TX_RETURN_CODES error_code = TX_RETURN_CODES::TX_IDLE_STATE;
 };
 
 struct transmit_ack_packet{
@@ -75,7 +75,7 @@ struct transmit_ack_packet{
   bool ack_confirmation = false; 
   uint32_t ack_timestamp = 0; 
   uint8_t retry_counter = 0; 
-  uint8_t error_code = 0; 
+  TX_RETURN_CODES error_code = TX_RETURN_CODES::TX_IDLE_STATE;
 };
 
 struct receive_packet{
@@ -562,9 +562,9 @@ uint8_t update_rx_fsm(){
 
 ///////////////// SEND DATA FRAME ////////////////////
  
-uint8_t update_tx_fsm(){
+TX_RETURN_CODES update_tx_fsm(){
 
-  uint8_t tx_return_status = 0; 
+  TX_RETURN_CODES tx_return_status = TX_RETURN_CODES::UNINITIALIZED;  
 
   // priorities the message based on the type. (ACK, RESEND, NORMAL)
   if((tx_state == TX_STATE_IDLE) && (tx_priority_packet.waiting == true)){
@@ -672,7 +672,6 @@ uint8_t update_tx_fsm(){
         else if(tx_pending_ack.error_code == TX_RETURN_CODES::TX_BUFFER_OVERFLOW || tx_priority_packet.error_code == TX_RETURN_CODES::TX_BUFFER_OVERFLOW || tx_normal_packet.error_code == TX_RETURN_CODES::TX_BUFFER_OVERFLOW){
           DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "TX", "failed to send packet due to serial bufer overflow. ");
         }
-
         tx_state = TX_STATE_IDLE;
         tx_return_status = TX_RETURN_CODES::TX_TRANSMISION_ERROR;
       break;  

@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <stdint.h>
 #include "global_config.h"
+#include "transport_types.h"
 
 
 // ================= MACROS =================
@@ -50,37 +51,37 @@ namespace RX_RETURN_CODES{
   constexpr uint8_t MSG_TIMEOUT_ERROR =       20;
 }
 
-// ================= TX RETURN CODES =================
-namespace TX_RETURN_CODES{
-  constexpr uint8_t TX_IDLE_STATE =                0;
-  constexpr uint8_t TX_PENDING_ACK =               1;
-  constexpr uint8_t TX_TRANSMITING =               2;
-  constexpr uint8_t RESENDING_MSG =                3;
-  constexpr uint8_t TX_TRANSMISION_SUCCESS =       4;
-  constexpr uint8_t TX_ACK_TRANSMISION_SUCCESS =   5;
-  constexpr uint8_t TX_RETRY_TRANSMISION_SUCCESS = 6; 
-  constexpr uint8_t TX_TRANSMISION_ERROR =         7;
-  constexpr uint8_t ACK_NOT_RECEVIED =             8;
-  constexpr uint8_t ACK_MISMATCHED =               9;
-  constexpr uint8_t ACK_WDT_TIMEOUT =              10;
-  constexpr uint8_t TX_BUFFER_OVERFLOW =           11;
+// // ================= TX RETURN CODES =================
+// namespace TX_RETURN_CODES{
+//   constexpr uint8_t TX_IDLE_STATE =                0;
+//   constexpr uint8_t TX_PENDING_ACK =               1;
+//   constexpr uint8_t TX_TRANSMITING =               2;
+//   constexpr uint8_t RESENDING_MSG =                3;
+//   constexpr uint8_t TX_TRANSMISION_SUCCESS =       4;
+//   constexpr uint8_t TX_ACK_TRANSMISION_SUCCESS =   5;
+//   constexpr uint8_t TX_RETRY_TRANSMISION_SUCCESS = 6; 
+//   constexpr uint8_t TX_TRANSMISION_ERROR =         7;
+//   constexpr uint8_t ACK_NOT_RECEVIED =             8;
+//   constexpr uint8_t ACK_MISMATCHED =               9;
+//   constexpr uint8_t ACK_WDT_TIMEOUT =              10;
+//   constexpr uint8_t TX_BUFFER_OVERFLOW =           11;
  
-}
+// }
 
 // =============== ENUM CLASS ===============
 // global class used to select a test. 
-enum class TX_SET_FAULT_MODE{           
-  NONE,
-  TYPE_CHANGE,
-  ACK_CHANGE,
-  ID_CHANGE,
-  RAND_DLC_CHANGE,
-  DLC_OVER_MAX_CAPACITY,
-  CRC_RAND_FLIP_BIT, 
-  CRC_CHANGE, 
-  RAND_DATA_FLIP_BIT,
-  RAND_DATA_CHANGE
-}; 
+// enum class TX_SET_FAULT_MODE{           
+//   NONE,
+//   TYPE_CHANGE,
+//   ACK_CHANGE,
+//   ID_CHANGE,
+//   RAND_DLC_CHANGE,
+//   DLC_OVER_MAX_CAPACITY,
+//   CRC_RAND_FLIP_BIT, 
+//   CRC_CHANGE, 
+//   RAND_DATA_FLIP_BIT,
+//   RAND_DATA_CHANGE
+// }; 
 
 // ================= STRUCT =================
 
@@ -133,7 +134,7 @@ uint8_t frame_avaliable();
 
 // update state machines must be called in order each loop 
 uint8_t update_rx_fsm();
-uint8_t update_tx_fsm();
+TX_RETURN_CODES update_tx_fsm();
 
 
 

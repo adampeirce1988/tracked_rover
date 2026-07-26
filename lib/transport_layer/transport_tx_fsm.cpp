@@ -1,13 +1,16 @@
 /*
+
 #include <Arduino.h>
 #include <string.h>
 #include "transport.h"
 #include "global_config.h"
 #include "global.h"
 #include "self_test.h"
-#include "debug.h"
 #include "messages.h"
-#include "transport_types_internal.h"
+#include "transport.h"
+#include "transport_internal.h"
+#include "debug.h"
+#include "debug_config.h"
 
 
 ///////////////// SEND DATA FRAME ////////////////////
@@ -162,5 +165,6 @@ uint8_t update_tx_fsm(){
 
   return tx_return_status;
 }
+
 
 */

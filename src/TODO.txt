@@ -18,8 +18,9 @@ test status: code compiles with 0 errors & untested on ESP.
 [FIXED]: 
 
 
-
 [TODO]: 
+- move RX_RETURN_CODE to transpor_types.h
+- TX_RETURN_CODES tx_transport_status in main.cpp requires moving to system
 - split the transport RX and TX FSM to sepreate files
 - refactor transport due to additon of 2x new functions
     transport_set_fifo();

@@ -17,7 +17,7 @@
 
 // return code variable ** these are also stored in system.h** 
 uint8_t rx_transport_status = 0;  
-uint8_t tx_transport_status = 0;
+TX_RETURN_CODES tx_transport_status = TX_RETURN_CODES::UNINITIALIZED; // ** THESE NEED TO BE MOVED **
 uint8_t rx_protocol_status = 0; 
 SELF_TEST_MANAGER_RETURN_CODE self_testmanager_status = SELF_TEST_MANAGER_RETURN_CODE::ERROR;
 

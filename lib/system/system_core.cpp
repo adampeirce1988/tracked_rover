@@ -13,7 +13,6 @@
 
 #define DEBUG_FILE DBG_SYSTEM
 
-
 void run_core_functions(){
 
     // print state change only on change. - to be dispalyed in the web interface on rlease

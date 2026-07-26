@@ -1,6 +1,8 @@
 #ifndef GLOBAL_CONFIG_H
 #define GLOBAL_CONFIG_H
 
+#include <stdint.h>
+
 
 // define the target platform here
 #define TARGET_PLATFORM ESP32

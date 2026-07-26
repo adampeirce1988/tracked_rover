@@ -11,7 +11,7 @@
 #define DEBUG_FILE DBG_ST_LOG
  
 
-void  process_transport_tx_return_error(uint8_t return_code){
+void  process_transport_tx_return_error(TX_RETURN_CODES return_code){
    
     switch(return_code){
 
@@ -52,7 +52,7 @@ void  process_transport_tx_return_error(uint8_t return_code){
 
         default: 
             // unecpected return code received. 
-            DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "LOG", "return code not mapped to a self test logging function", return_code); 
+            DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "LOG", "return code not mapped to a self test logging function", static_cast<uint8_t>(return_code)); 
             break; 
     }
 }

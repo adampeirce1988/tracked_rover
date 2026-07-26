@@ -2,6 +2,7 @@
 #define SYSTEM_H
 
 #include <stdint.h>
+#include "transport.h" // check this need to be included
 
 // system variables 
 extern bool health_test_status;                 // defines if the health_Test has passes or failed
@@ -10,7 +11,7 @@ extern bool health_test_status;                 // defines if the health_Test ha
 extern uint32_t diagnostics_WDT;                // WDT diagnostics test timeout
 
 // store module return codes 
-extern uint8_t tx_transport_status;             // stores status code for the transport tx state macheince
+extern TX_RETURN_CODES tx_transport_status;     // stores status code for the transport tx state macheince
 extern uint8_t rx_transport_status;             // stores status code for the transport rx state macheince
 extern uint8_t rx_protocol_status;              // stores status code for the protocol state macheince
 extern uint8_t test_manager_status;             // stores status code for the self test manager
