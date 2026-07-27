@@ -75,14 +75,14 @@ struct transmit_ack_packet{
   bool ack_confirmation = false; 
   uint32_t ack_timestamp = 0; 
   uint8_t retry_counter = 0; 
-  TX_RETURN_CODES error_code = TX_RETURN_CODES::TX_IDLE_STATE;
+  TX_RETURN_CODES error_code = TX_RETURN_CODES::UNINITIALIZED;
 };
 
 struct receive_packet{
   struct frame f; 
   uint8_t crc_check = 0; 
   uint8_t payload_position = 0; 
-  uint8_t error_code = 0; 
+  RX_RETURN_CODES error_code = RX_RETURN_CODES::UNINITIALIZED; 
   bool ack_response = false; 
   bool frame_ready = false; 
 };
@@ -275,16 +275,16 @@ static bool rx_msg_wdt_check(){
 }
 
 void reset_rx_message_struct(){
-  rx_packet.f.TYPE = 0;
-  rx_packet.f.ACK = 0;
-  rx_packet.f.ID = 0;
-  rx_packet.f.DLC = 0;
+  rx_packet.f.TYPE = 0x00;
+  rx_packet.f.ACK = 0x00;
+  rx_packet.f.ID = 0x00;
+  rx_packet.f.DLC = 0x00;
   for(uint8_t i = 0; i < MAX_PAYLOAD_LEN; i++){
     rx_packet.f.payload[i] = 0;
   }
   rx_packet.f.CRC = 0; 
   rx_packet.crc_check = 0; 
-  rx_packet.error_code = 0; 
+  rx_packet.error_code = RX_RETURN_CODES::UNINITIALIZED; 
   rx_packet.frame_ready = false; 
   rx_packet.payload_position = 0; 
 }
@@ -329,9 +329,9 @@ uint16_t transport_get_rx_latancy(){
 
 ///////////////// RECEIVE DATA FRAME ////////////////////
 
-uint8_t update_rx_fsm(){
+RX_RETURN_CODES update_rx_fsm(){
   
-  uint8_t rx_return_status = RX_RETURN_CODES::RX_STATE_IDLE; //initiates the return value
+  RX_RETURN_CODES rx_return_status = RX_RETURN_CODES::UNINITIALIZED; // initilize variable unused state
   uint8_t avaliable_bytes = current_transport->available();  // get the current amount of data
   uint8_t incoming = 0; 
 
@@ -354,7 +354,7 @@ uint8_t update_rx_fsm(){
 
           rx_packet.crc_check = 0;
           rx_packet.payload_position = 0;
-          rx_packet.error_code = 0; 
+          rx_packet.error_code = RX_RETURN_CODES::UNINITIALIZED;  // check usage 
           rx_packet.ack_response = false; 
           rx_packet.frame_ready = false; 
 
@@ -521,7 +521,7 @@ uint8_t update_rx_fsm(){
            /*report type error here*/
         }
         else if(rx_packet.error_code == RX_RETURN_CODES::ACK_OUT_OF_RANGE ){
-          DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "ACK", "out of range ACK: ", rx_packet.f.ACK);
+          DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "ACK", "out of range ACK: ", static_cast<uint8_t>(rx_packet.f.ACK));
           
         }
         else if(rx_packet.error_code == RX_RETURN_CODES::DLC_OVER_CAPACITY){

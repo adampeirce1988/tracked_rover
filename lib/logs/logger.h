@@ -40,7 +40,7 @@ enum EVALUATION_TYPE : uint8_t{
 // /////////////////////////////////////
 
 // Self-test return code router
-void process_transport_rx_return_error(uint8_t return_code);
+void process_transport_rx_return_error(RX_RETURN_CODES return_code);
 void process_transport_tx_return_error(TX_RETURN_CODES return_code);
 void process_protocol_return_error(uint8_t return_code);
 

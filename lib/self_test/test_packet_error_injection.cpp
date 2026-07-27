@@ -62,10 +62,10 @@ TEST_RETURN_STATUS self_test_error_injection(uint8_t no_of_packets, uint8_t erro
             DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "TEST", "packets sent current packet count: ", self_test::runtime_ctx.current_test_packet);
             
             // build data frame.
-            uint8_t type = MSG_TEST_VALID;                                        // Send all packets with a valid type
-            uint8_t ack  = TRANSPORT_ACK_TYPE::NORMAL_FRAME;                      // Send all packets as normal frames
-            uint8_t dlc  = random(1,(MAX_PAYLOAD_LEN + 1));                       // Set random dlc 1 - MAX_PAYLOAD
-            uint8_t data[MAX_PAYLOAD_LEN];                                        // Fill the payload with random values.
+            uint8_t type = MSG_TEST_VALID;                                          // Send all packets with a valid type
+            uint8_t ack = TRANSPORT_ACK_TYPE::NORMAL_FRAME;                         // Send all packets as normal frames
+            uint8_t dlc  = random(1,(MAX_PAYLOAD_LEN + 1));                         // Set random dlc 1 - MAX_PAYLOAD
+            uint8_t data[MAX_PAYLOAD_LEN];                                          // Fill the payload with random values.
             for(uint8_t i = 0; i < dlc; i++){
                 data[i] = random(MIN_DATA_VALUE, MAX_DATA_VALUE + 1);
             }

@@ -65,8 +65,7 @@ TEST_RETURN_STATUS self_test_transport_random_packet(uint8_t no_of_packets, uint
         if(self_test::runtime_ctx.current_test_packet < no_of_packets){
             
             uint8_t type = random(MIN_TYPE_VALUE, MAX_TYPE_VALUE + 1);    // random type 1-255 ** NO TYPE CHECK IMPLIMENTED **
-            uint8_t ack  = weighted_random_ack();      
-            ack = 0;                   // weighted ack 20% chance of ack 
+            uint8_t ack  = weighted_random_ack();              // weighted ack 20% chance of ack 
             uint8_t dlc  = random(0,(MAX_PAYLOAD_LEN + 1));               // set random DLC
             uint8_t data[MAX_PAYLOAD_LEN];                                // Fill random data based on the DLC
             for(uint8_t i = 0; i < dlc; i++){
@@ -75,7 +74,7 @@ TEST_RETURN_STATUS self_test_transport_random_packet(uint8_t no_of_packets, uint
 
             // Debug log ACK requests.
             if(ack == TRANSPORT_ACK_TYPE::ACK_REQUEST){
-                DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "ACK", "random packet sent with ack request set. ack_request: ", ack);
+                DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "ACK", "random packet sent with ack request set. ack_request: ", static_cast<uint8_t>(ack));
             } 
 
             // transmit packet

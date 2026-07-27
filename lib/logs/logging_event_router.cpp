@@ -58,7 +58,7 @@ void  process_transport_tx_return_error(TX_RETURN_CODES return_code){
 }
 
 
-void process_transport_rx_return_error(uint8_t rx_return_code){
+void process_transport_rx_return_error(RX_RETURN_CODES rx_return_code){
 
     switch(rx_return_code){
         case RX_RETURN_CODES::FRAME_READY:
@@ -111,7 +111,8 @@ void process_transport_rx_return_error(uint8_t rx_return_code){
         break;
 
         default:
-            break; 
+            DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "LOG", "return code not mapped to a self test logging function", static_cast<uint8_t>(rx_return_code)); 
+        break; 
     }
 }
 

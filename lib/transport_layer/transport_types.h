@@ -12,29 +12,39 @@
 // NACK
 // };
 
-// // ================= RX RETURN CODES =================
-// enum class RX_RETURN_CODES : uint8_t{
-//   RX_STATE_IDLE,
-//   WAITING_FOR_START,
-//   START_RECEIVED,
-//   TYPE_RECEIVED,
-//   ACK_REQUEST_RECEIVED,
-//   ACK_RESPONSE_RECEIVED,
-//   NACK_REQUEST_RECEIVED,
-//   NORMAL_FRAME_RECEIVED,
-//   ACK_RESPONSE_SENT,
-//   ID_RECEIVED,
-//   DLC_RECEIVED,
-//   RECEIVING_DATA,
-//   PAYLOAD_COMPLETE,
-//   ACK_READY,
-//   INVALID_TYPE,
-//   ACK_OUT_OF_RANGE,
-//   DLC_OVER_CAPACITY,
-//   PAYLOAD_OVERFLOW,
-//   CRC_ERROR,
-//   MSG_TIMEOUT_ERROR
-// };
+//================= ACK TYPES =================
+namespace TRANSPORT_ACK_TYPE{
+constexpr uint8_t NORMAL_FRAME =              0x00;
+constexpr uint8_t ACK_REQUEST  =              0x01;
+constexpr uint8_t ACK_RESPONSE =              0x02;
+constexpr uint8_t NACK =                      0x03;
+};
+
+// ================= RX RETURN CODES =================
+enum class RX_RETURN_CODES : uint8_t{
+  RX_STATE_IDLE,
+  WAITING_FOR_START,
+  START_RECEIVED,
+  TYPE_RECEIVED,
+  ACK_REQUEST_RECEIVED,
+  ACK_RESPONSE_RECEIVED,
+  NACK_REQUEST_RECEIVED,
+  NORMAL_FRAME_RECEIVED,
+  ACK_RESPONSE_SENT,
+  ID_RECEIVED,
+  DLC_RECEIVED,
+  RECEIVING_DATA,
+  PAYLOAD_COMPLETE,
+  ACK_READY,
+  INVALID_TYPE,
+  ACK_OUT_OF_RANGE,
+  DLC_OVER_CAPACITY,
+  PAYLOAD_OVERFLOW,
+  CRC_ERROR,
+  MSG_TIMEOUT_ERROR,
+  FRAME_READY,
+  UNINITIALIZED
+};
 
 // ================= TX RETURN CODES =================
 enum class TX_RETURN_CODES : uint8_t{

@@ -19,37 +19,37 @@
 constexpr uint8_t START_BYTE =                0xFF;
 
 // ================= ACK TYPES =================
-namespace TRANSPORT_ACK_TYPE{
-constexpr uint8_t NORMAL_FRAME =              0x00;
-constexpr uint8_t ACK_REQUEST  =              0x01;
-constexpr uint8_t ACK_RESPONSE =              0x02;
-constexpr uint8_t NACK =                      0x03;
-};
+// namespace TRANSPORT_ACK_TYPE{
+// constexpr uint8_t NORMAL_FRAME =              0x00;
+// constexpr uint8_t ACK_REQUEST  =              0x01;
+// constexpr uint8_t ACK_RESPONSE =              0x02;
+// constexpr uint8_t NACK =                      0x03;
+// };
 
-// ================= RX RETURN CODES =================
-namespace RX_RETURN_CODES{
-  constexpr uint8_t RX_STATE_IDLE =           0;
-  constexpr uint8_t WAITING_FOR_START =       1;
-  constexpr uint8_t START_RECEIVED =          2;
-  constexpr uint8_t TYPE_RECEIVED =           3;
-  constexpr uint8_t ACK_REQUEST_RECEIVED =    4;
-  constexpr uint8_t ACK_RESPONSE_RECEIVED =   5;
-  constexpr uint8_t NACK_REQUEST_RECEIVED =   6;
-  constexpr uint8_t NORMAL_FRAME_RECEIVED =   7;
-  constexpr uint8_t ACK_RESPONSE_SENT =       8;
-  constexpr uint8_t ID_RECEIVED =             9;
-  constexpr uint8_t DLC_RECEIVED =            10;
-  constexpr uint8_t RECEIVING_DATA =          11;
-  constexpr uint8_t PAYLOAD_COMPLETE =        12;
-  constexpr uint8_t FRAME_READY =             13;
-  constexpr uint8_t ACK_READY =               14;
-  constexpr uint8_t INVALID_TYPE =            15;
-  constexpr uint8_t ACK_OUT_OF_RANGE =        16;
-  constexpr uint8_t DLC_OVER_CAPACITY =       17;
-  constexpr uint8_t PAYLOAD_OVERFLOW =        18;
-  constexpr uint8_t CRC_ERROR =               19;
-  constexpr uint8_t MSG_TIMEOUT_ERROR =       20;
-}
+// // ================= RX RETURN CODES =================
+// namespace RX_RETURN_CODES{
+//   constexpr uint8_t RX_STATE_IDLE =           0;
+//   constexpr uint8_t WAITING_FOR_START =       1;
+//   constexpr uint8_t START_RECEIVED =          2;
+//   constexpr uint8_t TYPE_RECEIVED =           3;
+//   constexpr uint8_t ACK_REQUEST_RECEIVED =    4;
+//   constexpr uint8_t ACK_RESPONSE_RECEIVED =   5;
+//   constexpr uint8_t NACK_REQUEST_RECEIVED =   6;
+//   constexpr uint8_t NORMAL_FRAME_RECEIVED =   7;
+//   constexpr uint8_t ACK_RESPONSE_SENT =       8;
+//   constexpr uint8_t ID_RECEIVED =             9;
+//   constexpr uint8_t DLC_RECEIVED =            10;
+//   constexpr uint8_t RECEIVING_DATA =          11;
+//   constexpr uint8_t PAYLOAD_COMPLETE =        12;
+//   constexpr uint8_t FRAME_READY =             13;
+//   constexpr uint8_t ACK_READY =               14;
+//   constexpr uint8_t INVALID_TYPE =            15;
+//   constexpr uint8_t ACK_OUT_OF_RANGE =        16;
+//   constexpr uint8_t DLC_OVER_CAPACITY =       17;
+//   constexpr uint8_t PAYLOAD_OVERFLOW =        18;
+//   constexpr uint8_t CRC_ERROR =               19;
+//   constexpr uint8_t MSG_TIMEOUT_ERROR =       20;
+// }
 
 // // ================= TX RETURN CODES =================
 // namespace TX_RETURN_CODES{
@@ -133,7 +133,7 @@ void transport_get_frame(struct frame *out);
 uint8_t frame_avaliable(); 
 
 // update state machines must be called in order each loop 
-uint8_t update_rx_fsm();
+RX_RETURN_CODES update_rx_fsm();
 TX_RETURN_CODES update_tx_fsm();
 
 

@@ -12,7 +12,7 @@ extern uint32_t diagnostics_WDT;                // WDT diagnostics test timeout
 
 // store module return codes 
 extern TX_RETURN_CODES tx_transport_status;     // stores status code for the transport tx state macheince
-extern uint8_t rx_transport_status;             // stores status code for the transport rx state macheince
+extern RX_RETURN_CODES rx_transport_status;     // stores status code for the transport rx state macheince
 extern uint8_t rx_protocol_status;              // stores status code for the protocol state macheince
 extern uint8_t test_manager_status;             // stores status code for the self test manager
 
