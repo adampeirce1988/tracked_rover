@@ -6,6 +6,7 @@
 #include <Arduino.h>
 #include <string.h>
 #include "transport.h"
+#include "transport_internal.h"
 #include "global_config.h"
 #include "global.h"
 #include "self_test.h"
@@ -27,14 +28,14 @@
 
 
 // ===== PRIVATE PROTOTYPES =====
-static uint8_t calculate_crc(struct frame *f);
-static uint8_t inline_crc_calc(uint8_t CRC, uint8_t byte);
-static bool rx_msg_wdt_check();
-static void transmit_packet(struct frame *f);
-static bool pack_message(uint8_t type, uint8_t ack, uint8_t id, uint8_t dlc, uint8_t *data, struct frame *ptr);
-static void pack_ack(uint8_t type, uint8_t id, struct frame *f);
-static void copy_frame(struct frame *source, struct frame *destination);
-static void reset_rx_message_struct();
+static uint8_t calculate_crc(struct frame *f);              // internal 
+static uint8_t inline_crc_calc(uint8_t CRC, uint8_t byte);  // internal 
+static bool rx_msg_wdt_check();                             // internal
+static void transmit_packet(struct frame *f);               // internal 
+static bool pack_message(uint8_t type, uint8_t ack, uint8_t id, uint8_t dlc, uint8_t *data, struct frame *ptr); // internal 
+static void pack_ack(uint8_t type, uint8_t id, struct frame *f); // internal 
+static void copy_frame(struct frame *source, struct frame *destination); // internal 
+static void reset_rx_message_struct(); // internal 
 
 //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
@@ -102,18 +103,23 @@ struct receive_packet rx_packet;
 struct receive_ack rx_ack;
 
 struct frame *active;                                  // active frame for sending data 
-Transport_IO *current_transport = DEFAULT_TRANSPORT;   // communication port struct defined in transport.h and initialized in main.cpp
+//Transport_IO *current_transport = DEFAULT_TRANSPORT;   // communication port struct defined in transport.h and initialized in main.cpp
+
 
 // global variables
 static uint32_t last_read_byte = 0x00; 
 static uint32_t rx_wdt_timestamp = 0; 
 static uint8_t packet_id = 0x01; 
 
+
 // Timestamps(us) 
   uint32_t tx_start_timestamp = 0; 
   uint32_t rx_start_timestamp = 0;
   uint32_t total_rx_frame_time = 0;
   uint32_t total_tx_frame_time = 0;
+
+// transport
+//Transport_IO *current_transport = DEFAULT_TRANSPORT;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -126,23 +132,16 @@ bool transport_set(Transport_IO *io){
   current_transport = io;
   return true;
 }
-// TEST to stop exposure of the set vairiables //
-bool transport_set_fifo(){
-  return transport_set(&fifo_io);
-}
 
-bool transport_set_uart(){
-  return transport_set(&uart_io);
-}
 ////////////////////////////////////////////////
 
-void fifo_io_uart_engine_update(){
-   current_transport->update();
-}
+// void fifo_io_uart_engine_update(){
+//    current_transport->update();
+// }
 
-void coms_port_begin(uint32_t baud_rate){
-  current_transport->begin(baud_rate);
-}
+// void coms_port_begin(uint32_t baud_rate){
+//   current_transport->begin(baud_rate);
+// }
 
 uint8_t frame_avaliable(){
   if(rx_packet.frame_ready == true){

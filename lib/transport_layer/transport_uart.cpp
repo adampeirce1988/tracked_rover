@@ -1,6 +1,7 @@
 
 #include <Arduino.h>
 #include "transport.h"
+#include "transport_internal.h"
 #include "global_config.h"
 #include "debug.h"
 #include "debug_config.h"

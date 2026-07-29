@@ -1,6 +1,8 @@
 
 #include <Arduino.h>
 #include "transport.h"
+#include "transport_types.h"
+#include "transport_internal.h"
 #include "global_config.h"
 #include "debug.h"
 
@@ -8,6 +10,10 @@
 #define DEBUG_FILE           DBG_TRANSPORT_FIFO             //debug file name 
 #define BITS_PER_FRAME       10                             // number of bytes in 8N1 transmission 
 #define MICORS_PER_SECOND    1000000UL                      // no of u_seconds per second 
+
+// fifo macros 
+#define MAX_FRAME_SIZE(f) (sizeof (struct frame))
+#define DYNAMIC_FRAME_SIZE(f) (sizeof(struct frame) - MAX_PAYLOAD_LEN + (f).DLC)
 
 //Forward declarations
 void fifo_write(uint8_t byte);

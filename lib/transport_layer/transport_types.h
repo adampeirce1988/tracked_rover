@@ -1,23 +1,25 @@
-#ifndef TRANSPORT_INTERNAL_H
-#define TRANSPORT_INTERNAL_H
+#ifndef TRANSPORT_TYPES_H
+#define TRANSPORT_TYPES_H
 
 // folder containing all of enumm class to be included in the external.h so there is no need to include them in every file. 
 #include <stdint.h>
 
-// // ================= ACK TYPES =================
-// enum class TRANSPORT_ACK_TYPE : uint8_t{
-// NORMAL_FRAME, 
-// ACK_REQUEST,
-// ACK_RESPONSE,
-// NACK
-// };
+//data frame structure
+struct frame {
+  uint8_t TYPE;
+  uint8_t ACK;
+  uint8_t ID;
+  uint8_t DLC;
+  uint8_t payload[MAX_PAYLOAD_LEN];
+  uint8_t CRC;
+};
 
 //================= ACK TYPES =================
 namespace TRANSPORT_ACK_TYPE{
-constexpr uint8_t NORMAL_FRAME =              0x00;
-constexpr uint8_t ACK_REQUEST  =              0x01;
-constexpr uint8_t ACK_RESPONSE =              0x02;
-constexpr uint8_t NACK =                      0x03;
+  constexpr uint8_t NORMAL_FRAME =              0x00;
+  constexpr uint8_t ACK_REQUEST  =              0x01;
+  constexpr uint8_t ACK_RESPONSE =              0x02;
+  constexpr uint8_t NACK =                      0x03;
 };
 
 // ================= RX RETURN CODES =================
