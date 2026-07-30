@@ -16,11 +16,6 @@ test status: code compiles with 0 errors & untested on ESP.
 
 
 [FIXED]: 
-- added file transport_api.cpp - move external api code here
-- added transpor_internal.h - all internal finctions to go here 
-- chagnged port_begin() to ports_init() added set up for fifo & uart in one function
-- 
-
 
 
 [TODO]: 
