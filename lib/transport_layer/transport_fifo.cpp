@@ -12,8 +12,8 @@
 #define MICORS_PER_SECOND    1000000UL                      // no of u_seconds per second 
 
 // fifo macros 
-#define MAX_FRAME_SIZE(f) (sizeof (struct frame))
-#define DYNAMIC_FRAME_SIZE(f) (sizeof(struct frame) - MAX_PAYLOAD_LEN + (f).DLC)
+//#define MAX_FRAME_SIZE(f) (sizeof (struct frame))
+//#define DYNAMIC_FRAME_SIZE(f) (sizeof(struct frame) - MAX_PAYLOAD_LEN + (f).DLC)
 
 //Forward declarations
 void fifo_write(uint8_t byte);

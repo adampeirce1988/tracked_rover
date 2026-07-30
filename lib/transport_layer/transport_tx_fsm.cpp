@@ -1,23 +1,24 @@
-/*
 
-#include <Arduino.h>
-#include <string.h>
-#include "transport.h"
-#include "global_config.h"
+
 #include "global.h"
-#include "self_test.h"
-#include "messages.h"
 #include "transport.h"
 #include "transport_internal.h"
 #include "debug.h"
-#include "debug_config.h"
 
+
+#define DEBUG_FILE DBG_TRANSPORT 
+
+TX_STATE tx_state; 
+
+uint32_t tx_start_timestamp = 0; 
+uint32_t total_tx_frame_time = 0;
+uint8_t packet_id = 0x01; 
 
 ///////////////// SEND DATA FRAME ////////////////////
  
-uint8_t update_tx_fsm(){
+TX_RETURN_CODES update_tx_fsm(){
 
-  uint8_t tx_return_status = 0; 
+  TX_RETURN_CODES tx_return_status = TX_RETURN_CODES::UNINITIALIZED;  
 
   // priorities the message based on the type. (ACK, RESEND, NORMAL)
   if((tx_state == TX_STATE_IDLE) && (tx_priority_packet.waiting == true)){
@@ -125,7 +126,6 @@ uint8_t update_tx_fsm(){
         else if(tx_pending_ack.error_code == TX_RETURN_CODES::TX_BUFFER_OVERFLOW || tx_priority_packet.error_code == TX_RETURN_CODES::TX_BUFFER_OVERFLOW || tx_normal_packet.error_code == TX_RETURN_CODES::TX_BUFFER_OVERFLOW){
           DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "TX", "failed to send packet due to serial bufer overflow. ");
         }
-
         tx_state = TX_STATE_IDLE;
         tx_return_status = TX_RETURN_CODES::TX_TRANSMISION_ERROR;
       break;  
@@ -165,6 +165,3 @@ uint8_t update_tx_fsm(){
 
   return tx_return_status;
 }
-
-
-*/

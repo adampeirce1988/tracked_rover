@@ -4,15 +4,6 @@
 // folder containing all of enumm class to be included in the external.h so there is no need to include them in every file. 
 #include <stdint.h>
 
-//data frame structure
-struct frame {
-  uint8_t TYPE;
-  uint8_t ACK;
-  uint8_t ID;
-  uint8_t DLC;
-  uint8_t payload[MAX_PAYLOAD_LEN];
-  uint8_t CRC;
-};
 
 //================= ACK TYPES =================
 namespace TRANSPORT_ACK_TYPE{

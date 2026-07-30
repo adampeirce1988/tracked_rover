@@ -19,6 +19,8 @@ test status: code compiles with 0 errors & untested on ESP.
 
 
 [TODO]: 
+- update the file diagram to reflect the file changes
+- refactor of transport to improve readability and flow
 - RX_RETURN_CODES tx_transport_status in main.cpp requires moving to system
 - TX_RETURN_CODES tx_transport_status in main.cpp requires moving to system
 - split the transport RX and TX FSM to sepreate files

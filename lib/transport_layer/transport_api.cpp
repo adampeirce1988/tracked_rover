@@ -3,15 +3,13 @@
 #include "global_config.h"
 #include "transport_types.h"
 
-
 Transport_IO *current_transport = DEFAULT_TRANSPORT;   // communication port struct defined in transport.h and initialized in main.cpp
-
 
 ////////////////////////////////////////////
 //          Transport io init()           //
 ////////////////////////////////////////////
 
-void ports_init(uint32_t baud_rate){
+void transport_init(uint32_t baud_rate){
   //current_transport->begin(baud_rate);
   uart_io.begin(baud_rate);
   fifo_io.begin(baud_rate);
@@ -45,3 +43,12 @@ void fifo_io_uart_engine_update(){
 ////////////////////////////////////////////
 //                 Transport              //
 ////////////////////////////////////////////
+
+uint8_t frame_avaliable(){
+  if(rx_packet.frame_ready == true){
+    return true; 
+  }
+  else{
+    return false; 
+  }
+}

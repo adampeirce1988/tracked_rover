@@ -68,7 +68,7 @@ VEHICLE_STATE_RETURN_CODE run_vehicle_state(){
       // set the current transport & baud rate. 
       //transport_set(&uart_io); ** remove after refactor ** 
       transport_set_default();                                                  // set transport method default to be serial (&uart_io / &fifo_io)
-      ports_init(COMS_PORT_BAUD);                                           // open inter board serial port 
+      transport_init(COMS_PORT_BAUD);                                           // open inter board serial port 
       
       // **DELETE** once handled via the web interface
       user_enable_simulation();  //***** DELETE ONCE HANDLED BY THE WEB INTERFACE ***** 

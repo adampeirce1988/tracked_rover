@@ -1,19 +1,24 @@
-
-/*
-#include <Arduino.h>
-#include <string.h>
-#include "transport.h"
-#include "global_config.h"
 #include "global.h"
-#include "self_test.h"
+#include "transport.h"
+#include "transport_internal.h"
 #include "debug.h"
-#include "messages.h"
+
+
+#define DEBUG_FILE DBG_TRANSPORT 
+
+uint32_t last_read_byte = 0x00; 
+uint32_t rx_wdt_timestamp = 0; 
+uint32_t rx_start_timestamp = 0;
+uint32_t total_rx_frame_time = 0;
+
+
+RX_STATE rx_state; 
 
 ///////////////// RECEIVE DATA FRAME ////////////////////
 
-uint8_t update_rx_fsm(){
+RX_RETURN_CODES update_rx_fsm(){
   
-  uint8_t rx_return_status = RX_RETURN_CODES::RX_STATE_IDLE; //initiates the return value
+  RX_RETURN_CODES rx_return_status = RX_RETURN_CODES::UNINITIALIZED; // initilize variable unused state
   uint8_t avaliable_bytes = current_transport->available();  // get the current amount of data
   uint8_t incoming = 0; 
 
@@ -36,7 +41,7 @@ uint8_t update_rx_fsm(){
 
           rx_packet.crc_check = 0;
           rx_packet.payload_position = 0;
-          rx_packet.error_code = 0; 
+          rx_packet.error_code = RX_RETURN_CODES::UNINITIALIZED;  // check usage 
           rx_packet.ack_response = false; 
           rx_packet.frame_ready = false; 
 
@@ -200,10 +205,10 @@ uint8_t update_rx_fsm(){
 
       case RX_STATE_ERROR: 
         if(rx_packet.error_code == RX_RETURN_CODES::INVALID_TYPE){
-           //report type error here
+           /*report type error here*/
         }
         else if(rx_packet.error_code == RX_RETURN_CODES::ACK_OUT_OF_RANGE ){
-          DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "ACK", "out of range ACK: ", rx_packet.f.ACK);
+          DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "ACK", "out of range ACK: ", static_cast<uint8_t>(rx_packet.f.ACK));
           
         }
         else if(rx_packet.error_code == RX_RETURN_CODES::DLC_OVER_CAPACITY){
@@ -240,4 +245,4 @@ uint8_t update_rx_fsm(){
 
   return rx_return_status;
 }
-*/
+

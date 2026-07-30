@@ -161,6 +161,7 @@ void tx_frame_error_injection(struct frame *f ){ // TODO: add a config struct fo
                 str_failure_type = "NONE";
             break;
         }
+        
         DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_TEST, "INJT", "TX fault injected type: ", str_failure_type); 
         tx_fault_injection_cfg.tx_fault_injection_flag = false; // must be cleared at the end of the call.
     }
