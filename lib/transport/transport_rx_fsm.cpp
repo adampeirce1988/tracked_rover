@@ -16,21 +16,23 @@ RX_STATE rx_state;
 
 ///////////////// RECEIVE DATA FRAME ////////////////////
 
-RX_RETURN_CODES update_rx_fsm(){
+RX_RETURN_CODES update_rx_fsm()
+{
   
-  RX_RETURN_CODES rx_return_status = RX_RETURN_CODES::UNINITIALIZED; // initilize variable unused state
-  uint8_t avaliable_bytes = current_transport->available();  // get the current amount of data
+  RX_RETURN_CODES rx_return_status = RX_RETURN_CODES::UNINITIALIZED; // initialize variable unused state
+  uint8_t available_bytes = current_transport->available();  // get the current amount of data
   uint8_t incoming = 0; 
 
-  if(avaliable_bytes > 0 || rx_state == RX_STATE_ERROR){
+  if(available_bytes > 0 || rx_state == RX_STATE_ERROR){
     
-    // only read bytes if data avaliable.  
-    if(avaliable_bytes > 0 && rx_state != RX_STATE_ERROR){
+    // only read bytes if data available.  
+    if(available_bytes > 0 && rx_state != RX_STATE_ERROR){
       incoming = current_transport->read();
       last_read_byte = micros();
     }
 
-    switch(rx_state){
+    switch(rx_state)
+    {
 
       case RX_STATE_WAIT_START: 
         if(incoming == START_BYTE){
@@ -95,7 +97,7 @@ RX_RETURN_CODES update_rx_fsm(){
           rx_return_status = RX_RETURN_CODES::NORMAL_FRAME_RECEIVED;
         }
         else{
-          // handel ack out of range error 
+          // handle ack out of range error 
           rx_packet.error_code = RX_RETURN_CODES::ACK_OUT_OF_RANGE;
           rx_return_status = RX_RETURN_CODES::ACK_OUT_OF_RANGE;
           rx_state = RX_STATE_ERROR;
@@ -165,7 +167,7 @@ RX_RETURN_CODES update_rx_fsm(){
         DEBUG_STREAM_END(DEBUG_FILE, DEBUG_STREAM, incoming);
         DEBUG_PRINT_DATA_FRAME(DEBUG_FILE, DEBUG_MSG, RX_FRAME, "462", START_BYTE, "[RX]", rx_packet.f);
 
-        // check and report corupt frames
+        // check and report corrupt frames
         if(rx_packet.crc_check != rx_packet.f.CRC){
           rx_return_status = RX_RETURN_CODES::CRC_ERROR; 
           rx_packet.error_code = RX_RETURN_CODES::CRC_ERROR;
@@ -195,7 +197,7 @@ RX_RETURN_CODES update_rx_fsm(){
             rx_return_status = RX_RETURN_CODES::FRAME_READY; 
           }
 
-          // log end time and update the logest time if greater than the longest. 
+          // log end time and update the longest time if greater than the longest. 
           total_rx_frame_time = micros() - rx_start_timestamp;
 
           rx_state = RX_STATE_WAIT_START;
@@ -212,15 +214,15 @@ RX_RETURN_CODES update_rx_fsm(){
           
         }
         else if(rx_packet.error_code == RX_RETURN_CODES::DLC_OVER_CAPACITY){
-          DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "RX", "DLC greater that payload capacity: ", ARRAY_SIZE(rx_packet.f.payload));
+          DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "RX", "DLC greater than payload capacity: ", ARRAY_SIZE(rx_packet.f.payload));
           
         }
         else if(rx_packet.error_code == RX_RETURN_CODES::PAYLOAD_OVERFLOW){
-          DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "DLC", "Payload exceded DLC: ", rx_packet.payload_position);
+          DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "DLC", "Payload exceeded DLC: ", rx_packet.payload_position);
           
         }
         else if(rx_packet.error_code == RX_RETURN_CODES::MSG_TIMEOUT_ERROR){
-          DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_ERROR, "RX", "RX watch dog timer trigered elapsed time: ", CONVERT_US_TO_MS((rx_wdt_timestamp - last_read_byte)), "ms");
+          DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_ERROR, "RX", "RX watchdog timer triggered elapsed time: ", CONVERT_US_TO_MS((rx_wdt_timestamp - last_read_byte)), "ms");
           
         }
         else if(rx_packet.error_code == RX_RETURN_CODES::CRC_ERROR){
@@ -235,7 +237,7 @@ RX_RETURN_CODES update_rx_fsm(){
       break;
     }
   }
-  // cehcek the message WTD for timeout error rest only if the state is idle nad rx is in progress(removed wdt check ignotrd if RX_STATE_IDLE)
+  // checek the message WTD for timeout error rest only if the state is idle nad rx is in progress(removed wdt check ignotrd if RX_STATE_IDLE)
   if(rx_msg_wdt_check() == true && rx_state != RX_STATE_WAIT_START){
     rx_wdt_timestamp = micros();
     rx_state = RX_STATE_ERROR;

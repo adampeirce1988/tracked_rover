@@ -16,10 +16,18 @@ test status: code compiles with 0 errors & untested on ESP.
 
 
 [FIXED]: 
+- updated the file diagram to reflect the file refactored structure 
+- cleaned the structure of teansport_internal.h 
+- reveiwed  the following files and standanrdized the format:
+    - transport_api.cpp 
+    - transport_fifo.cpp
+    - transport_internal.cpp 
+    - transport_internal.h 
+    - transport_rx_fsm.cpp 
+    - transport_structs.h 
 
 
 [TODO]: 
-- update the file diagram to reflect the file changes
 - refactor of transport to improve readability and flow
 - RX_RETURN_CODES tx_transport_status in main.cpp requires moving to system
 - TX_RETURN_CODES tx_transport_status in main.cpp requires moving to system
@@ -93,8 +101,14 @@ tracked_rover-built-in-trasmission-self-test/
     │   └── vehicle_state_macheine.cpp
     │
     └── transport_layer/
-        ├── transport.cpp
-        ├── transport.h
+        ├── transport_api.cpp ✅ (9.7/10)
         ├── transport_fifo.cpp
+        ├── transport_internal.cpp ✅ (9.5/10)
+        ├── transport_internal.h ✅ (9.5/10)
+        ├── transport_rx_fsm.cpp ✅ (9.6/10)
+        ├── transport_structs.h ✅ (9.7/10)
+        ├── transport_tx_fsm.cpp
+        ├── transport_types.h
         ├── transport_uart.cpp
+        ├── transport.h
         └── transpot_fault_injection.cpp

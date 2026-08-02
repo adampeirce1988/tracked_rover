@@ -55,7 +55,7 @@ void transport_queue_message(uint8_t type, uint8_t ack, uint8_t dlc, uint8_t *da
 void transport_get_frame(frame *out);
 
 /// Returns non-zero when a complete frame is available.
-bool frame_avaliable();
+bool frame_available();
 
 
 /*=============================================================================

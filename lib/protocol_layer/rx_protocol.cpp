@@ -18,14 +18,12 @@ frame protocol_frame;
 
 uint8_t rx_message_task_dispatcher(){ 
 
-    
     // return if no frames are avaliable
-    if(frame_avaliable() == 0){ 
+    if(frame_available() == 0){ 
         DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "PROTO", "NO frames avaliable");
         return PROTOCOL_RX_RETURN_CODE::PROTO_IDLE;
     }
     
-
     // get the received frame and clear rx_packet.frame_ready
     transport_get_frame(&protocol_frame); 
     DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "PROTO", "frame copied from Transport to protocol");

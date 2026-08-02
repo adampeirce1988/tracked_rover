@@ -3,21 +3,30 @@
 #include "transport_structs.h"
 #include "debug.h"
 
-// defines the name od the debug macro for this file
-#define DEBUG_FILE DBG_TRANSPORT 
+/*=============================================================================
+    Debug Configuration
+=============================================================================*/
 
-// structure to send a priority frame. 
-struct transmit_packet tx_priority_packet;
-struct transmit_packet tx_normal_packet; 
-struct transmit_ack_packet tx_pending_ack;
-struct receive_packet rx_packet; 
-struct receive_ack rx_ack;
+#define DEBUG_FILE DBG_TRANSPORT
+ 
 
-struct frame *active;                                  // active frame for sending data 
+/*=============================================================================
+    Runtime Objects
+=============================================================================*/
 
+struct transmit_packet      tx_priority_packet;
+struct transmit_packet      tx_normal_packet;
+struct transmit_ack_packet  tx_pending_ack;
 
+struct receive_packet       rx_packet;
+struct receive_ack          rx_ack;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+struct frame *active = nullptr;
+                               
+
+/*=============================================================================
+    Transport Interface
+=============================================================================*/
 
 bool transport_set(Transport_IO *io){
   if(io == NULL){
@@ -30,7 +39,9 @@ bool transport_set(Transport_IO *io){
 }
 
 
-
+/*=============================================================================
+    CRC Functions
+=============================================================================*/
 
  uint8_t inline_crc_calc(uint8_t CRC, uint8_t byte){
   CRC ^= byte;
@@ -45,6 +56,7 @@ bool transport_set(Transport_IO *io){
   }
   return CRC;
 }
+
 
  uint8_t calculate_crc(struct frame *f){
 
@@ -63,6 +75,11 @@ bool transport_set(Transport_IO *io){
   return crc;
 }
 
+
+/*=============================================================================
+    Frame Utilities
+=============================================================================*/
+
  void flush_struct(struct frame *f){ 
   f->TYPE = 0x00;
   f->ACK = 0x00;
@@ -73,6 +90,11 @@ bool transport_set(Transport_IO *io){
   }
   f->CRC = 0x00;
 }
+
+
+/*=============================================================================
+    Packet Construction
+=============================================================================*/
 
 void transport_queue_message(uint8_t type, uint8_t ack, uint8_t dlc, uint8_t *data){
   // send ack frame
@@ -123,6 +145,7 @@ bool pack_message(uint8_t type, uint8_t ack, uint8_t id, uint8_t dlc, uint8_t *d
   return true;
 }
 
+
 void pack_ack(uint8_t type, uint8_t id, struct frame *f){
   // flush the ack struct before packaging the frame.
   flush_struct(f); // flush the ack struct before packaging the frame. 
@@ -135,22 +158,29 @@ void pack_ack(uint8_t type, uint8_t id, struct frame *f){
   f->CRC = calculate_crc(f); 
 }
 
+
+/*=============================================================================
+    Receive Utilities
+=============================================================================*/
+
 void transport_get_frame(struct frame *out){
   *out = rx_packet.f;
   rx_packet.frame_ready = false; 
-  DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "MSG", "receive frame returned to protocal layer");
+  DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "MSG", "receive frame returned to protocol layer");
 }
+
 
 bool rx_msg_wdt_check(){
   if(rx_state != RX_STATE_WAIT_START && (micros() - last_read_byte) > MSG_WDT_TIMEOUT_US){
     DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_ERROR, "WDT", "rx incoming data watchdog timer timeout. elapsed time: ", (micros() - last_read_byte), "us");
-    DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "WDT", "watchdog timer timout occoured in rx_state: ", rx_state);
+    DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "WDT", "watchdog timer timeout occourred in rx_state: ", rx_state);
     return true;
   }
   else{
     return false; 
   }
 }
+
 
 void reset_rx_message_struct(){
   rx_packet.f.TYPE = 0x00;
@@ -167,6 +197,11 @@ void reset_rx_message_struct(){
   rx_packet.payload_position = 0; 
 }
 
+
+/*=============================================================================
+    Transmission
+=============================================================================*/
+
 void transmit_packet(struct frame *f){
   current_transport->write(START_BYTE); 
   current_transport->write(f->TYPE);
@@ -179,14 +214,20 @@ void transmit_packet(struct frame *f){
   current_transport->write(f->CRC);
 }
 
+
 void copy_frame(struct frame *scr, struct frame *dst){
   *dst = *scr; 
 
   DEBUG_PRINT_DATA_PTR_FRAME(DEBUG_FILE, DEBUG_INFO, COPIED_FRAME, "318", START_BYTE, " copy from frame passed to copy. FROM: ", scr);
-  DEBUG_PRINT_DATA_PTR_FRAME(DEBUG_FILE, DEBUG_INFO, COPIED_FRAME, "319",START_BYTE, "copy to frame returned after copy opperation. TO:", dst);
+  DEBUG_PRINT_DATA_PTR_FRAME(DEBUG_FILE, DEBUG_INFO, COPIED_FRAME, "319",START_BYTE, "copy to frame returned after copy operation. TO:", dst);
   
   return;
 }
+
+
+/*=============================================================================
+    Diagnostics
+=============================================================================*/
 
 uint16_t transport_get_tx_latancy(){  
   if(total_tx_frame_time > UINT16_MAX){
@@ -195,6 +236,7 @@ uint16_t transport_get_tx_latancy(){
 
   return total_tx_frame_time; 
 }
+
 
 uint16_t transport_get_rx_latancy(){
   if(total_rx_frame_time > UINT16_MAX){
