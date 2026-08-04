@@ -183,18 +183,22 @@ bool rx_msg_wdt_check(){
 
 
 void reset_rx_message_struct(){
-  rx_packet.f.TYPE = 0x00;
-  rx_packet.f.ACK = 0x00;
-  rx_packet.f.ID = 0x00;
-  rx_packet.f.DLC = 0x00;
-  for(uint8_t i = 0; i < MAX_PAYLOAD_LEN; i++){
-    rx_packet.f.payload[i] = 0;
-  }
+  // flush the rx_packet struct
+  flush_struct(&rx_packet.f); 
+
+  // reset the rx_packet parameters
   rx_packet.f.CRC = 0; 
   rx_packet.crc_check = 0; 
   rx_packet.error_code = RX_RETURN_CODES::UNINITIALIZED; 
   rx_packet.frame_ready = false; 
   rx_packet.payload_position = 0; 
+}
+
+
+void clear_rx_ack(){
+  rx_ack.TYPE = 0x00;
+  rx_ack.ID = 0x00;
+  rx_ack.ack_valid = false;
 }
 
 

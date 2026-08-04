@@ -116,6 +116,7 @@ struct receive_ack
 /*=============================================================================
     Internal Runtime Objects
 =============================================================================*/
+
 // packet struct declerations 
 extern struct transmit_packet tx_priority_packet;
 extern struct transmit_packet tx_normal_packet; 
@@ -125,8 +126,6 @@ extern struct receive_packet rx_packet;
 extern struct receive_ack rx_ack;
  
 extern struct frame *active;
-
-
 
 /*=============================================================================
     Transport Interface
@@ -185,24 +184,15 @@ bool rx_msg_wdt_check();
 
 void transmit_packet(frame *f);
 
-bool pack_message(
-    uint8_t type,
-    uint8_t ack,
-    uint8_t id,
-    uint8_t dlc,
-    uint8_t *data,
-    frame *ptr);
+bool pack_message( uint8_t type, uint8_t ack, uint8_t id, uint8_t dlc, uint8_t *data, frame *ptr);
 
-void pack_ack(
-    uint8_t type,
-    uint8_t id,
-    frame *f);
+void pack_ack( uint8_t type, uint8_t id, frame *f);
 
-void copy_frame(
-    frame *source,
-    frame *destination);
+void copy_frame(frame *source, frame *destination);
 
 void flush_struct(frame *f);
+
+void clear_rx_ack(); 
 
 void reset_rx_message_struct();
 

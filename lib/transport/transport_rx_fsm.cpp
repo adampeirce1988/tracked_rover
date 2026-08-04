@@ -1,57 +1,70 @@
-#include "global.h"
-#include "transport.h"
 #include "transport_internal.h"
 #include "debug.h"
 
 
-#define DEBUG_FILE DBG_TRANSPORT 
+/*=============================================================================
+    Debug Configuration
+=============================================================================*/
 
-uint32_t last_read_byte = 0x00; 
-uint32_t rx_wdt_timestamp = 0; 
-uint32_t rx_start_timestamp = 0;
-uint32_t total_rx_frame_time = 0;
+#define DEBUG_FILE DBG_TRANSPORT
 
 
-RX_STATE rx_state; 
+/*=============================================================================
+    Runtime Objects
+=============================================================================*/
 
-///////////////// RECEIVE DATA FRAME ////////////////////
+uint32_t last_read_byte        = 0x00; 
+uint32_t rx_timeout_timestamp  = 0; 
+uint32_t rx_start_timestamp    = 0;
+uint32_t total_rx_frame_time   = 0;
+
+RX_STATE rx_state = RX_STATE_WAIT_START; 
+
+
+/*=============================================================================
+    Receive State Machine
+=============================================================================*/
 
 RX_RETURN_CODES update_rx_fsm()
 {
   
-  RX_RETURN_CODES rx_return_status = RX_RETURN_CODES::UNINITIALIZED; // initialize variable unused state
-  uint8_t available_bytes = current_transport->available();  // get the current amount of data
-  uint8_t incoming = 0; 
+  RX_RETURN_CODES rx_return_status = RX_RETURN_CODES::UNINITIALIZED;
+  
+  uint16_t available_bytes = current_transport->available();  // get the current amount of data
+  uint8_t incoming_byte = 0;                                      // store the read byte of data 
+
+  /*-------------------------------------------------------------------------
+     Read Incoming Data
+  -------------------------------------------------------------------------*/
 
   if(available_bytes > 0 || rx_state == RX_STATE_ERROR){
     
     // only read bytes if data available.  
     if(available_bytes > 0 && rx_state != RX_STATE_ERROR){
-      incoming = current_transport->read();
+      incoming_byte = current_transport->read();
       last_read_byte = micros();
     }
+
+
+    /*---------------------------------------------------------------------
+        RX State Machine
+    ---------------------------------------------------------------------*/
 
     switch(rx_state)
     {
 
       case RX_STATE_WAIT_START: 
-        if(incoming == START_BYTE){
-          //log start of read
+        if(incoming_byte == START_BYTE){
+          
           rx_start_timestamp = micros();
 
-          flush_struct(&rx_packet.f);
-
-          rx_packet.crc_check = 0;
-          rx_packet.payload_position = 0;
-          rx_packet.error_code = RX_RETURN_CODES::UNINITIALIZED;  // check usage 
-          rx_packet.ack_response = false; 
-          rx_packet.frame_ready = false; 
+          reset_rx_message_struct();
 
           rx_state = RX_STATE_READ_TYPE;
           rx_return_status = RX_RETURN_CODES::START_RECEIVED;
 
-          DEBUG_PRINT_MSG_VAL_HEX(DEBUG_FILE, DEBUG_INFO, "RX", "start byte received: ", incoming);
-          DEBUG_STREAM_START(DEBUG_FILE, DEBUG_STREAM, "RX", incoming);
+          DEBUG_PRINT_MSG_VAL_HEX(DEBUG_FILE, DEBUG_INFO, "RX", "start byte received: ", incoming_byte);
+          DEBUG_STREAM_START(DEBUG_FILE, DEBUG_STREAM, "RX", incoming_byte);
         }
         else{
           rx_return_status = RX_RETURN_CODES::WAITING_FOR_START;
@@ -60,21 +73,21 @@ RX_RETURN_CODES update_rx_fsm()
 
       case RX_STATE_READ_TYPE:
 
-        rx_packet.f.TYPE = incoming;
-        rx_packet.crc_check = inline_crc_calc(rx_packet.crc_check, incoming);
+        rx_packet.f.TYPE = incoming_byte;
+        rx_packet.crc_check = inline_crc_calc(rx_packet.crc_check, incoming_byte);
 
         rx_state = RX_STATE_READ_ACK;
         rx_return_status = RX_RETURN_CODES::TYPE_RECEIVED;
 
-        DEBUG_STREAM_DATA(DEBUG_FILE, DEBUG_STREAM, incoming);
+        DEBUG_STREAM_DATA(DEBUG_FILE, DEBUG_STREAM, incoming_byte);
       break;
 
       case RX_STATE_READ_ACK:
 
-        rx_packet.f.ACK = incoming;
-        rx_packet.crc_check = inline_crc_calc(rx_packet.crc_check, incoming);
+        rx_packet.f.ACK = incoming_byte;
+        rx_packet.crc_check = inline_crc_calc(rx_packet.crc_check, incoming_byte);
 
-        DEBUG_STREAM_DATA(DEBUG_FILE, DEBUG_STREAM, incoming);
+        DEBUG_STREAM_DATA(DEBUG_FILE, DEBUG_STREAM, incoming_byte);
     
         if(rx_packet.f.ACK == TRANSPORT_ACK_TYPE::ACK_REQUEST){
           DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "ACK", "ACK request received.");
@@ -105,26 +118,26 @@ RX_RETURN_CODES update_rx_fsm()
       break;
 
       case RX_STATE_READ_ID:
-        rx_packet.f.ID = incoming;
-        rx_packet.crc_check = inline_crc_calc(rx_packet.crc_check, incoming);
+        rx_packet.f.ID = incoming_byte;
+        rx_packet.crc_check = inline_crc_calc(rx_packet.crc_check, incoming_byte);
         
-        DEBUG_STREAM_DATA(DEBUG_FILE, DEBUG_STREAM, incoming);
+        DEBUG_STREAM_DATA(DEBUG_FILE, DEBUG_STREAM, incoming_byte);
 
         rx_state = RX_STATE_READ_DLC;
         rx_return_status = RX_RETURN_CODES::ID_RECEIVED; 
       break;
       
       case RX_STATE_READ_DLC: 
-        if(incoming > ARRAY_SIZE(rx_packet.f.payload)){
+        if(incoming_byte > MAX_PAYLOAD_LEN){
           rx_return_status = RX_RETURN_CODES::DLC_OVER_CAPACITY;
           rx_packet.error_code = RX_RETURN_CODES::DLC_OVER_CAPACITY;
           rx_state = RX_STATE_ERROR;
         } 
         else{
-          rx_packet.f.DLC = incoming;
-          rx_packet.crc_check = inline_crc_calc(rx_packet.crc_check, incoming);
+          rx_packet.f.DLC = incoming_byte;
+          rx_packet.crc_check = inline_crc_calc(rx_packet.crc_check, incoming_byte);
 
-          DEBUG_STREAM_DATA(DEBUG_FILE, DEBUG_STREAM, incoming);
+          DEBUG_STREAM_DATA(DEBUG_FILE, DEBUG_STREAM, incoming_byte);
 
           if(rx_packet.f.DLC == 0){
             rx_state = RX_STATE_READ_CRC;
@@ -139,20 +152,19 @@ RX_RETURN_CODES update_rx_fsm()
 
       case RX_STATE_READ_PAYLOAD:
         if(rx_packet.payload_position < rx_packet.f.DLC){
-          rx_packet.f.payload[rx_packet.payload_position] = incoming;
-          rx_packet.crc_check = inline_crc_calc(rx_packet.crc_check, incoming);
+          rx_packet.f.payload[rx_packet.payload_position] = incoming_byte;
+          rx_packet.crc_check = inline_crc_calc(rx_packet.crc_check, incoming_byte);
           rx_packet.payload_position ++; 
           
           rx_return_status = RX_RETURN_CODES::RECEIVING_DATA;
 
-          DEBUG_STREAM_DATA(DEBUG_FILE, DEBUG_STREAM, incoming);
+          DEBUG_STREAM_DATA(DEBUG_FILE, DEBUG_STREAM, incoming_byte);
         }
         if (rx_packet.payload_position == rx_packet.f.DLC){
           rx_state = RX_STATE_READ_CRC;
           rx_return_status = RX_RETURN_CODES::PAYLOAD_COMPLETE;
         }
         else if (rx_packet.payload_position > rx_packet.f.DLC){
-          // error detected
           rx_state = RX_STATE_ERROR;
           rx_return_status = RX_RETURN_CODES::PAYLOAD_OVERFLOW; 
           rx_packet.error_code = RX_RETURN_CODES::PAYLOAD_OVERFLOW;
@@ -161,13 +173,13 @@ RX_RETURN_CODES update_rx_fsm()
 
       case RX_STATE_READ_CRC:
 
-        rx_packet.f.CRC = incoming;
+        rx_packet.f.CRC = incoming_byte;
         
-        // print / stream received frame. 
-        DEBUG_STREAM_END(DEBUG_FILE, DEBUG_STREAM, incoming);
-        DEBUG_PRINT_DATA_FRAME(DEBUG_FILE, DEBUG_MSG, RX_FRAME, "462", START_BYTE, "[RX]", rx_packet.f);
+        
+        DEBUG_STREAM_END(DEBUG_FILE, DEBUG_STREAM, incoming_byte);
+        DEBUG_PRINT_DATA_FRAME(DEBUG_FILE, DEBUG_MSG, RX_FRAME, "", START_BYTE, "[RX]", rx_packet.f);
 
-        // check and report corrupt frames
+        // Validate CRC
         if(rx_packet.crc_check != rx_packet.f.CRC){
           rx_return_status = RX_RETURN_CODES::CRC_ERROR; 
           rx_packet.error_code = RX_RETURN_CODES::CRC_ERROR;
@@ -181,8 +193,8 @@ RX_RETURN_CODES update_rx_fsm()
             DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "RX", "responding to ACK request.");
             pack_ack(rx_packet.f.TYPE, rx_packet.f.ID, &tx_priority_packet.f);
             tx_priority_packet.waiting = true;
-            rx_packet.frame_ready = true; // TEST CODE
-            rx_return_status = RX_RETURN_CODES::FRAME_READY;  // this is not tested ***
+            rx_packet.frame_ready = true;
+            rx_return_status = RX_RETURN_CODES::FRAME_READY;
           }
           else if(rx_packet.f.ACK == TRANSPORT_ACK_TYPE::ACK_RESPONSE){ 
             DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "ACK", "received ack response. ");
@@ -197,7 +209,7 @@ RX_RETURN_CODES update_rx_fsm()
             rx_return_status = RX_RETURN_CODES::FRAME_READY; 
           }
 
-          // log end time and update the longest time if greater than the longest. 
+          // Record total RX frame processing time. 
           total_rx_frame_time = micros() - rx_start_timestamp;
 
           rx_state = RX_STATE_WAIT_START;
@@ -222,27 +234,34 @@ RX_RETURN_CODES update_rx_fsm()
           
         }
         else if(rx_packet.error_code == RX_RETURN_CODES::MSG_TIMEOUT_ERROR){
-          DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_ERROR, "RX", "RX watchdog timer triggered elapsed time: ", CONVERT_US_TO_MS((rx_wdt_timestamp - last_read_byte)), "ms");
+          DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_ERROR, "RX", "RX watchdog timer triggered elapsed time: ", CONVERT_US_TO_MS((rx_timeout_timestamp - last_read_byte)), "ms");
           
         }
         else if(rx_packet.error_code == RX_RETURN_CODES::CRC_ERROR){
-          DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "CRC", "CRC check NOK. calculated CRC: ", rx_packet.crc_check);
-         
+          DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "CRC", "Received CRC: ", rx_packet.f.CRC);
+          DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "CRC", "Calculated CRC: ", rx_packet.crc_check);
+
         }
         
-        // reset all rx packet data. 
+        // Reset RX context after error.
         reset_rx_message_struct();
 
         rx_state = RX_STATE_WAIT_START;
       break;
     }
   }
-  // checek the message WTD for timeout error rest only if the state is idle nad rx is in progress(removed wdt check ignotrd if RX_STATE_IDLE)
+
+
+  /*-------------------------------------------------------------------------
+    RX Watchdog
+  -------------------------------------------------------------------------*/
+
+  // Ignore timeout when waiting for a new frame.
   if(rx_msg_wdt_check() == true && rx_state != RX_STATE_WAIT_START){
-    rx_wdt_timestamp = micros();
-    rx_state = RX_STATE_ERROR;
+    rx_timeout_timestamp = micros();
     rx_return_status =  RX_RETURN_CODES::MSG_TIMEOUT_ERROR; 
     rx_packet.error_code = RX_RETURN_CODES::MSG_TIMEOUT_ERROR;
+    rx_state = RX_STATE_ERROR;
   }
 
   return rx_return_status;

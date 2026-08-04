@@ -15,21 +15,21 @@ void  process_transport_tx_return_error(TX_RETURN_CODES return_code){
    
     switch(return_code){
 
-        case TX_RETURN_CODES::TX_TRANSMISION_SUCCESS:
+        case TX_RETURN_CODES::TX_TRANSMISSION_SUCCESS:
             // store the latancy of the last frame
             st_log_event(ST_LOG_EVENT::EVENT_PACKET_SENT, LOG_TYPE::METRIC);
             tx_latency_add_value(transport_get_tx_latancy());
         break; 
         
-        case TX_RETURN_CODES::TX_ACK_TRANSMISION_SUCCESS:
+        case TX_RETURN_CODES::TX_ACK_TRANSMISSION_SUCCESS:
                 st_log_event(ST_LOG_EVENT::EVENT_ACK_SENT, LOG_TYPE::METRIC);
         break; 
 
-        case TX_RETURN_CODES::TX_RETRY_TRANSMISION_SUCCESS:
+        case TX_RETURN_CODES::TX_RETRY_TRANSMISSION_SUCCESS:
                 st_log_event(ST_LOG_EVENT::EVENT_RETRY_SENT, LOG_TYPE::METRIC);
         break; 
 
-        case TX_RETURN_CODES::ACK_NOT_RECEVIED:
+        case TX_RETURN_CODES::ACK_NOT_RECEIVED:
                 st_log_event(ST_LOG_EVENT::EVENT_ACK_NOT_RECEIVED, LOG_TYPE::ERROR); 
                 rt_log_error(rt_error_log_array[ERROR_ID::ACK_NOT_RECEIVED], false);
         break; 

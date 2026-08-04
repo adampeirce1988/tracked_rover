@@ -16,15 +16,6 @@ test status: code compiles with 0 errors & untested on ESP.
 
 
 [FIXED]: 
-- updated the file diagram to reflect the file refactored structure 
-- cleaned the structure of teansport_internal.h 
-- reveiwed  the following files and standanrdized the format:
-    - transport_api.cpp 
-    - transport_fifo.cpp
-    - transport_internal.cpp 
-    - transport_internal.h 
-    - transport_rx_fsm.cpp 
-    - transport_structs.h 
 
 
 [TODO]: 
@@ -107,7 +98,7 @@ tracked_rover-built-in-trasmission-self-test/
         ├── transport_internal.h ✅ (9.5/10)
         ├── transport_rx_fsm.cpp ✅ (9.6/10)
         ├── transport_structs.h ✅ (9.7/10)
-        ├── transport_tx_fsm.cpp
+        ├── transport_tx_fsm.cpp ✅ (9.2/10)
         ├── transport_types.h
         ├── transport_uart.cpp
         ├── transport.h
