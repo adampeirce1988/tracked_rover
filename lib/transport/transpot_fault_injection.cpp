@@ -33,10 +33,10 @@ struct TX_FAULT_INJECTION_CFG{
 TX_FAULT_INJECTION_CFG tx_fault_injection_cfg; 
 
 //forward declerations
-TX_FAILURE_MODE set_test_type(TX_SET_FAULT_MODE type);
+TX_FAILURE_MODE set_test_type(TX_FAULT_MODE type);
 
 
-void set_tx_fault_injection_active(TX_SET_FAULT_MODE type, uint8_t value){
+void set_tx_fault_injection_active(TX_FAULT_MODE type, uint8_t value){
   tx_fault_injection_cfg.mode = set_test_type(type);
   tx_fault_injection_cfg.value = value; 
   tx_fault_injection_cfg.tx_fault_injection_flag = true; 
@@ -46,17 +46,17 @@ void set_tx_fault_injection_active(TX_SET_FAULT_MODE type, uint8_t value){
 //  Type selector
 // ============================================================
 
-TX_FAILURE_MODE set_test_type(TX_SET_FAULT_MODE type){
+TX_FAILURE_MODE set_test_type(TX_FAULT_MODE type){
     switch(type){
-        case TX_SET_FAULT_MODE::TYPE_CHANGE:           return TX_FAILURE_MODE::TYPE_CHANGE; 
-        case TX_SET_FAULT_MODE::ACK_CHANGE:            return TX_FAILURE_MODE::ACK_CHANGE; 
-        case TX_SET_FAULT_MODE::ID_CHANGE:             return TX_FAILURE_MODE::ID_CHANGE; 
-        case TX_SET_FAULT_MODE::RAND_DLC_CHANGE:       return TX_FAILURE_MODE::DLC_CHANGE;
-        case TX_SET_FAULT_MODE::DLC_OVER_MAX_CAPACITY: return TX_FAILURE_MODE::DLC_OVER_MAX_CAPACITY;
-        case TX_SET_FAULT_MODE::CRC_RAND_FLIP_BIT:     return TX_FAILURE_MODE::CRC_RAND_FLIP_BIT; 
-        case TX_SET_FAULT_MODE::CRC_CHANGE:            return TX_FAILURE_MODE::CRC_CHANGE; 
-        case TX_SET_FAULT_MODE::RAND_DATA_FLIP_BIT:    return TX_FAILURE_MODE::RAND_DATA_FLIP_BIT;
-        case TX_SET_FAULT_MODE::RAND_DATA_CHANGE:      return TX_FAILURE_MODE::RAND_DATA_CHANGE;
+        case TX_FAULT_MODE::TYPE_CHANGE:           return TX_FAILURE_MODE::TYPE_CHANGE; 
+        case TX_FAULT_MODE::ACK_CHANGE:            return TX_FAILURE_MODE::ACK_CHANGE; 
+        case TX_FAULT_MODE::ID_CHANGE:             return TX_FAILURE_MODE::ID_CHANGE; 
+        case TX_FAULT_MODE::RAND_DLC_CHANGE:       return TX_FAILURE_MODE::DLC_CHANGE;
+        case TX_FAULT_MODE::DLC_OVER_MAX_CAPACITY: return TX_FAILURE_MODE::DLC_OVER_MAX_CAPACITY;
+        case TX_FAULT_MODE::CRC_RAND_FLIP_BIT:     return TX_FAILURE_MODE::CRC_RAND_FLIP_BIT; 
+        case TX_FAULT_MODE::CRC_CHANGE:            return TX_FAILURE_MODE::CRC_CHANGE; 
+        case TX_FAULT_MODE::RAND_DATA_FLIP_BIT:    return TX_FAILURE_MODE::RAND_DATA_FLIP_BIT;
+        case TX_FAULT_MODE::RAND_DATA_CHANGE:      return TX_FAILURE_MODE::RAND_DATA_CHANGE;
         
         default: 
             return TX_FAILURE_MODE::NONE;

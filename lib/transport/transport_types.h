@@ -1,21 +1,34 @@
 #ifndef TRANSPORT_TYPES_H
 #define TRANSPORT_TYPES_H
 
-// folder containing all of enumm class to be included in the external.h so there is no need to include them in every file. 
 #include <stdint.h>
 
+/*=============================================================================
+    Transport Types
 
-//================= ACK TYPES =================
+    Shared public transport enumerations and constants.
+=============================================================================*/
+
+/*=============================================================================
+    ACK Types
+       
+    Kept as constexpr values instead of enum class to allow direct comparison
+    with transport frame uint8_t fields without casting.
+=============================================================================*/
+
 namespace TRANSPORT_ACK_TYPE{
-  constexpr uint8_t NORMAL_FRAME =              0x00;
-  constexpr uint8_t ACK_REQUEST  =              0x01;
-  constexpr uint8_t ACK_RESPONSE =              0x02;
-  constexpr uint8_t NACK =                      0x03;
+  constexpr uint8_t NORMAL_FRAME = 0x00;
+  constexpr uint8_t ACK_REQUEST  = 0x01;
+  constexpr uint8_t ACK_RESPONSE = 0x02;
+  constexpr uint8_t NACK =         0x03;
 };
 
-// ================= RX RETURN CODES =================
+
+/*=============================================================================
+    RX RETURN CODES 
+=============================================================================*/
+
 enum class RX_RETURN_CODES : uint8_t{
-  RX_STATE_IDLE,
   WAITING_FOR_START,
   START_RECEIVED,
   TYPE_RECEIVED,
@@ -39,11 +52,15 @@ enum class RX_RETURN_CODES : uint8_t{
   UNINITIALIZED
 };
 
-// ================= TX RETURN CODES =================
+
+/*=============================================================================
+    TX RETURN CODES 
+=============================================================================*/
+
 enum class TX_RETURN_CODES : uint8_t{
+  UNINITIALIZED,
   TX_IDLE_STATE,
   TX_PENDING_ACK,
-  TX_TRANSMITING,
   RESENDING_MSG,
   TX_TRANSMISSION_SUCCESS,
   TX_ACK_TRANSMISSION_SUCCESS,
@@ -52,13 +69,15 @@ enum class TX_RETURN_CODES : uint8_t{
   ACK_NOT_RECEIVED,
   ACK_MISMATCHED,
   ACK_WDT_TIMEOUT,
-  TX_BUFFER_OVERFLOW, 
-  UNINITIALIZED
+  TX_BUFFER_OVERFLOW
 };
 
-// =============== ENUM CLASS ===============
-// global class used to select a test. 
-enum class TX_SET_FAULT_MODE{           
+
+/*=============================================================================
+   TX Fault Injection Modes
+=============================================================================*/
+
+enum class TX_FAULT_MODE : uint8_t{           
   NONE,
   TYPE_CHANGE,
   ACK_CHANGE,

@@ -45,7 +45,7 @@ TEST_RETURN_STATUS execute_self_test(){
             return self_test_error_injection(
                 INJECTION_TEST_PACKET_COUNT,
                 INJECTION_TEST_ERROR_COUNT,
-                TX_SET_FAULT_MODE::TYPE_CHANGE
+                TX_FAULT_MODE::TYPE_CHANGE
             );
         } 
 
@@ -56,7 +56,7 @@ TEST_RETURN_STATUS execute_self_test(){
             return self_test_error_injection(
                 INJECTION_TEST_PACKET_COUNT,
                 INJECTION_TEST_ERROR_COUNT,
-                TX_SET_FAULT_MODE::ACK_CHANGE, 
+                TX_FAULT_MODE::ACK_CHANGE, 
                 TRANSPORT_ACK_TYPE::NACK
             );
         } 
@@ -68,7 +68,7 @@ TEST_RETURN_STATUS execute_self_test(){
             return self_test_error_injection(
                 INJECTION_TEST_PACKET_COUNT,
                 INJECTION_TEST_ERROR_COUNT,
-                TX_SET_FAULT_MODE::ID_CHANGE
+                TX_FAULT_MODE::ID_CHANGE
             );
         }
         
@@ -80,7 +80,7 @@ TEST_RETURN_STATUS execute_self_test(){
             return self_test_error_injection(
                 INJECTION_TEST_PACKET_COUNT,
                 INJECTION_TEST_ERROR_COUNT,
-                TX_SET_FAULT_MODE::RAND_DLC_CHANGE
+                TX_FAULT_MODE::RAND_DLC_CHANGE
             );
         }
         
@@ -91,7 +91,7 @@ TEST_RETURN_STATUS execute_self_test(){
             return self_test_error_injection(
                 INJECTION_TEST_PACKET_COUNT,
                 INJECTION_TEST_ERROR_COUNT,
-                TX_SET_FAULT_MODE::DLC_OVER_MAX_CAPACITY
+                TX_FAULT_MODE::DLC_OVER_MAX_CAPACITY
             );
         }
 
@@ -103,7 +103,7 @@ TEST_RETURN_STATUS execute_self_test(){
             return self_test_error_injection(
                 INJECTION_TEST_PACKET_COUNT,
                 INJECTION_TEST_ERROR_COUNT,
-                TX_SET_FAULT_MODE::CRC_RAND_FLIP_BIT
+                TX_FAULT_MODE::CRC_RAND_FLIP_BIT
             );
         }
        
@@ -114,7 +114,7 @@ TEST_RETURN_STATUS execute_self_test(){
             return self_test_error_injection(
                 INJECTION_TEST_PACKET_COUNT, 
                 INJECTION_TEST_ERROR_COUNT, 
-                TX_SET_FAULT_MODE::CRC_CHANGE,
+                TX_FAULT_MODE::CRC_CHANGE,
                 CRC_RANDOM_REPLACEMENT_VALUE
             );
         } 
@@ -126,7 +126,7 @@ TEST_RETURN_STATUS execute_self_test(){
             return self_test_error_injection(
                 INJECTION_TEST_PACKET_COUNT,
                 INJECTION_TEST_ERROR_COUNT,
-                TX_SET_FAULT_MODE::RAND_DATA_FLIP_BIT
+                TX_FAULT_MODE::RAND_DATA_FLIP_BIT
             );
         }
 
@@ -137,7 +137,7 @@ TEST_RETURN_STATUS execute_self_test(){
             return self_test_error_injection(
                 INJECTION_TEST_PACKET_COUNT,
                 INJECTION_TEST_ERROR_COUNT,
-                TX_SET_FAULT_MODE::RAND_DATA_CHANGE
+                TX_FAULT_MODE::RAND_DATA_CHANGE
             );
         }
     

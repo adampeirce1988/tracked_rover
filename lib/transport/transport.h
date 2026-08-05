@@ -71,7 +71,7 @@ void fifo_io_uart_engine_update();
 =============================================================================*/
 
 // Configure transmit fault injection.
-void set_tx_fault_injection_active(TX_SET_FAULT_MODE type, uint8_t value);
+void set_tx_fault_injection_active(TX_FAULT_MODE type, uint8_t value);
 
 // Returns the last measured transmit latency (µs).
 uint16_t transport_get_tx_latancy();

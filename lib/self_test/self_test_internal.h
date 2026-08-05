@@ -52,7 +52,7 @@ uint16_t weighted_random_delay(uint16_t std_delay);            // Creates random
 void manager_runtime_monitor();
 // Core test functions 
 TEST_RETURN_STATUS self_test_transport_random_packet(uint8_t no_of_packets, uint16_t delay_time_us, bool random_delay_active);
-TEST_RETURN_STATUS self_test_error_injection(uint8_t no_of_packets, uint8_t error_count, TX_SET_FAULT_MODE fault_type, uint8_t fault_value = 0);
+TEST_RETURN_STATUS self_test_error_injection(uint8_t no_of_packets, uint8_t error_count, TX_FAULT_MODE fault_type, uint8_t fault_value = 0);
 TEST_RETURN_STATUS self_test_diagnostics_wdt(); 
 
 //****************************************************

@@ -18,7 +18,7 @@ constexpr uint8_t MAX_DATA_VALUE = 255;
 constexpr uint8_t INJECTION_INTERVAL = 10; 
 
 
-TEST_RETURN_STATUS self_test_error_injection(uint8_t no_of_packets, uint8_t error_count, TX_SET_FAULT_MODE fault_type, uint8_t fault_value){
+TEST_RETURN_STATUS self_test_error_injection(uint8_t no_of_packets, uint8_t error_count, TX_FAULT_MODE fault_type, uint8_t fault_value){
 
     // Cache micro to prvent recalling agian in function
     const uint32_t cached_micros = micros(); 
