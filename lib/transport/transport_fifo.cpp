@@ -31,7 +31,7 @@ uint8_t fifo_begin(uint32_t baud_rate);
 void fifo_update();
 
 /*=============================================================================
-    Transport Interface
+    FiFO Transport Interface
 =============================================================================*/
 
 Transport_IO fifo_io = {

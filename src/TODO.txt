@@ -19,13 +19,10 @@ test status: code compiles with 0 errors & untested on ESP.
 
 
 [TODO]: 
-- refactor of transport to improve readability and flow
+- transport_fault_injection.cpp after testing
+    //f->DLC = tx_fault_injection_cfg.value; // remove after testing
 - RX_RETURN_CODES tx_transport_status in main.cpp requires moving to system
 - TX_RETURN_CODES tx_transport_status in main.cpp requires moving to system
-- split the transport RX and TX FSM to sepreate files
-- refactor transport due to additon of 2x new functions
-    transport_set_fifo();
-    transport_set_uart();
 - code review all current module 
 - run a full case test on hardware
 - merge code into main(only once the above are completed)
@@ -99,7 +96,7 @@ tracked_rover-built-in-trasmission-self-test/
         ├── transport_rx_fsm.cpp ✅ (9.6/10)
         ├── transport_structs.h ✅ (9.7/10)
         ├── transport_tx_fsm.cpp ✅ (9.2/10)
-        ├── transport_types.h
-        ├── transport_uart.cpp
-        ├── transport.h
-        └── transpot_fault_injection.cpp
+        ├── transport_types.h ✅ (9.6/10)
+        ├── transport_uart.cpp ✅ (9.8/10)
+        ├── transport.h ✅ (9.6/10)
+        └── transpot_fault_injection.cpp ✅ (9.3/10)

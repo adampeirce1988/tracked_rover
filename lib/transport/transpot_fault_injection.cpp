@@ -2,14 +2,15 @@
 #include "transport.h"
 #include "debug.h"
 
-// ============================================================
-//  Debig config 
-// ============================================================
+/*=============================================================================
+    Debug Configuration
+=============================================================================*/
+
 #define DEBUG_FILE DBG_TRANSPORT
 
-// ============================================================
-//  Fault Injection Types
-// ============================================================
+/*=============================================================================
+    Enum Classes & structs 
+=============================================================================*/
 enum class TX_FAILURE_MODE : uint8_t{
     NONE,
     TYPE_CHANGE,
@@ -29,22 +30,36 @@ struct TX_FAULT_INJECTION_CFG{
     uint8_t value = 0;
 };
 
-// failure type config.
+
+/*=============================================================================*
+    TX Fault Injection Configuration
+*=============================================================================*/
+
 TX_FAULT_INJECTION_CFG tx_fault_injection_cfg; 
 
-//forward declerations
+
+/*=============================================================================
+    Function Prototypes 
+=============================================================================*/
+
 TX_FAILURE_MODE set_test_type(TX_FAULT_MODE type);
 
+
+/*=============================================================================*
+    Fault Injection Functions
+*=============================================================================*/
 
 void set_tx_fault_injection_active(TX_FAULT_MODE type, uint8_t value){
   tx_fault_injection_cfg.mode = set_test_type(type);
   tx_fault_injection_cfg.value = value; 
   tx_fault_injection_cfg.tx_fault_injection_flag = true; 
-  DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_TEST, "INJT", "tx_fault_injection_flag: ", tx_fault_injection_cfg.tx_fault_injection_flag); // change to INFO after testing
+  DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "INJT", "tx_fault_injection_flag: ", tx_fault_injection_cfg.tx_fault_injection_flag); 
 }
-// ============================================================
-//  Type selector
-// ============================================================
+
+
+/*=============================================================================
+    Error Type Selector FSM 
+=============================================================================*/
 
 TX_FAILURE_MODE set_test_type(TX_FAULT_MODE type){
     switch(type){
@@ -64,19 +79,19 @@ TX_FAILURE_MODE set_test_type(TX_FAULT_MODE type){
 }
         
 
-// ============================================================
-//  Fault Injection Engine
-// ============================================================    
+/*=============================================================================
+    Fault Injection Engine 
+=============================================================================*/
 
-void tx_frame_error_injection(struct frame *f ){ // TODO: add a config struct for set up and ste this in set_tx_fault_injecton()
+void tx_frame_error_injection(struct frame *f ){
     if(f == nullptr){
         DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "INJT", "pointer passed to function tx_frame_error_injection(): NULL");
         return; 
     }
 
-    if(tx_fault_injection_cfg.tx_fault_injection_flag == true){
+    if(tx_fault_injection_cfg.tx_fault_injection_flag){
 
-        const char* str_failure_type; 
+        const char* str_failure_type = "UNKNOWN"; 
 
         switch(tx_fault_injection_cfg.mode){
             case TX_FAILURE_MODE::TYPE_CHANGE:{
@@ -108,7 +123,7 @@ void tx_frame_error_injection(struct frame *f ){ // TODO: add a config struct fo
                 else{
                     f->DLC = rand_dlc; 
                 }
-                //f->DLC = tx_fault_injection_cfg.value; 
+                //f->DLC = tx_fault_injection_cfg.value; // remove after testing
                 str_failure_type = "f->DLC";
             } break;
             
@@ -118,7 +133,7 @@ void tx_frame_error_injection(struct frame *f ){ // TODO: add a config struct fo
             } break;
 
             case TX_FAILURE_MODE::CRC_RAND_FLIP_BIT:{
-                // Get random bit
+                // get random bit
                 uint8_t bit_position = random(0, 8);  // random no between 0-7
                 f->CRC ^= (1<<bit_position); 
                 str_failure_type = "CRC_RAND_FLIP_BIT";
@@ -134,7 +149,7 @@ void tx_frame_error_injection(struct frame *f ){ // TODO: add a config struct fo
 
             case TX_FAILURE_MODE::RAND_DATA_FLIP_BIT:
             { 
-                // get the random possintions
+                // get the random position 
                 uint8_t data_position = random(0, f->DLC); 
                 uint8_t bit_position = random(0, 8); 
                 f->payload[data_position] ^= (1<<bit_position); 
@@ -168,8 +183,4 @@ void tx_frame_error_injection(struct frame *f ){ // TODO: add a config struct fo
     else{
         return; 
     }
-  
 }
-
-
-
