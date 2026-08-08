@@ -24,7 +24,7 @@ void    uart_update();
    UART Transport Interface
 =============================================================================*/
 
-const Transport_IO uart_io = {
+Transport_IO uart_io = {
     uart_write,
     uart_available,
     uart_read,

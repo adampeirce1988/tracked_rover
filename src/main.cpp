@@ -1,25 +1,5 @@
 
-// TODO: on return to safe_state the paramer sys::comunication esatbolished to false on error. 
-
-#include <Arduino.h>
-#include <HardwareSerial.h>
-#include "self_test.h"
-#include "logger.h"
-#include "transport.h"
-#include "debug.h"
-#include "protocol.h"
-#include "global_config.h"
-#include "global.h"
-#include "messages.h"
 #include "system.h"
-
-#define DEBUG_FILE DBG_ESP_MAIN
-
-// return code variable ** these are also stored in system.h** 
-RX_RETURN_CODES rx_transport_status = RX_RETURN_CODES::UNINITIALIZED; // ** THESE NEED TO BE MOVED **
-TX_RETURN_CODES tx_transport_status = TX_RETURN_CODES::UNINITIALIZED; // ** THESE NEED TO BE MOVED **
-uint8_t rx_protocol_status = 0; 
-SELF_TEST_MANAGER_RETURN_CODE self_testmanager_status = SELF_TEST_MANAGER_RETURN_CODE::ERROR;
 
 void setup(){
  // All setup function should be completed in vehicle state booting

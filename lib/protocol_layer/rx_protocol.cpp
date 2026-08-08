@@ -1,9 +1,9 @@
 
 #include <stdint.h>
-#include "transport.h"
 #include "protocol.h"
-#include "permissions.h"
 #include "messages.h"
+#include "transport.h"
+#include "permissions.h"
 #include "debug.h"
 #include "system.h"
 
@@ -51,7 +51,7 @@ uint8_t rx_message_task_dispatcher(){
         
             case MSG_ESTABLISH_COMMUNICATION:
                 DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "PROTO", "Running: MSG_ESTABLISH_COMMUNICATION");
-                set_comunication_bus_alive(); 
+                //set_communication_bus_alive();
             break;
 
             case MSG_CONFIRM_COMMUNICATION: 

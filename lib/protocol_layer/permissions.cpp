@@ -3,6 +3,7 @@
 #include "permissions.h"
 #include "protocol.h"
 #include "system.h"
+#include "system_internal.h"
 #include "debug.h"
 
 #define DEBUG_FILE DBG_PROTOCOL
@@ -10,7 +11,7 @@
 
 PERMISSION_RETURN_CODE is_message_allowed_in_current_state(uint8_t type){
 
-    uint8_t state_mask = (1U << static_cast<uint8_t>(active_vehicle_state)); // change to mask based on vehicle state. 
+    uint8_t state_mask = (1U << static_cast<uint8_t>(get_active_vehicle_state())); // change to mask based on vehicle state. 
 
     for(size_t index = 0; index < sizeof(rules) / sizeof(rules[0]); index++){
         if(type == rules[index].msg){

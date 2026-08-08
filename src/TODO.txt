@@ -19,6 +19,8 @@ test status: code compiles with 0 errors & untested on ESP.
 
 
 [TODO]: 
+- convert rx return type to an enum class
+-resolve dependiancy issue with //set_communication_bus_alive(); in rx_protocol 
 - transport_fault_injection.cpp after testing
     //f->DLC = tx_fault_injection_cfg.value; // remove after testing
 - RX_RETURN_CODES tx_transport_status in main.cpp requires moving to system

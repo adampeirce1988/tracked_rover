@@ -1,4 +1,5 @@
 #include<Arduino.h>
+#include "system_internal.h"
 #include "system.h"
 #include "protocol.h"
 #include "global.h" // move sys:: these to the system folder. 
@@ -36,7 +37,6 @@ bool request_vehicle_state_change(VEHICLE_STATE requested){
       else if(requested == VEHICLE_STATE::DIAGNOSTICS){
         return_state = VEHICLE_STATE::SAFE_STATE;
         active_vehicle_state = VEHICLE_STATE::DIAGNOSTICS;
-        diagnostics_WDT = millis();
       }
       else{
         // do nothing as vehicle still in safe stat
@@ -56,7 +56,6 @@ bool request_vehicle_state_change(VEHICLE_STATE requested){
       else if(requested == VEHICLE_STATE::DIAGNOSTICS){
         return_state = VEHICLE_STATE::IDLE; 
         active_vehicle_state = VEHICLE_STATE::DIAGNOSTICS; 
-        diagnostics_WDT = millis();
       }
       else{
         DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "MAIN", "ERROR: VEHICLE_STATE::IDLE not avaliable form the current state");
@@ -116,8 +115,8 @@ bool request_vehicle_state_change(VEHICLE_STATE requested){
       else if(requested == VEHICLE_STATE::IDLE){
         active_vehicle_state = VEHICLE_STATE::IDLE;
       }
-      else if(requested == VEHICLE_STATE::SHUTING_DOWN){
-        active_vehicle_state = VEHICLE_STATE::SHUTING_DOWN;
+      else if(requested == VEHICLE_STATE::SHUTTING_DOWN){
+        active_vehicle_state = VEHICLE_STATE::SHUTTING_DOWN;
       }
       else{
         return false; 
@@ -132,8 +131,8 @@ bool request_vehicle_state_change(VEHICLE_STATE requested){
       return false; 
     break; 
 
-    case VEHICLE_STATE::SHUTING_DOWN:
-      active_vehicle_state = VEHICLE_STATE::SHUTING_DOWN; 
+    case VEHICLE_STATE::SHUTTING_DOWN:
+      active_vehicle_state = VEHICLE_STATE::SHUTTING_DOWN; 
     break; 
 
   }

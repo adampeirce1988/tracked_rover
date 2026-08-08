@@ -5,6 +5,7 @@
 #include <Arduino.h>
 
 #include "system.h"
+#include "system_internal.h"
 #include "protocol.h"
 #include "global.h"      // TODO: Move sys:: variables into system module
 #include "debug.h"
@@ -29,18 +30,6 @@
 // Remove after diagnostics refactor
 bool TEST_call_diag_once = true;
 
-///////////////////////////////////////////////////////////////////////////////
-// Vehicle State Variables
-///////////////////////////////////////////////////////////////////////////////
-
-// Vehicle always boots into BOOTING
-VEHICLE_STATE active_vehicle_state = VEHICLE_STATE::BOOTING;
-
-// previous active state this should be diffrent from above.
-VEHICLE_STATE last_vehicle_state = VEHICLE_STATE::BOOTING; 
-
-// Used when temporarily entering another state
-VEHICLE_STATE return_state  = VEHICLE_STATE::SAFE_STATE;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -56,7 +45,7 @@ VEHICLE_STATE_RETURN_CODE run_vehicle_state(){
 
   switch(active_vehicle_state){
 
-    //setup code will go here not in main.cpp void setup();
+    //setup code gos here not in main.cpp void setup();
     case VEHICLE_STATE::BOOTING: 
 
       // open debug port and print version data.
@@ -96,7 +85,6 @@ VEHICLE_STATE_RETURN_CODE run_vehicle_state(){
       // check all system flags move to idle
       if(check_system_health_flags()){ // I2C check not needed for ESP. Arduino will return an error if the bus is offline.
         request_vehicle_state_change(VEHICLE_STATE::IDLE);
-        DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "MAIN", "VEHICLE_STATE: ", vehicle_state_to_string(active_vehicle_state) );
       } 
       else{
     
@@ -169,7 +157,6 @@ VEHICLE_STATE_RETURN_CODE run_vehicle_state(){
     case VEHICLE_STATE::DIAGNOSTICS:
 
     //** only run the diagnostic FSM here all other functionsa to be handled by the FSM. 
-    // convert return code to unit8_t and use test_manager_status = run_test_manager();
     run_test_manager();
         
     break;
@@ -184,12 +171,27 @@ VEHICLE_STATE_RETURN_CODE run_vehicle_state(){
       // possible to exit by changing to another tab without proforming a firmware update
 
     break; 
+
+
+    case VEHICLE_STATE::FAIL_SAFE: 
+      
+    // fault detected the vehicle will be stoped ans made safe
+    // (may later only opperate in derate depending on the issue)
+
+    break; 
+
+    case VEHICLE_STATE::SHUTTING_DOWN:
+
+     // save and close all open files
+     // enter low power mode and wait for power discconetion or rebooting command 
+
+    break; 
     
     ///////////////////////////////////////////////////////////////////////////
     // DEFAULT
     ///////////////////////////////////////////////////////////////////////////
     default:
-        active_vehicle_state = VEHICLE_STATE::SAFE_STATE; 
+        request_vehicle_state_change(VEHICLE_STATE::SAFE_STATE);
     break; 
   };
 
