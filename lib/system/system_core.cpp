@@ -1,6 +1,5 @@
 
 #include <Arduino.h>
-#include <HardwareSerial.h>
 
 #include "system.h"
 #include "system_internal.h"
@@ -13,30 +12,29 @@
 
 #include "debug.h"
 #include "global_config.h"
-#include "global.h"
 #include "messages.h"
 
 /*=============================================================================*
  * Debug Configuration
  *=============================================================================*/
 
-
 #define DEBUG_FILE DBG_SYSTEM
 
 
 /*=============================================================================*
- * Debug Configuration
+ * Vehicle states 
  *=============================================================================*/
+
 RX_RETURN_CODES rx_transport_status = RX_RETURN_CODES::UNINITIALIZED; 
 TX_RETURN_CODES tx_transport_status = TX_RETURN_CODES::UNINITIALIZED;
-uint8_t rx_protocol_status = 0;  // conver this to an enum class. 
+uint8_t rx_protocol_status = 0;       // TODO conver this to an enum class. 
 
 /*=============================================================================*
    * Core System Functions
  *=============================================================================*/
 
-/**
- * @brief Run all core system functions.
+/*
+ * Run all core system functions.
  *
  * This function is called continuously from the main application loop.
  * It is responsible for maintaining the execution order of the core

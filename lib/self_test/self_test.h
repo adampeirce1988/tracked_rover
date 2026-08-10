@@ -16,7 +16,12 @@ bool request_self_test(TEST_ID test_id);
 
 // Requests the active self-test to abort.
 // Cleanup is performed by the self-test manager.
-void abort_current_test();            
+void abort_current_test();       
+
+// request status of diagnostics 
+// returns true if a test is running. 
+bool diagnostics_active();
+
 
 //===============================================================
 

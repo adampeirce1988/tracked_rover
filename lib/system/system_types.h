@@ -8,15 +8,26 @@
  *=============================================================================*/
 
 enum class VEHICLE_STATE : uint8_t{
-  BOOTING,          // all setup code will run ib here and not in main. 
-  SAFE_STATE,       // allow communication recovery messages only & block all control and motor commands
-  IDLE,             // vehicle idle awaiting commands 
+  BOOTING,          // Run all system setup code.
+  SAFE_STATE,       // Allow communication recovery only; block control commands.
+  IDLE,             // Vehicle idle and awaiting commands.
   MANUAL,           // vehile under opporators control 
-  AUTONOMOUS,       // vehicle oppeerates autonomusly (this will be the last to impliment)
-  DIAGNOSTICS,      // Run on boad self tests and live data. 
-  UPDATE,           // carry out an OTA update of the ESP 
-  FAIL_SAFE,        // fault detected the vehicle will be stoped (may later only opperate in derate depending on the issue)
-  SHUTTING_DOWN     // used to shut down the esp (all files that are open on LittleFS will be closed and saved) 
+  AUTONOMOUS,       // Vehicle operates autonomously.
+  DIAGNOSTICS,      // Run onboard self-tests and live diagnostics.
+  UPDATE,           // Carry out an OTA update.
+  FAIL_SAFE,        // Fault detected; vehicle is stopped and made safe.
+  SHUTTING_DOWN     // Save and close files before entering low-power state.
+};
+
+/*=============================================================================*
+ * Vehicle State return codes
+ *=============================================================================*/
+
+enum class VEHICLE_STATE_RETURN_CODE : uint8_t
+{
+    RUNNING,
+    CHANGE_DENIED,
+    CHANGE_APPROVED
 };
 
 #endif

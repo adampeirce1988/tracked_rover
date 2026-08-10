@@ -5,7 +5,6 @@
 #include "logger.h"
 #include "metrics.h"
 #include "transport.h"
-#include "global.h"
 #include "debug.h"
 
 #define DEBUG_FILE DBG_LOGS

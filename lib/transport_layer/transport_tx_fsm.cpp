@@ -1,5 +1,5 @@
 
-#include "global.h"
+#include "system.h"
 #include "transport.h"
 #include "transport_internal.h"
 #include "debug.h"

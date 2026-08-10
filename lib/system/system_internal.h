@@ -1,7 +1,7 @@
 #ifndef SYSTEM_INTERNAL_H
 #define SYSTEM_INTERNAL_H
 
-
+#include <stdint.h>
 #include "system_types.h"
 
 
@@ -22,12 +22,39 @@ extern VEHICLE_STATE return_state;
 
 
 /*=============================================================================*
+ * system variables
+ *=============================================================================*/
+namespace sys {
+
+    // timing 
+    extern uint32_t sys_heartbeat;
+    extern uint32_t tx_last_valid_packet; 
+    extern uint32_t last_connection_attempt;
+
+    // comunication 
+    extern bool communication_warn_active;
+
+    // system status 
+    extern bool bus_connectivity_status; 
+    extern bool i2c_connectivity_status;
+
+}
+
+/*=============================================================================*
  * Vehicle State Machine Functions
  *=============================================================================*/
 
 bool request_vehicle_state_change(VEHICLE_STATE requested);
 
 const char* vehicle_state_to_string(VEHICLE_STATE state);
+
+/*=============================================================================*
+ * system srvice internal function calls 
+ *=============================================================================*/
+
+void update_system_heartbeat();
+void update_last_connection_attempt();
+void check_transport_alive();  // not currently used in vehicle fsm
 
 
 #endif

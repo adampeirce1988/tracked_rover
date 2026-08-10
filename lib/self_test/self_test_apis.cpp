@@ -2,8 +2,6 @@
 
 #include <Arduino.h>
 #include "self_test_internal.h"
-//#include "global_config.h"
-//#include "transport.h"
 #include "self_test.h" 
 #include "debug.h"
 
@@ -37,5 +35,9 @@ bool request_self_test(TEST_ID test_id){
     DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "TEST", "Test requested:", get_test_name(test_id)); 
 
     return true; 
+}
+
+bool diagnostics_active(){
+    return self_test::runtime_ctx.diagnostics_active; 
 }
 //=========================================================

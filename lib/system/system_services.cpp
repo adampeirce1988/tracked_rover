@@ -1,42 +1,26 @@
-
-
 #include <stdint.h>
-#include <Arduino.h>
+#include "system_internal.h"
 #include "global_config.h"
 #include "protocol.h"
-#include "global.h"
 #include "debug.h"
 #include "debug_config.h"
 
-#define DEBUG_FILE DBG_SYSTEM 
+#define DEBUG_FILE DBG_SYSTEM_SERVICES
 
-/////////////////////////////////////////
-//          SYSTEM GLOBALS             // 
-/////////////////////////////////////////
+// only system alive checks to be added here. 
+bool check_system_health_flags(){
+    if(sys::bus_connectivity_status && 
+        sys::i2c_connectivity_status ){
+        return true;
+    }  
+    else{
+        return false;
+    }
+}
 
-namespace sys {
-
-// timing
-uint32_t sys_heartbeat = 0;
-uint32_t tx_last_valid_packet = 0;
-uint32_t last_connection_attempt = 0;
-
-// communication
-bool communication_warn_active = false; // add for warning implimentation with auto reconnect.
-
-// Alive flag
-bool bus_connectivity_status = false; 
-bool i2c_connectivity_status = true; // leave true untill bus check implimented
-
-//test 
-bool diagnostics_active = false; 
-
-
-// error states 
-
-};
-    
-// function calls to update system variabls 
+void set_communication_bus_alive(){
+    sys::bus_connectivity_status = true; 
+}
 
 void update_last_valid_comms(){
     sys::tx_last_valid_packet = millis();
@@ -74,15 +58,3 @@ void check_transport_alive(){
         }
     }
 }
-
-
-// // only system alive checks to be added here. 
-// bool check_system_health_flags(){
-//     if(sys::bus_connectivity_status == true && 
-//         sys::i2c_connectivity_status == true ){
-//         return true;
-//     }  
-//     else{
-//         return false;
-//     }
-// }

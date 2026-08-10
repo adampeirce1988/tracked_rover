@@ -2,7 +2,6 @@
 #include "system_internal.h"
 #include "system.h"
 #include "protocol.h"
-#include "global.h" // move sys:: these to the system folder. 
 #include "debug.h"
 
 

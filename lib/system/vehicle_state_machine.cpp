@@ -7,7 +7,6 @@
 #include "system.h"
 #include "system_internal.h"
 #include "protocol.h"
-#include "global.h"      // TODO: Move sys:: variables into system module
 #include "debug.h"
 #include "logger.h"
 #include "self_test.h"

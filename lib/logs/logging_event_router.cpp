@@ -5,7 +5,6 @@
 #include "metrics.h"
 #include "self_test_logger.h"
 #include "runtime_error_log.h"
-#include "global.h"
 #include "logger.h"
 
 #define DEBUG_FILE DBG_ST_LOG

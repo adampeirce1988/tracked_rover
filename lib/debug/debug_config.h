@@ -27,9 +27,10 @@
 #define DBG_SELF_TEST            (1UL << 8)
 #define DBG_LOGS                 (1UL << 9)
 #define DBG_SYSTEM               (1UL << 10)
-#define DBG_ST_LOG               (1UL << 11)
-#define DBG_RT_LOG               (1UL << 12)
-#define DBG_METRIC_LOG           (1UL << 13)
+#define DBG_SYSTEM_SERVICES      (1UL << 11)
+#define DBG_ST_LOG               (1UL << 12)
+#define DBG_RT_LOG               (1UL << 13)
+#define DBG_METRIC_LOG           (1UL << 14)
 
 
 //------------ debug level bitmask------------ //

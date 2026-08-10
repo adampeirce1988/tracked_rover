@@ -19,11 +19,12 @@ test status: code compiles with 0 errors & untested on ESP.
 
 
 [TODO]: 
+- TEST self test due to moving respobsibilty of diagnostics_active into self test. 
 - convert rx return type to an enum class
 -resolve dependiancy issue with //set_communication_bus_alive(); in rx_protocol 
 - transport_fault_injection.cpp after testing
     //f->DLC = tx_fault_injection_cfg.value; // remove after testing
-- RX_RETURN_CODES tx_transport_status in main.cpp requires moving to system
+- RX_RETURN_CODES rx_transport_status in main.cpp requires moving to system
 - TX_RETURN_CODES tx_transport_status in main.cpp requires moving to system
 - code review all current module 
 - run a full case test on hardware
@@ -46,8 +47,6 @@ tracked_rover-built-in-trasmission-self-test/
     │
     ├── config/
     │   ├── global.cpp ✅
-    │   ├── global.h. ✅
-    │   └── global_config.h. ✅ 
     │
     ├── debug/
     │   ├── debug.cpp ✅
@@ -85,10 +84,14 @@ tracked_rover-built-in-trasmission-self-test/
     │   └── test_packet_timing.cpp ✅ (9.9/10)
     │
     ├── system/
+    │   ├── system_core.cpp
+    │   ├── system_internal.h
+    │   ├── system_services.cpp
+    │   ├── system_types.h ✅ (9.8/10)
     │   ├── system.cpp
-    │   ├── system.h
+    │   ├── system. ✅ (9.8/10)
     │   ├── vehicle_state_change.cpp
-    │   └── vehicle_state_macheine.cpp
+    │   └── vehicle_state_machine.cpp
     │
     └── transport_layer/
         ├── transport_api.cpp ✅ (9.7/10)

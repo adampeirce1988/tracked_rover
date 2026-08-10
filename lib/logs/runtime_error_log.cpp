@@ -1,8 +1,7 @@
 
-#include <stdint.h>
-#include <Arduino.h>
-#include "global.h"
 #include "runtime_error_log.h"
+#include <Arduino.h>
+#include "self_test.h"
 
 
 RUNTIME_ERROR rt_error_log_array[ERROR_ID::COUNT]; 
@@ -13,7 +12,7 @@ static void rt_log_entry_clear(RUNTIME_ERROR &s);
 
    
 void rt_log_error(RUNTIME_ERROR &s, bool latch_error = false){
-    if(sys::diagnostics_active || s.latch){ // if diagnostics test active do not log or the fault is latched
+    if(diagnostics_active() || s.latch){ // if diagnostics test active do not log or the fault is latched
         return; 
     }
 
