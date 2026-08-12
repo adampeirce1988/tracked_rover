@@ -29,8 +29,7 @@ struct frame *active = nullptr;
 =============================================================================*/
 
 bool transport_set(Transport_IO *io){
-  if(io == NULL){
-    //DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "PORT", "Invalid transport IO provided; current_transport: ", "uart_io");
+  if(io == nullptr){
     current_transport = DEFAULT_TRANSPORT;
     return false; 
   }
@@ -43,18 +42,18 @@ bool transport_set(Transport_IO *io){
     CRC Functions
 =============================================================================*/
 
- uint8_t inline_crc_calc(uint8_t CRC, uint8_t byte){
-  CRC ^= byte;
+ uint8_t inline_crc_calc(uint8_t crc, uint8_t byte){
+  crc ^= byte;
 
   for (uint8_t i = 0; i < 8; i++) {
-    if (CRC & 0x80){
-     CRC = (CRC << 1) ^ 0x07;
+    if (crc & 0x80){
+     crc = (crc << 1) ^ 0x07;
     }
     else{
-      CRC <<= 1;
+      crc <<= 1;
     }
   }
-  return CRC;
+  return crc;
 }
 
 
@@ -107,7 +106,7 @@ void transport_queue_message(uint8_t type, uint8_t ack, uint8_t dlc, uint8_t *da
     tx_normal_packet.waiting = true;
     DEBUG_PRINT_DATA_FRAME(DEBUG_FILE, DEBUG_MSG, TX_PACK_MSG, "204", START_BYTE, "TX_PAC", tx_normal_packet.f);
   }
-  // report an error with pack fuction
+  // report an error with pack function
   else{
     DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "TX", "Failed to pack message. Message not sent.");
     tx_state = TX_STATE_FAILED;
@@ -122,39 +121,40 @@ bool pack_message(uint8_t type, uint8_t ack, uint8_t id, uint8_t dlc, uint8_t *d
     return false; 
   }
 
-  // flush the ack struct before packaging the frame.
-  flush_struct(f); // flush the struct before packaging the frame  
+  // Flush the ACK frame before packaging.
+  flush_struct(f); 
 
-  // pack frame with passed data.
+  // Populate the ACK frame.
   f->TYPE = type;
   f->ACK = ack;
   f->ID = id;
   f->DLC = dlc;
-  if(data != NULL){ // check for no data condition 
-    for(uint8_t i = 0; i < f->DLC; i++){
+  if(data != nullptr){ // Check for no data condition.
+    for(uint8_t i = 0; i < f->DLC; i++){  
       f->payload[i] = data[i];
     }
   }  
   f->CRC = calculate_crc(f); 
 
-  // check frame.error_injection  
+  // Apply frame error injection if tx_fault_injection_cfg.tx_fault_injection_flag == true
   tx_frame_error_injection(f);
 
-  // debug print the packed frame before sendingg the frame.
+  // Debug-print the packed frame before transmission.
   DEBUG_PRINT_DATA_PTR_FRAME(DEBUG_FILE, DEBUG_MSG, TX_PACK_MSG, "244", START_BYTE, "PAC_PTR", f);
   return true;
 }
 
 
 void pack_ack(uint8_t type, uint8_t id, struct frame *f){
-  // flush the ack struct before packaging the frame.
-  flush_struct(f); // flush the ack struct before packaging the frame. 
+  
+  // Flush the ACK frame before packaging.
+  flush_struct(f); 
 
-  //pack frame with passed data.
+  // Populate the ACK frame.
   f->TYPE = type;
   f->ACK = TRANSPORT_ACK_TYPE::ACK_RESPONSE;
   f->ID = id;
-  f->DLC = 0x00; // no data to sent in ACK.
+  f->DLC = 0x00; // no data to send in ACK.
   f->CRC = calculate_crc(f); 
 }
 
@@ -166,19 +166,18 @@ void pack_ack(uint8_t type, uint8_t id, struct frame *f){
 void transport_get_frame(struct frame *out){
   *out = rx_packet.f;
   rx_packet.frame_ready = false; 
-  DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "MSG", "receive frame returned to protocol layer");
+  DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "MSG", "Received frame returned to protocol layer.");
 }
 
 
 bool rx_msg_wdt_check(){
   if(rx_state != RX_STATE_WAIT_START && (micros() - last_read_byte) > MSG_WDT_TIMEOUT_US){
     DEBUG_PRINT_MSG_VAL_MSG(DEBUG_FILE, DEBUG_ERROR, "WDT", "rx incoming data watchdog timer timeout. elapsed time: ", (micros() - last_read_byte), "us");
-    DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "WDT", "watchdog timer timeout occourred in rx_state: ", rx_state);
+    DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "WDT", "Watchdog timer timeout occurred in rx_state: ", rx_state);
     return true;
   }
-  else{
-    return false; 
-  }
+  
+  return false; 
 }
 
 
@@ -187,7 +186,6 @@ void reset_rx_message_struct(){
   flush_struct(&rx_packet.f); 
 
   // reset the rx_packet parameters
-  rx_packet.f.CRC = 0; 
   rx_packet.crc_check = 0; 
   rx_packet.error_code = RX_RETURN_CODES::UNINITIALIZED; 
   rx_packet.frame_ready = false; 
@@ -219,13 +217,12 @@ void transmit_packet(struct frame *f){
 }
 
 
-void copy_frame(struct frame *scr, struct frame *dst){
-  *dst = *scr; 
+void copy_frame(struct frame *src, struct frame *dst){
+  *dst = *src; 
 
-  DEBUG_PRINT_DATA_PTR_FRAME(DEBUG_FILE, DEBUG_INFO, COPIED_FRAME, "318", START_BYTE, " copy from frame passed to copy. FROM: ", scr);
+  DEBUG_PRINT_DATA_PTR_FRAME(DEBUG_FILE, DEBUG_INFO, COPIED_FRAME, "318", START_BYTE, " copy from frame passed to copy operation. FROM: ", src);
   DEBUG_PRINT_DATA_PTR_FRAME(DEBUG_FILE, DEBUG_INFO, COPIED_FRAME, "319",START_BYTE, "copy to frame returned after copy operation. TO:", dst);
   
-  return;
 }
 
 
@@ -233,7 +230,7 @@ void copy_frame(struct frame *scr, struct frame *dst){
     Diagnostics
 =============================================================================*/
 
-uint16_t transport_get_tx_latancy(){  
+uint16_t transport_get_tx_latency(){  
   if(total_tx_frame_time > UINT16_MAX){
     return UINT16_MAX; 
   }
@@ -242,7 +239,7 @@ uint16_t transport_get_tx_latancy(){
 }
 
 
-uint16_t transport_get_rx_latancy(){
+uint16_t transport_get_rx_latency(){
   if(total_rx_frame_time > UINT16_MAX){
     return UINT16_MAX; 
   }

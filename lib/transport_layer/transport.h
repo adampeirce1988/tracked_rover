@@ -74,10 +74,10 @@ void fifo_io_uart_engine_update();
 void set_tx_fault_injection_active(TX_FAULT_MODE type, uint8_t value);
 
 // Returns the last measured transmit latency (µs).
-uint16_t transport_get_tx_latancy();
+uint16_t transport_get_tx_latency();
 
 // Returns the last measured receive latency (µs).
-uint16_t transport_get_rx_latancy();
+uint16_t transport_get_rx_latency();
 
 
 /*=============================================================================

@@ -27,7 +27,7 @@
 
 RX_RETURN_CODES rx_transport_status = RX_RETURN_CODES::UNINITIALIZED; 
 TX_RETURN_CODES tx_transport_status = TX_RETURN_CODES::UNINITIALIZED;
-uint8_t rx_protocol_status = 0;       // TODO conver this to an enum class. 
+PROTOCOL_RX_RETURN_CODE rx_protocol_status;
 
 /*=============================================================================*
    * Core System Functions

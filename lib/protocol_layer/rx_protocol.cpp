@@ -16,7 +16,7 @@ uint8_t last_packet_id_received;
 frame protocol_frame; 
 
 
-uint8_t rx_message_task_dispatcher(){ 
+PROTOCOL_RX_RETURN_CODE rx_message_task_dispatcher(){ 
 
     // return if no frames are avaliable
     if(frame_available() == 0){ 

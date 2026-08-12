@@ -1,30 +1,20 @@
-#ifndef PROTOCOL_N
+#ifndef PROTOCOL_H
 #define PROTOCOL_H
 
-// ================= RX PROTOCOL RETURN CODES =================
-namespace PROTOCOL_RX_RETURN_CODE {
-    constexpr uint8_t PROTO_IDLE = 0;
-    constexpr uint8_t PROTO_INVALID_TYPE = 1;
-    constexpr uint8_t PROTO_VALID_TYPE = 2;
-    constexpr uint8_t PROTO_VALID_MSG_INHIBITED = 3;  
-    constexpr uint8_t PROTO_RESERVED_TYPE = 4;    
-}
+#include "protocol_types.h"
 
-// ================= RX PROTOCOL RETURN CODES =================
-namespace PROTOCOL_TX_RETURN_CODE { 
-// not yet implimented 
-}
-// ============================================================
+/*=============================================================================*
+ * Protocol API
+ *=============================================================================*/
+
+PROTOCOL_RX_RETURN_CODE rx_message_task_dispatcher();
 
 
-// ========================= API ==============================
-uint8_t rx_message_task_dispatcher();
-// ============================================================
+/*=============================================================================*
+ * Communication Functions
+ *=============================================================================*/
 
-
-// ================== function prototypes =====================
-void establish_coms(); 
+void establish_coms();
 void confirm_coms();
-// ============================================================
 
 #endif

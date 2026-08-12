@@ -9,7 +9,6 @@
 
 #define DEBUG_FILE DBG_ST_LOG
  
-
 void  process_transport_tx_return_error(TX_RETURN_CODES return_code){
    
     switch(return_code){
@@ -17,7 +16,7 @@ void  process_transport_tx_return_error(TX_RETURN_CODES return_code){
         case TX_RETURN_CODES::TX_TRANSMISSION_SUCCESS:
             // store the latancy of the last frame
             st_log_event(ST_LOG_EVENT::EVENT_PACKET_SENT, LOG_TYPE::METRIC);
-            tx_latency_add_value(transport_get_tx_latancy());
+            tx_latency_add_value(transport_get_tx_latency());
         break; 
         
         case TX_RETURN_CODES::TX_ACK_TRANSMISSION_SUCCESS:
@@ -62,12 +61,12 @@ void process_transport_rx_return_error(RX_RETURN_CODES rx_return_code){
     switch(rx_return_code){
         case RX_RETURN_CODES::FRAME_READY:
             // store the latancy of the last received frame
-            rx_latency_add_value(transport_get_rx_latancy());
+            rx_latency_add_value(transport_get_rx_latency());
             st_log_event(ST_LOG_EVENT::EVENT_PACKET_RECEIVED, LOG_TYPE::METRIC); 
         break;
         
         case RX_RETURN_CODES::ACK_READY:
-            rx_latency_add_value(transport_get_rx_latancy());
+            rx_latency_add_value(transport_get_rx_latency());
             st_log_event(ST_LOG_EVENT::EVENT_ACK_RECEIVED , LOG_TYPE::METRIC);
             // reset tx and rx ack related error flags 
             rt_clear_latch(rt_error_log_array[ERROR_ID::ACK_WDT_TIMEOUT]); 
@@ -75,7 +74,7 @@ void process_transport_rx_return_error(RX_RETURN_CODES rx_return_code){
         break; 
 
         case RX_RETURN_CODES::NACK_REQUEST_RECEIVED: 
-            rx_latency_add_value(transport_get_rx_latancy());
+            rx_latency_add_value(transport_get_rx_latency());
             st_log_event(ST_LOG_EVENT::EVENT_NACK_REVEIVED, LOG_TYPE::METRIC);
         break; 
         
@@ -115,7 +114,7 @@ void process_transport_rx_return_error(RX_RETURN_CODES rx_return_code){
     }
 }
 
-void process_protocol_return_error(uint8_t protocol_return_code){
+void process_protocol_return_error(PROTOCOL_RX_RETURN_CODE protocol_return_code){
 
     switch(protocol_return_code){
         case PROTOCOL_RX_RETURN_CODE::PROTO_IDLE:
@@ -141,7 +140,8 @@ void process_protocol_return_error(uint8_t protocol_return_code){
         break; 
 
         default: 
-            DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "LOG", "return code not mapped to a self test logging function", protocol_return_code); 
+            // changed this to a static cast. ** TODO ** check this function
+            DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "LOG", "return code not mapped to a self test logging function", static_cast<uint8_t>(protocol_return_code)); 
         break;
     }
 }
