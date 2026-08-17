@@ -6,14 +6,14 @@
 #include "debug.h"
 
 /*=============================================================================*
-    * Debug Configuration
+  * Debug Configuration
 *=============================================================================*/
 
 #define DEBUG_FILE DBG_SYSTEM_SERVICES
 
 
 /*=============================================================================*
-    * System Service functions
+  * System Service functions
 *=============================================================================*/
 
 // System health and communication monitoring services.
@@ -43,7 +43,7 @@ void update_system_heartbeat(){
 }
 
 /*=============================================================================*
-    * Communication Monitoring
+  * Communication Monitoring
 *=============================================================================*/
 
 void check_transport_alive(){
