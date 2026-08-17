@@ -29,10 +29,10 @@ bool check_system_health_flags();
 void set_communication_bus_alive();
 
 /*=============================================================================*
- * System services APIs 
+ * System services API
  *=============================================================================*/
 
- // Update the timestamp of the last valid communication packet.
+// Update the timestamp of the last valid communication packet.
 void update_last_valid_comms(); 
 
 

@@ -1,33 +1,18 @@
-///////////////////////////////////////////////////////////////////////////////
-// Includes
-///////////////////////////////////////////////////////////////////////////////
-
-#include <Arduino.h>
-
 #include "system.h"
-#include "protocol.h"
-#include "debug.h"
-#include "self_test.h"
 #include "system_internal.h"
 
 
-///////////////////////////////////////////////////////////////////////////////
-// Configuration
-///////////////////////////////////////////////////////////////////////////////
-#define DEBUG_FILE DBG_SYSTEM
-
-
-//////////////////////////////////////////////////////////////////////////////
-// System Status Variables
-///////////////////////////////////////////////////////////////////////////////
-
-bool health_test_status = true;
-
+/*=============================================================================*
+ * System Runtime Variables
+ *=============================================================================*/
 
 // vehicle states
 VEHICLE_STATE active_vehicle_state  = VEHICLE_STATE::BOOTING;
 VEHICLE_STATE last_vehicle_state    = VEHICLE_STATE::BOOTING; 
 VEHICLE_STATE return_state          = VEHICLE_STATE::SAFE_STATE;
+
+//  System health flags
+bool health_test_status = true; // Review usage once the web application is implemented.
 
 
 // System communication state
@@ -45,27 +30,9 @@ namespace sys
 }
 
 
-
-// Overall system health state
-//bool health_test_status = true;
-
-// Diagnostic / self-test state
-//TEST_RETURN_STATUS selftest_state = TEST_RETURN_STATUS::NO_TEST_RUNNING;
-//uint32_t diagnostics_WDT    = 0;
-
-// Protocol / dispatcher status
-uint8_t rx_dispacher_status = 0;
-
-// Transport status
-// NOTE:
-// Currently logged but otherwise unused.
-// Future plan is to centralize transport error reporting here.
-uint8_t tx_status = 0;
-uint8_t rx_status = 0;
-
-///////////////////////////////////////////////////////////////////////////////
-// New fuctions
-///////////////////////////////////////////////////////////////////////////////
+/*=============================================================================*
+ * Public Accessors
+ *=============================================================================*/
 
 VEHICLE_STATE get_active_vehicle_state(){
     return active_vehicle_state;

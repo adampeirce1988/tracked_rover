@@ -19,11 +19,8 @@ test status: code compiles with 0 errors & untested on ESP.
 
 
 [TODO]: 
-- TEST self test due to moving respobsibilty of diagnostics_active into self test. 
-- transport_fault_injection.cpp after testing
-    //f->DLC = tx_fault_injection_cfg.value; // remove after testing
-- code review all current module 
-- run a full case test on hardware
+- Review diagnostics return_state handling and allowed transitions.
+- run hardware testing on all test cases 
 - merge code into main(only once the above are completed)
 - create a new fork and impliment a HTML based controler, diagnostic port as ota updater(esp32)
 
@@ -79,15 +76,19 @@ tracked_rover-built-in-trasmission-self-test/
     │   ├── test_packet_error_injection.cpp ✅ (10/10)
     │   └── test_packet_timing.cpp ✅ (9.9/10)
     │
+    ├── simulation/
+    │   ├── simulation.h ✅ (9.5/10) 
+    │   └── simulation.cpp ✅ (9.7/10) 
+    │
     ├── system/
-    │   ├── system_core.cpp
-    │   ├── system_internal.h
-    │   ├── system_services.cpp
+    │   ├── system_core.cpp ✅ (9.6/10)
+    │   ├── system_internal.h ✅ (9.4/10)
+    │   ├── system_services.cpp ✅ (9.7/10)
     │   ├── system_types.h ✅ (9.8/10)
-    │   ├── system.cpp
+    │   ├── system.cpp ✅ (9.7/10)
     │   ├── system.h ✅ (9.8/10)
-    │   ├── vehicle_state_change.cpp
-    │   └── vehicle_state_machine.cpp
+    │   ├── vehicle_state_change.cpp ✅ (9.6/10)
+    │   └── vehicle_state_machine.cpp ✅ (9.4/10)
     │
     └── transport_layer/
         ├── transport_api.cpp ✅ (9.7/10)

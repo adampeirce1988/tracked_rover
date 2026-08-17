@@ -1,18 +1,14 @@
 
-#include <Arduino.h>
-
 #include "system.h"
 #include "system_internal.h"
 
-#include "self_test.h"
-#include "logger.h"
-#include "transport.h"
-#include "protocol.h"
+#include "logger.h" 
+#include "transport.h" 
+#include "protocol.h" 
 #include "simulation.h"
 
 #include "debug.h"
-#include "global_config.h"
-#include "messages.h"
+
 
 /*=============================================================================*
  * Debug Configuration
@@ -22,15 +18,16 @@
 
 
 /*=============================================================================*
- * Vehicle states 
+ * Module Runtime Status
  *=============================================================================*/
 
-RX_RETURN_CODES rx_transport_status = RX_RETURN_CODES::UNINITIALIZED; 
-TX_RETURN_CODES tx_transport_status = TX_RETURN_CODES::UNINITIALIZED;
-PROTOCOL_RX_RETURN_CODE rx_protocol_status;
+RX_RETURN_CODES rx_transport_status         = RX_RETURN_CODES::UNINITIALIZED; 
+TX_RETURN_CODES tx_transport_status         = TX_RETURN_CODES::UNINITIALIZED;
+PROTOCOL_RX_RETURN_CODE rx_protocol_status  = PROTOCOL_RX_RETURN_CODE::PROTO_IDLE;
+
 
 /*=============================================================================*
-   * Core System Functions
+  * Core System Functions
  *=============================================================================*/
 
 /*
@@ -54,7 +51,8 @@ void run_core_functions(){
   *-------------------------------------------------------------------------*/
 
   if(active_vehicle_state != last_vehicle_state){
-    DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "MAIN", "vehicle state cahnged: ", vehicle_state_to_string(active_vehicle_state));
+    
+    DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "MAIN", "vehicle state changed: ", vehicle_state_to_string(active_vehicle_state));
     last_vehicle_state = active_vehicle_state; 
   }
 
@@ -87,6 +85,4 @@ void run_core_functions(){
   *-------------------------------------------------------------------------*/
 
   run_simulations();
-
-
 }

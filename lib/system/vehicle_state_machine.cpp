@@ -1,6 +1,6 @@
-///////////////////////////////////////////////////////////////////////////////
-// Includes
-///////////////////////////////////////////////////////////////////////////////
+/*=============================================================================*
+ * Includes
+*=============================================================================*/
 
 #include <Arduino.h>
 
@@ -8,103 +8,108 @@
 #include "system_internal.h"
 #include "protocol.h"
 #include "debug.h"
-#include "logger.h"
 #include "self_test.h"
 #include "transport.h"
 #include "simulation.h"
 
 
-
-///////////////////////////////////////////////////////////////////////////////
-// Configuration
-///////////////////////////////////////////////////////////////////////////////
+/*=============================================================================*
+ * Configuration
+*=============================================================================*/
 
 #define DEBUG_FILE DBG_SYSTEM
 
-///////////////////////////////////////////////////////////////////////////////
-// Temporary / Test Variables
-///////////////////////////////////////////////////////////////////////////////
+
+/*=============================================================================*
+ * Temporary / Test Variables
+*=============================================================================*/
 
 // TEST ONLY
 // Remove after diagnostics refactor
 bool TEST_call_diag_once = true;
 
 
-
-///////////////////////////////////////////////////////////////////////////////
-// Vehicle State Machine
-///////////////////////////////////////////////////////////////////////////////
-
+/*=============================================================================*
+ * Vehicle State Machine
+ *=============================================================================*/
 
 VEHICLE_STATE_RETURN_CODE run_vehicle_state(){
 
-    
-  run_core_functions(); // this line runs all the core functions that need to run in all states 
+  // This line runs all the core functions that need to run in all states 
+  run_core_functions(); 
   
 
   switch(active_vehicle_state){
 
-    //setup code gos here not in main.cpp void setup();
+
+    /*-------------------------------------------------------------------------*
+      * BOOTING
+      
+      * System initialisation is performed here rather than in main.cpp.
+    *-------------------------------------------------------------------------*/
     case VEHICLE_STATE::BOOTING: 
 
-      // open debug port and print version data.
+      // Open debug port and print version data.
       debug_port_begin();                                                    // open the debug port
       delay(1000);                                                           // run 1s delay before transmitting data 
-      PRINT_VERSION_DATA(SW_VERSION, HARDWARE_VERSION, RELEASE_NOTES);       // print version and meta data 
+      PRINT_VERSION_DATA(SW_VERSION, HARDWARE_VERSION, RELEASE_NOTES);       // print version and metadata 
       delay(1000);
 
-      // set the current transport & baud rate. 
-      //transport_set(&uart_io); ** remove after refactor ** 
+      // Configure the default transport and baud rate.
       transport_set_default();                                                  // set transport method default to be serial (&uart_io / &fifo_io)
-      transport_init(COMS_PORT_BAUD);                                           // open inter board serial port 
+      transport_init(COMS_PORT_BAUD);                                           // open inter-board serial port 
       
       // **DELETE** once handled via the web interface
       user_enable_simulation();  //***** DELETE ONCE HANDLED BY THE WEB INTERFACE ***** 
       
 
-      // configure wifi handle ap fall back. 
+      // Configure WiFi/AP fallback
       //WiFi.mode(WIFI_AP);
 
       // leave booting always transition to SAFE_STATE
-      request_vehicle_state_change(VEHICLE_STATE::SAFE_STATE);               // move to safe state. 
+      request_vehicle_state_change(VEHICLE_STATE::SAFE_STATE);
     break;
 
-    ///////////////////////////////////////////////////////////////////////////
-    // SAFE STATE
-    ///////////////////////////////////////////////////////////////////////////
+      /*-------------------------------------------------------------------------*
+        * SAFE STATE
+      *-------------------------------------------------------------------------*/
      case VEHICLE_STATE::SAFE_STATE:
 
       
-      //send out a request for confirmation of receiving node ** THIS ONLY EVER RUNS ONCE **
+      // Attempt to establish communication once per second until the communication bus is active.
       if(!sys::bus_connectivity_status && millis() - sys::last_connection_attempt > 1000){
         update_last_connection_attempt(); 
         establish_coms();
       }
       
-      // check all system flags move to idle
+      // Transition to IDLE once all required system health checks pass.
       if(check_system_health_flags()){ // I2C check not needed for ESP. Arduino will return an error if the bus is offline.
         request_vehicle_state_change(VEHICLE_STATE::IDLE);
       } 
       else{
-    
+
+      // TODO: 
       // no commands are accepted or executed. 
-      // I2C bus and sensor communication will stop. rund device check to confirm the bus status then halt transmission 
+      // I2C bus and sensor communication will stop. run device check to confirm the bus status then halt transmission 
       // any errors that caused the safe state to occur will be logged.
+
       break;
       }
 
     break;
 
-    ///////////////////////////////////////////////////////////////////////////
-    // IDLE
-    ///////////////////////////////////////////////////////////////////////////
+    /*-------------------------------------------------------------------------*
+      * IDLE
+    *-------------------------------------------------------------------------*/
     case VEHICLE_STATE::IDLE:
 
+      // ** TEST ONLY **
+      // Remove when diagnostic entry is controlled by the system/web interface.
       // on request for diagnostics a test case must be requested 
-      if(TEST_call_diag_once == true){
+      if(TEST_call_diag_once){
       DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "MAIN", "diagnostics called.");
-      request_vehicle_state_change(VEHICLE_STATE::DIAGNOSTICS);
       request_self_test(TEST_ID::TRANSPORT_TYPE_CHANGE);
+      request_vehicle_state_change(VEHICLE_STATE::DIAGNOSTICS);
       TEST_call_diag_once = false;
       }
 
@@ -128,9 +133,9 @@ VEHICLE_STATE_RETURN_CODE run_vehicle_state(){
     break;
 
       
-    ///////////////////////////////////////////////////////////////////////////
-    // MANUAL
-    ///////////////////////////////////////////////////////////////////////////
+    /*-------------------------------------------------------------------------*
+      * MANUAL
+    *-------------------------------------------------------------------------*/
     case VEHICLE_STATE::MANUAL: 
       // Vehicle operational
       // Accept live control commands
@@ -140,59 +145,67 @@ VEHICLE_STATE_RETURN_CODE run_vehicle_state(){
       // if no commands received
     break;
 
-
-    ///////////////////////////////////////////////////////////////////////////
-    // AUTONOMOUS
-    ///////////////////////////////////////////////////////////////////////////
+    /*-------------------------------------------------------------------------*
+      * AUTONOMOUS
+    *-------------------------------------------------------------------------*/
     case VEHICLE_STATE::AUTONOMOUS: 
-      // Vehicle operation in atonomuse mode
-      // Not yet implimented
+      // Vehicle operation in autonomous mode
+      // Not yet implemented
     break;
 
-    
-    ///////////////////////////////////////////////////////////////////////////
-    // DIAGNOSTICS 
-    ///////////////////////////////////////////////////////////////////////////
+    /*-------------------------------------------------------------------------*
+      * DIAGNOSTICS
+    *-------------------------------------------------------------------------*/
     case VEHICLE_STATE::DIAGNOSTICS:
 
-    //** only run the diagnostic FSM here all other functionsa to be handled by the FSM. 
+    // Only run the diagnostics FSM here all other functions are handled by the FSM core. 
     run_test_manager();
         
     break;
 
+    /*-------------------------------------------------------------------------*
+      * UPDATE 
+    *-------------------------------------------------------------------------*/
     case VEHICLE_STATE::UPDATE: 
 
-      // Access via the OTA updater tab 
-      // used only to carry out:
-      //   - ESP32 OTA update
-      //   - UX HTML file
-      //   - ARDUINO via SDK passthrough (Much later on in the project)
-      // possible to exit by changing to another tab without proforming a firmware update
+      // OTA update services:
+      // - ESP32 firmware
+      // - Web interface files
+      // - Arduino firmware passthrough
 
     break; 
 
+    /*-------------------------------------------------------------------------*
+      * FAIL SAFE 
+    *-------------------------------------------------------------------------*/
 
     case VEHICLE_STATE::FAIL_SAFE: 
       
-    // fault detected the vehicle will be stoped ans made safe
-    // (may later only opperate in derate depending on the issue)
+    // Fault detected the vehicle will be stopped and made safe
+    // (may later only operate in derate depending on the issue)
+    request_vehicle_state_change(VEHICLE_STATE::SAFE_STATE);
 
     break; 
 
+
+    /*-------------------------------------------------------------------------*
+      * SHUTTING DOWN
+    *-------------------------------------------------------------------------*/
     case VEHICLE_STATE::SHUTTING_DOWN:
 
-     // save and close all open files
-     // enter low power mode and wait for power discconetion or rebooting command 
+     // Save and close all open files
+     // enter low power mode and wait for power disconnection or rebooting command 
 
     break; 
     
-    ///////////////////////////////////////////////////////////////////////////
-    // DEFAULT
-    ///////////////////////////////////////////////////////////////////////////
+    /*-------------------------------------------------------------------------*
+      * DEFAULT
+    *-------------------------------------------------------------------------*/
     default:
         request_vehicle_state_change(VEHICLE_STATE::SAFE_STATE);
     break; 
   };
 
-  return VEHICLE_STATE_RETURN_CODE::RUNNING; // defult until full implimentaion 
+  // Default until the state machine has meaningful return conditions.
+  return VEHICLE_STATE_RETURN_CODE::RUNNING; 
 }

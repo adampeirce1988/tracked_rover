@@ -123,8 +123,9 @@ void tx_frame_error_injection(struct frame *f ){
                 else{
                     f->DLC = rand_dlc; 
                 }
-                //f->DLC = tx_fault_injection_cfg.value; // remove after testing
+
                 str_failure_type = "f->DLC";
+                
             } break;
             
             case TX_FAILURE_MODE::DLC_OVER_MAX_CAPACITY:{ 

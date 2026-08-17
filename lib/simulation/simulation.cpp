@@ -1,19 +1,28 @@
-
+#include "simulation.h"
 #include "transport.h"
-#include "global_config.h"
 
-// Simulation variables
-namespace simulation{
+/*=============================================================================*
+ * Simulation Runtime State
+*=============================================================================*/
 
-// uart simulation (DEBUG & SELF_TEST)
-bool fifo_active = false;          // current status
-bool fifo_user_requested = false;  // requested via the user interface 
-bool fifo_test_request = false;    // requested via self_test
+namespace simulation
+{
+    // FIFO simulation state.
+    bool fifo_active = false;
 
-};
+    // FIFO simulation requested by the user interface.
+    bool fifo_user_requested = false;
 
-// FIFO transport simulation control
-bool fifo_simulation_request_active(){
+    // FIFO simulation requested by self-test.
+    bool fifo_test_request = false;
+}
+
+
+/*=============================================================================*
+ * FIFO Simulation Control
+ *=============================================================================*/
+
+bool fifo_simulation_requested(){
     return simulation::fifo_test_request || simulation::fifo_user_requested;
 }
 
@@ -29,6 +38,11 @@ void release_fifo_test_simulation(){
     simulation::fifo_test_request = false; 
 }
 
+
+/*=============================================================================*
+ * User Simulation Control
+ *=============================================================================*/
+
 void user_enable_simulation(){  // call from the web interface only
     simulation::fifo_user_requested = true; 
 }
@@ -38,11 +52,13 @@ void user_disable_simulation(){
 }
 
 
+/*=============================================================================*
+ * Simulation Manager
+ *=============================================================================*/
 
-// simulation manager 
 void run_simulations(){
 
-    bool requested_state = fifo_simulation_request_active();
+    const bool requested_state = fifo_simulation_requested();
 
     if(requested_state != simulation::fifo_active){
 
