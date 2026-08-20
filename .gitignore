@@ -7,3 +7,6 @@ build/
 
 # Mac
 .DS_Store
+
+# persional wifi credentials 
+include/credentials.h
