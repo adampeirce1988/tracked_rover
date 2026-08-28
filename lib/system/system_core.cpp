@@ -1,7 +1,7 @@
 
 #include "system.h"
 #include "system_internal.h"
-
+#include "network.h"
 #include "logger.h" 
 #include "transport.h" 
 #include "protocol.h" 
@@ -85,4 +85,11 @@ void run_core_functions(){
   *-------------------------------------------------------------------------*/
 
   run_simulations();
+
+  /*-------------------------------------------------------------------------*
+    * web server
+  *-------------------------------------------------------------------------*/
+
+  run_server();
+  
 }

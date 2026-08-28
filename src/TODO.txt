@@ -15,10 +15,18 @@ test status: code compiles with 0 errors & untested on ESP.
 - Diagnostics WDT test:..........OK PROGRESS: ######################## 100%
 
 
-[FIXED]: 
+[FIXED]:
+- updated platformIO ini
+- added DBG_WIFI to the debug_config.h 
+- created wifi_init() with station mode fall back
+- added data/ to store web page 
+- added update.h & update.cpp
 
 
 [TODO]: 
+
+- ** verify littleFS and host a basic HTML page via AP_MODE. **
+
 - Review diagnostics return_state handling and allowed transitions.
 - run hardware testing on all test cases 
 - merge code into main(only once the above are completed)
@@ -35,6 +43,8 @@ tracked_rover-built-in-trasmission-self-test/
 ├── src/
 │   ├── main.cpp
 │   └── TODO.txt
+│
+│── data/ 
 │
 └── lib/
     │
@@ -56,6 +66,14 @@ tracked_rover-built-in-trasmission-self-test/
     │   ├── self_test_logger.cpp ✅ (9.0/10)
     │   └── self_test_logger.h ✅ (9.2/10)
     │
+    ├── network/
+    │   ├── credentials_example.h
+    │   ├── credentials.h
+    │   ├── network_internals.h
+    │   ├── network_types.h
+    │   ├── network.cpp 
+    │   └── network.h
+    │   
     ├── protocol_layer
     │   ├── messages.h ✅ (9.4/10)
     │   ├── permissions.cpp ✅ (9.4/10)
@@ -90,15 +108,19 @@ tracked_rover-built-in-trasmission-self-test/
     │   ├── vehicle_state_change.cpp ✅ (9.6/10)
     │   └── vehicle_state_machine.cpp ✅ (9.4/10)
     │
-    └── transport_layer/
-        ├── transport_api.cpp ✅ (9.7/10)
-        ├── transport_fifo.cpp ✅ (9.7/10)
-        ├── transport_internal.cpp ✅ (9.5/10)
-        ├── transport_internal.h ✅ (9.5/10)
-        ├── transport_rx_fsm.cpp ✅ (9.6/10)
-        ├── transport_structs.h ✅ (9.7/10)
-        ├── transport_tx_fsm.cpp ✅ (9.2/10)
-        ├── transport_types.h ✅ (9.6/10)
-        ├── transport_uart.cpp ✅ (9.8/10)
-        ├── transport.h ✅ (9.6/10)
-        └── transpot_fault_injection.cpp ✅ (9.3/10)
+    │── transport_layer/
+    │   ├── transport_api.cpp ✅ (9.7/10)
+    │   ├── transport_fifo.cpp ✅ (9.7/10)
+    │   ├── transport_internal.cpp ✅ (9.5/10)
+    │   ├── transport_internal.h ✅ (9.5/10)
+    │   ├── transport_rx_fsm.cpp ✅ (9.6/10)
+    │   ├── transport_structs.h ✅ (9.7/10)
+    │   ├── transport_tx_fsm.cpp ✅ (9.2/10)
+    │   ├── transport_types.h ✅ (9.6/10)
+    │   ├── transport_uart.cpp ✅ (9.8/10)
+    │   ├── transport.h ✅ (9.6/10)
+    │   └── transpot_fault_injection.cpp ✅ (9.3/10)
+    │   
+    └── update/ 
+        │── update.cpp 
+        └── update.h

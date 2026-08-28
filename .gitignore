@@ -10,3 +10,4 @@ build/
 
 # persional wifi credentials 
 credentials.h
+include/credentials.h

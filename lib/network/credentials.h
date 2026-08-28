@@ -6,8 +6,11 @@
  * Wi-Fi Credentials
 *=============================================================================*/
 
-constexpr const char* SSID = "YOUR_WIFI_SSID";
-constexpr const char* PASSWORD = "YOUR_WIFI_PASSWORD";
+// wifi mode 
+constexpr const char* WIFI_SSID           = "YOUR_WIFI_SSID";
+constexpr const char* WIFI_PASSWORD       = "YOUR_WIFI_PASSWORD";
 
+// fall back mode
+constexpr const char* WIFI_SSID_AP_MODE   = "ESP32_ROVER-1";
 
 #endif

@@ -6,11 +6,13 @@
 
 #include "system.h"
 #include "system_internal.h"
+#include "network.h"
 #include "protocol.h"
 #include "debug.h"
 #include "self_test.h"
 #include "transport.h"
 #include "simulation.h"
+#include "file_system.h"
 
 
 /*=============================================================================*
@@ -62,9 +64,13 @@ VEHICLE_STATE_RETURN_CODE run_vehicle_state(){
       // **DELETE** once handled via the web interface
       user_enable_simulation();  //***** DELETE ONCE HANDLED BY THE WEB INTERFACE ***** 
       
+      // mount the LittleFS filesystem 
+      filesystem_init(); 
+      filesystem_list_files();  // move to diagnostic(HTML and will need to be availabel to run the page)
 
       // Configure WiFi/AP fallback
-      //WiFi.mode(WIFI_AP);
+      wifi_init();
+      server_init();
 
       // leave booting always transition to SAFE_STATE
       request_vehicle_state_change(VEHICLE_STATE::SAFE_STATE);

@@ -31,6 +31,7 @@
 #define DBG_ST_LOG               (1UL << 12)
 #define DBG_RT_LOG               (1UL << 13)
 #define DBG_METRIC_LOG           (1UL << 14)
+#define DBG_WIFI                 (1UL << 15)
 
 
 //------------ debug level bitmask------------ //
