@@ -18,6 +18,7 @@ PlatformIO command to Load littleFS files: pio run -t uploadfs
 
 
 [FIXED]:
+- fixed naming issue with style.css
 
 
 [TODO]: 

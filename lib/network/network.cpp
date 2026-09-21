@@ -114,6 +114,21 @@ void server_init(){
 
     });
 
+     server.on("/style.css", HTTP_GET, []()
+    {
+        File file = LittleFS.open("/style.css", "r");
+
+        if (!file)
+        {
+            server.send(500, "text/plain", "Failed to open style.css");
+            return;
+        }
+
+        server.streamFile(file, "text/css");
+
+        file.close();
+    });
+
     // Register a GET endpoint for "/status".
     // When the web interface requests this URL, the lambda sends a JSON status response.
     // This is a place holder for furture expansion when i need to send data to the web page. 
