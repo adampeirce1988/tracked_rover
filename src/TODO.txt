@@ -1,5 +1,7 @@
 test status: code compiles with 0 errors & untested on ESP.  
 
+PlatformIO command to Load littleFS files: pio run -t uploadfs
+
 [verified]:
 - 200 good packet test:..........ok PROGRESS: ######################### 100%
 - 200 good packet stress test:...ok PROGRESS: ######################### 100%
@@ -16,24 +18,11 @@ test status: code compiles with 0 errors & untested on ESP.
 
 
 [FIXED]:
-- updated platformIO init
-- added DBG_WIFI to the debug_config.h 
-- created wifi_init() with station mode fall back
-- added data/ to store web page 
-- added update.h & update.cpp
-- fixed bug that casused a fatal crash and stoped serail debug from working 
-    constexpr uint8_t DEBUG_PORT_RX_PIN =      3; from 16
-    constexpr uint8_t DEBUG_PORT_TX_PIN =      1; from 17
 
 
 [TODO]: 
-- IMPORTANT: ** remove personal credentials to gitignore before populating **
-- ** verify littleFS and host a basic HTML page via AP_MODE. **
-
 - Review diagnostics return_state handling and allowed transitions.
-- run hardware testing on all test cases 
-- merge code into main(only once the above are completed)
-- create a new fork and impliment a HTML based controler, diagnostic port as ota updater(esp32)
+- run hardware testing on all test cases via web app 
 
 
 [BUILD TREE]:
@@ -48,6 +37,9 @@ tracked_rover-built-in-trasmission-self-test/
 │   └── TODO.txt
 │
 │── data/ 
+│    ├── index.html
+│    ├── scripts.js
+│    └── style.css
 │
 └── lib/
     │

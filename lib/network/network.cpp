@@ -8,6 +8,7 @@
 #include "network_types.h"
   
 
+
 /*=============================================================================*
  * Debug Configuration
 *=============================================================================*/
@@ -98,9 +99,24 @@ WIFI_STATUS wifi_init(){
 void server_init(){
 
      server.on("/", HTTP_GET, []() {
-        server.send(200, "text/plain", "ESP32 is alive!");
+
+        File file = LittleFS.open("/index.html", "r"); // open index.html
+
+        // manage file opening failures 
+        if (!file)
+        {
+            server.send(500, "text/plain", "Failed to open index.html");
+            return;
+        }
+
+        server.streamFile(file, "text/html");
+        file.close();
+
     });
 
+    // Register a GET endpoint for "/status".
+    // When the web interface requests this URL, the lambda sends a JSON status response.
+    // This is a place holder for furture expansion when i need to send data to the web page. 
     server.on("/status", HTTP_GET, []() {
         server.send(200, "application/json",
                     "{\"status\":\"ok\"}");

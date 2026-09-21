@@ -7,10 +7,14 @@
 
 bool filesystem_mounted = false;  // must be initilised to false
 
-
 bool filesystem_init(){
-    if(!LittleFS.begin()){
+    
+    if(LittleFS.begin()){
         filesystem_mounted = true; 
+        DEBUG_PORT.println("Filesystem_mounted sucessfuly");  
+    }
+    else{
+        DEBUG_PORT.println("Filesystem_mounted unsucesful");  
     }
 
     return filesystem_mounted;
@@ -30,8 +34,11 @@ void filesystem_list_files(){
     DEBUG_PORT.println(filesystem_status() ? "True" : "False"); 
 
     if(!root.isDirectory()){
-        DEBUG_PORT.print(" File systen is not a directory");
+        DEBUG_PORT.println("File systen is not a directory");
         return; 
+    }
+    else {
+        DEBUG_PORT.println("File system directory found."); 
     }
 
     while(file){

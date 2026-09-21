@@ -3,8 +3,8 @@
 
 
 // define the files that you would like to debug here
-//#define DEBUG_FILE_MASK   (DBG_ESP_MAIN | DBG_TRANSPORT | DBG_TRANSPORT_FIFO | DBG_SELF_TEST | DBG_LOGS)
-  #define DEBUG_FILE_MASK (DBG_SYSTEM | DBG_TRANSPORT | DBG_PROTOCOL | DBG_TRANSPORT_FIFO | DBG_SELF_TEST )
+#define DEBUG_FILE_MASK   (DBG_ESP_MAIN | DBG_WIFI)
+//#define DEBUG_FILE_MASK (DBG_SYSTEM | DBG_TRANSPORT | DBG_PROTOCOL | DBG_TRANSPORT_FIFO | DBG_SELF_TEST )
 
 // define the levels of debuging required here
   #define DEBUG_LEVEL_MASK  (DEBUG_META | DEBUG_ERROR | DEBUG_WARN) // use at runtime 

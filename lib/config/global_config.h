@@ -43,8 +43,8 @@ constexpr uint8_t PENDING_ACK_QUEUE_SIZE =     2;        // size for the pending
 
     // Use the ESP32 dev board's UART0 USB-serial pins so output appears in the
     // PlatformIO monitor without extra wiring.
-    constexpr uint8_t DEBUG_PORT_RX_PIN =      16;
-    constexpr uint8_t DEBUG_PORT_TX_PIN =      17; 
+    constexpr uint8_t DEBUG_PORT_RX_PIN =      3;  // 16
+    constexpr uint8_t DEBUG_PORT_TX_PIN =      1;  // 17
     constexpr uint8_t MAX_SERIAL_BUFFER_SIZE = 128;
 
     #define MSG_FORMAT             SERIAL_8N1
