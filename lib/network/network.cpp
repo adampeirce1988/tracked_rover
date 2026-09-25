@@ -114,6 +114,21 @@ void server_init(){
 
     });
 
+    server.on("/update.html", HTTP_GET, []()
+    {
+        File file = LittleFS.open("/update.html", "r"); 
+
+        if(!file)
+        {
+            server.send(500, "text/plain", "failed to open update.html");
+            return; 
+        }
+
+        server.streamFile(file, "text/html");
+
+        file.close();
+    });
+
      server.on("/style.css", HTTP_GET, []()
     {
         File file = LittleFS.open("/style.css", "r");

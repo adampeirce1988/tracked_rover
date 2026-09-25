@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="veiwport" content="device-width" initial-scale="1.0">
+        
+        <title>ESP-Nexus - firmware Update</title>
+
+        <link rel="stylesheet" href="style.css"> 
+
+    </head>
+
+    <body>
+
+         <!--=========================================================================*
+        * Header
+        *=========================================================================-->
+        
+        <header class="header">
+
+            <button class="menu-button" type="button" aria-label="Open menu">
+
+                <span></span>
+                <span></span>
+                <span></span>
+
+            </button>
+
+            <h1> Firmware Update</h1>
+
+        </header>
+
+        <!--=========================================================================*
+        * Menu
+        *=========================================================================-->
+
+        <nav class="menu"> 
+
+            <a href="/"> Controler</a>
+            <a href="#"> Diagnostics</a>
+            <a href="#"> Sensor data</a>
+            <a href="/update.html"> Update firmware</a>
+            <a href="#"> Settings</a>
+
+        </nav>
+
+       
+        <!--=========================================================================*
+        * Main Content
+        *=========================================================================-->
+        
+        <main class="container">
+
+            <p class="subtitle">
+            ESP-Nexus Firmware Update
+            </p>
+
+            <section class="card"> 
+
+                <h2>Firmware</h2>
+
+                <p>
+                    Select firmware file to upload to ESP-32.
+                </p>
+
+                <input type="file" id="firmware file" accept=".bin">
+                
+                <button type="button"> 
+                    Upload Firmware
+                </button>
+
+                <!-- Firmware update progress bar -->
+                <div class="progress-container">
+
+                    <div class="progress-bar" id="progress-bar"> </div>
+
+                </div>
+
+                <p id= "progress-text">0%</p> 
+
+            </section>
+
+        </main>
+
+    </body>
+
+</html>

@@ -2,15 +2,28 @@
  * Global
  *=============================================================================*/
 
+html,
 body {
 
-    font-family: Arial, sans-serif;
+    width: 100%;
+    height: 100%;
+
+    margin: 0;
+
+    overflow: hidden;
+
+}
+
+
+body {
+
+    display: flex;
+    flex-direction: column;
 
     background: #111827;
     color: #f9fafb;
 
-    margin: 0;
-    padding: 20px;
+    font-family: Arial, sans-serif;
 
 }
 
@@ -21,11 +34,14 @@ body {
 
 .header {
 
+    flex-shrink: 0;
+
+    height: 56px;
+
     display: flex;
     align-items: center;
 
-    max-width: 600px;
-    margin: 0 auto 30px auto;
+    padding: 0 12px;
 
 }
 
@@ -56,7 +72,7 @@ body {
     padding: 8px;
 
     background: transparent;
-    border: blue;
+    border: none;
 
     cursor: pointer;
 
@@ -78,49 +94,98 @@ body {
 
 
 /*=============================================================================*
+ * Navigation Menu
+ *=============================================================================*/
+
+.menu {
+
+    flex-shrink: 0;
+
+    background: #1f2937;
+
+    padding: 8px 0;
+
+}
+
+
+.menu a {
+
+    display: block;
+
+    padding: 4px 2px;
+
+    color: #f9fafb;
+
+    text-decoration: none;
+
+}
+
+
+.menu a:hover {
+
+    background: #374151;
+
+}
+
+
+/*=============================================================================*
  * Main Content
  *=============================================================================*/
 
-.container {
+main {
 
-    max-width: 600px;
-    margin: 0 auto;
+    flex: 1;
+
+    min-height: 0;
+
+    position: relative;
 
 }
 
 
 .subtitle {
 
+    margin: 16px;
+
     color: #9ca3af;
 
 }
 
-.menu {
+/*=============================================================================*
+ * Firmware Update Progress
+ *=============================================================================*/
 
-    max-width: 600px;
-    margin: 0 auto 30px auto; 
-    background: #1f2937;
+.progress-container {
 
-    border-radius: 10px; 
+    width: 100%;
+    height: 12px;
 
-    padding: 10px 0; 
+    margin-top: 16px;
+
+    background: #374151; 
+
+    border-radius: 6px;
+
+    overflow: hidden;
 
 }
 
-.menu a { 
+.progress-bar {
 
-    display: block;
+    width: 0%;
+    height:12px;
 
-    padding: 12px 20px; 
+    background: #4ade80;
 
-    color: #f9fafb; 
+    transition: width 0.2s easy;
+
+}
+
+.progress-text {
+
+    margin: 8px 0 0 0; 
+
+    text-align: centre; 
+    color: #9ca3af; 
     
-    text-decoration: none;
-
-}
-
-.menu a:hover { 
-
-    background-color: #374151;
-
 }
