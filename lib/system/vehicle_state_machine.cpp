@@ -4,6 +4,7 @@
 
 #include <Arduino.h>
 
+#include "update.h"
 #include "system.h"
 #include "system_internal.h"
 #include "network.h"
@@ -56,6 +57,9 @@ VEHICLE_STATE_RETURN_CODE run_vehicle_state(){
       delay(1000);                                                           // run 1s delay before transmitting data 
       PRINT_VERSION_DATA(SW_VERSION, HARDWARE_VERSION, RELEASE_NOTES);       // print version and metadata 
       delay(1000);
+
+      // print all partition data for the ESP32 
+      ota_print_patrition_data();        
 
       // Configure the default transport and baud rate.
       transport_set_default();                                                  // set transport method default to be serial (&uart_io / &fifo_io)

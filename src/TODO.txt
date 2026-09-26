@@ -18,15 +18,16 @@ PlatformIO command to Load littleFS files: pio run -t uploadfs
 
 
 [FIXED]:
-- fixed naming issue with style.css
-- added update.html 
-- added update to the server handler
+
 
 
 
 [TODO]: 
+- update the bulid tree to incluce all files.
+- resolve bug stopping the little fs file ststem opening.
+- move partition dump to a diagnostic test. 
 - Review diagnostics return_state handling and allowed transitions.
-- run hardware testing on all test cases via web app 
+- run hardware testing on all test cases via web app.
 
 
 [BUILD TREE]:
