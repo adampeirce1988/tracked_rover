@@ -29,18 +29,32 @@ void filesystem_list_files(){
     File root = LittleFS.open("/"); 
     File file = root.openNextFile();
 
+    DEBUG_PORT.println();
+    DEBUG_PORT.println("========================================");
+    DEBUG_PORT.println(" LittleFS Data");
+    DEBUG_PORT.println("========================================");
+
     // print file ststem status
-    DEBUG_PORT.print("Filesystemm status: ");
+    DEBUG_PORT.print("Filesystemm sucesfuly mounted: ");
     DEBUG_PORT.println(filesystem_status() ? "True" : "False"); 
 
-    if(!root.isDirectory()){
-        DEBUG_PORT.println("File systen is not a directory");
-        return; 
+    DEBUG_PORT.print("File System type: "); 
+
+    if(root.isDirectory()){
+        DEBUG_PORT.println("Directory");
+    
+        // print table header if the file is a directory
+        DEBUG_PORT.println("File name        | Size           | Directory");
+        DEBUG_PORT.println("-----------------|----------------|----------");
+        
     }
     else {
-        DEBUG_PORT.println("File system directory found."); 
+
+        DEBUG_PORT.println("File"); 
+        return; 
     }
 
+    
     while(file){
 
         // cache stoage
@@ -50,16 +64,14 @@ void filesystem_list_files(){
     
         //print_file_data(name, size, directory); creae in debug 
 
-        // temp solution. 
-        DEBUG_PORT.print("File name: "); 
-        DEBUG_PORT.print(name);
-        DEBUG_PORT.print("   Size: ");
-        DEBUG_PORT.print(size); 
-        DEBUG_PORT.print("bytes   directory: ");
-        DEBUG_PORT.println(directory ? "True" : "Fasle");
+        // print the formated data
+        DEBUG_PORT.printf("%-16s | %8u bytes | %-9s\n",name,size, directory ? "Directory" : "File");
+
 
         file = root.openNextFile(); 
     }
+
+    DEBUG_PORT.println();
 
     root.close();
 }

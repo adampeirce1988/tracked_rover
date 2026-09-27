@@ -4,6 +4,92 @@
 #include "esp_partition.h"
 #include "esp_ota_ops.h"
 
+#define DEBUG_FILE DBG_UPDATE
+
+bool ota_begin(size_t firmware_size){
+
+    const esp_partition_t* partition = get_ota_update_partititon();
+    
+    // check partition is avaliable to write to
+    if(partition == nullptr){
+        return false;
+    }
+
+    // check file size is smaler than the partition
+    if(!check_ota_update_file_size(firmware_size)){
+        return false;
+    }
+
+    // start the OTA update here. TO-BE-COMPLETED 
+
+    return true; 
+
+}
+
+bool check_ota_update_file_size(size_t firmware_size){
+
+   const esp_partition_t* partition = get_ota_update_partititon();
+
+   if(partition == nullptr){
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "OTA", "No partition exsists to write update file");
+        return false; 
+   }
+   
+   if(firmware_size > partition->size){
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "OTA", "Update file exceeds partition capacity");
+        return false; 
+
+   }
+
+   return true; 
+
+}
+
+
+// fetch the next update partition
+const esp_partition_t* get_ota_update_partititon(){
+
+    return esp_ota_get_next_update_partition(nullptr); 
+
+} 
+
+
+void ota_print_update_partition(){
+
+    // print the partition information that the update will be writen to. 
+
+    const esp_partition_t* update_partition = esp_ota_get_next_update_partition(nullptr);
+
+    if (update_partition == nullptr){
+    
+        DEBUG_PORT.println();
+        DEBUG_PORT.println("OTA update partition: NONE");
+    }
+    else{
+        DEBUG_PORT.println();
+        DEBUG_PORT.println("========================================");
+        DEBUG_PORT.println(" OTA UPDATE PARTITION INFORMATION ");
+        DEBUG_PORT.println("========================================");
+
+        DEBUG_PORT.println();
+        DEBUG_PORT.println("OTA update partition:");
+
+        DEBUG_PORT.print("  Label   : ");   
+        DEBUG_PORT.println(update_partition->label);
+
+        DEBUG_PORT.print("  Address : 0x");
+        DEBUG_PORT.println(update_partition->address, HEX);
+
+        DEBUG_PORT.print("  Size    : ");
+        DEBUG_PORT.println(update_partition->size);
+
+        DEBUG_PORT.print("  Type    : ");
+        DEBUG_PORT.println(update_partition->type);
+
+        DEBUG_PORT.print("  Subtype : 0x");
+        DEBUG_PORT.println(update_partition->subtype, HEX);
+    }
+}
 
 void ota_print_patrition_data(){
 
