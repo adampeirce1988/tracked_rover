@@ -18,12 +18,7 @@ PlatformIO command to Load littleFS files: pio run -t uploadfs
 
 
 [FIXED]:
-- resolved bug that caused the littleFS to be errased unintetionly
-- upadated boot message to reflect current development path. 
-- formatded littleFS data dump using printf to align with the partition data
-- added dynamic ota partition selection
-- added file size check before any ota upload commences 
-- added nullptr protection and diagnostics to the ota process
+
 
 
 [TODO]: 
