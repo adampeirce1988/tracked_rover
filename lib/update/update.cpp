@@ -3,33 +3,126 @@
 #include "debug.h"
 #include "esp_partition.h"
 #include "esp_ota_ops.h"
-
+#include "update_internal.h"
+        
 #define DEBUG_FILE DBG_UPDATE
+
+
+//=============================================================================*
+// OTA varaiables
+//=============================================================================*
+
+static esp_ota_handle_t ota_handle = 0;  // variable feteched by ota begin to carry out update. 
+static const esp_partition_t* ota_partition = nullptr; // cache the partition pointer 
+
+
+//=============================================================================*
+// OTA Update Functions
+//=============================================================================*
 
 bool ota_begin(size_t firmware_size){
 
-    const esp_partition_t* partition = get_ota_update_partititon();
+    // cache the partition being used for this OTA operation.
+    ota_partition = get_ota_update_partition();
+
+    // Check that an OTA partition is available.
+    if(ota_partition == nullptr){
+        return false;
+    }
+
+    // Check that the firmware will fit within the OTA partition.
+    if(!check_ota_update_file_size(ota_partition, firmware_size)){
+        return false;
+    }
+
+    // Start the OTA update on the selected partition.
+    esp_err_t result = esp_ota_begin(ota_partition, firmware_size, &ota_handle);
+
+    if(result != ESP_OK){
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "OTA", "OTA update failed to initiate");
+        return false; 
+    }
     
-    // check partition is avaliable to write to
-    if(partition == nullptr){
-        return false;
-    }
-
-    // check file size is smaler than the partition
-    if(!check_ota_update_file_size(firmware_size)){
-        return false;
-    }
-
-    // start the OTA update here. TO-BE-COMPLETED 
-
     return true; 
 
 }
 
-bool check_ota_update_file_size(size_t firmware_size){
 
-   const esp_partition_t* partition = get_ota_update_partititon();
+bool ota_write(const uint8_t* data, size_t length){
 
+    esp_err_t result = esp_ota_write(ota_handle, data, length); 
+
+    if(result != ESP_OK){
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "OTA", "OTA update failed to write to partition");
+        return false; 
+    }
+
+    return true; 
+}
+
+
+bool ota_finalise(){
+
+    esp_err_t result = esp_ota_end(ota_handle); 
+
+    if(result != ESP_OK){ 
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "OTA", "OTA image failed to sucessfuly verrify");
+        return false; 
+    }
+
+    DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "OTA", "OTA write finalised");
+
+    ota_handle = 0; // rest the handle variable. 
+
+    return true;
+
+}
+
+bool ota_set_boot_partition(){
+
+    // Check that an OTA partition is available.
+    if (ota_partition == nullptr){
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "OTA", "No OTA partition available to set as boot partition");
+        return false; 
+    }
+
+    esp_err_t result = esp_ota_set_boot_partition(ota_partition);
+
+    if(result != ESP_OK){
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "OTA", "Failed to set OTA partition as boot partition");
+        return false;
+    }
+     
+    DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "OTA", "OTA boot partition updated sucsessfully");
+    return true; 
+
+}
+
+
+void ota_reboot(){
+
+    // change to info once the the web interface reports the rebooting messae
+    DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "OTA", "Rebooting system");   
+    
+    // reboot the ESP
+    ESP.restart();
+}
+
+
+//=============================================================================*
+// OTA Internal Functions
+//=============================================================================*
+
+const esp_partition_t* get_ota_update_partition(){
+
+    return esp_ota_get_next_update_partition(nullptr); 
+
+} 
+
+
+bool check_ota_update_file_size(const esp_partition_t* partition, size_t firmware_size){
+
+   // Check that an OTA partition is available. 
    if(partition == nullptr){
         DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "OTA", "No partition exsists to write update file");
         return false; 
@@ -38,27 +131,23 @@ bool check_ota_update_file_size(size_t firmware_size){
    if(firmware_size > partition->size){
         DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "OTA", "Update file exceeds partition capacity");
         return false; 
-
    }
 
+   DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "OTA", "OTA passed file size size check");
    return true; 
 
 }
 
 
-// fetch the next update partition
-const esp_partition_t* get_ota_update_partititon(){
-
-    return esp_ota_get_next_update_partition(nullptr); 
-
-} 
-
+//=============================================================================*
+// OTA Diagnostic Functions
+//=============================================================================*
 
 void ota_print_update_partition(){
 
     // print the partition information that the update will be writen to. 
 
-    const esp_partition_t* update_partition = esp_ota_get_next_update_partition(nullptr);
+    const esp_partition_t* update_partition = get_ota_update_partition();
 
     if (update_partition == nullptr){
     

@@ -18,11 +18,11 @@ PlatformIO command to Load littleFS files: pio run -t uploadfs
 
 
 [FIXED]:
-
-
+ 
 
 [TODO]: 
-- Complete ota_begin();
+- run testing on all OTA functions
+- assembel all OTA function into one functio
 - update the bulid tree to incluce all files.
 - move partition dump to a diagnostic test. 
 - Review diagnostics return_state handling and allowed transitions.
