@@ -3,6 +3,7 @@
 #include "debug.h"
 #include "esp_partition.h"
 #include "esp_ota_ops.h"
+#include "update.h"
 #include "update_internal.h"
         
 #define DEBUG_FILE DBG_UPDATE
@@ -12,12 +13,139 @@
 // OTA varaiables
 //=============================================================================*
 
-static esp_ota_handle_t ota_handle = 0;  // variable feteched by ota begin to carry out update. 
-static const esp_partition_t* ota_partition = nullptr; // cache the partition pointer 
-
+static esp_ota_handle_t ota_handle = 0;                       // Cariable feteched by ota begin to carry out update. 
+static const esp_partition_t* ota_partition = nullptr;        // Cache the partition pointer 
+static UPDATE_TYPE active_update_type = UPDATE_TYPE::NONE;    // Cache the current update type 
 
 //=============================================================================*
-// OTA Update Functions
+// Updatw Core functions
+//=============================================================================*
+
+bool update_begin(UPDATE_TYPE type, size_t update_size){
+
+    // gaurd against calling this founction agian once an update has started 
+    if(active_update_type != UPDATE_TYPE::NONE){
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "UDAT", "Update_begin() called during an active_update update");
+        return false; 
+    }
+
+    if(type == UPDATE_TYPE::FIRMWARE){
+        // Start the OTA firmware update.
+        if(!ota_begin(update_size)){
+            return false;
+        }
+
+        active_update_type = type; 
+    }
+    else if(type == UPDATE_TYPE::FILESYSTEM){
+        // file system update goes here
+
+        return false; 
+
+    }
+    else{
+        // gaurd against invalid calls 
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "UDAT", "Update requested while an update is in progress");
+        active_update_type = UPDATE_TYPE::NONE; 
+        return false; 
+    }
+
+    return true; 
+ 
+}
+
+
+bool update_write(const uint8_t* data, size_t length){
+
+    // gaurd agains invalid data 
+    if(data == nullptr){
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "UDAT", "Update wirte receive invalid data");
+        return false; 
+    }
+    // gaurd agains 0 length
+    if(length == 0){ 
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "UDAT", "Update write recived invalid length"); 
+        return false; 
+    } 
+
+
+    // pass this chunk to the active update mechanism
+    if(active_update_type == UPDATE_TYPE::FIRMWARE){
+        return ota_write(data, length);
+    }
+    else if(active_update_type == UPDATE_TYPE::FILESYSTEM){
+        // filesystem write goes here
+        return false;
+    }
+    else{
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "UDAT", "Update write requested with no active update");
+        return false;
+    }
+}
+
+
+bool update_finalise(){
+    // complete and validate the active update
+
+    if(active_update_type == UPDATE_TYPE::FIRMWARE){
+        
+        if(!ota_finalise()){
+            return false; 
+        }
+
+        if(!ota_set_boot_partition()){
+            return false; 
+        }
+
+        active_update_type = UPDATE_TYPE::NONE; // reset the active update on sucsess. 
+        return true; 
+    }
+    else if(active_update_type == UPDATE_TYPE::FILESYSTEM){
+        // Filesystem finalise code gos here. 
+        return false; 
+
+    }
+    else{
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "UDAT", "Update finalise requested with no active update");
+        return false;
+    }
+
+}
+
+bool update_abort(){
+
+    if(active_update_type == UPDATE_TYPE::FIRMWARE){
+
+        if(!ota_abort()){
+            return false; 
+        }
+
+        active_update_type = UPDATE_TYPE::NONE; 
+        return true; 
+    }
+    else if(active_update_type == UPDATE_TYPE::FILESYSTEM){
+
+        // Filesyststem update abort - gos here
+
+        active_update_type = UPDATE_TYPE::NONE;
+        return true; 
+    }
+    else{
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "UDAT", "Update abort requested with no active update");
+        return false; 
+    }
+}
+//=============================================================================*
+// OTA Update Core Function
+//=============================================================================*
+
+//bool run_update(){
+
+
+//}
+
+//=============================================================================*
+// OTA Update Sub Functions
 //=============================================================================*
 
 bool ota_begin(size_t firmware_size){
@@ -78,6 +206,23 @@ bool ota_finalise(){
 
 }
 
+bool ota_abort(){ 
+    esp_err_t result = esp_ota_abort(ota_handle); 
+
+    if(result != ESP_OK){
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "OTA", "OTA update failed to abort");
+        return false; 
+    }
+
+    ota_handle = 0; 
+    ota_partition = nullptr; 
+
+    DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "OTA", "OTA update aborted");
+
+    return true; 
+    
+}
+
 bool ota_set_boot_partition(){
 
     // Check that an OTA partition is available.
@@ -97,7 +242,6 @@ bool ota_set_boot_partition(){
     return true; 
 
 }
-
 
 void ota_reboot(){
 
