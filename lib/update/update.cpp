@@ -18,7 +18,17 @@ static const esp_partition_t* ota_partition = nullptr;        // Cache the parti
 static UPDATE_TYPE active_update_type = UPDATE_TYPE::NONE;    // Cache the current update type 
 
 //=============================================================================*
-// Updatw Core functions
+// Update Core Function
+//=============================================================================*
+
+//bool run_update(){
+
+
+//}
+
+
+//=============================================================================*
+// Update Sub functions
 //=============================================================================*
 
 bool update_begin(UPDATE_TYPE type, size_t update_size){
@@ -94,6 +104,10 @@ bool update_finalise(){
         }
 
         if(!ota_set_boot_partition()){
+            
+            // clear the current_update_type if partition change fails
+            active_update_type = UPDATE_TYPE::NONE;
+        
             return false; 
         }
 
@@ -135,14 +149,6 @@ bool update_abort(){
         return false; 
     }
 }
-//=============================================================================*
-// OTA Update Core Function
-//=============================================================================*
-
-//bool run_update(){
-
-
-//}
 
 //=============================================================================*
 // OTA Update Sub Functions

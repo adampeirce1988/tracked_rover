@@ -18,7 +18,6 @@ PlatformIO command to Load littleFS files: pio run -t uploadfs
 
 
 [FIXED]:
-
    
 
 [TODO]: 
