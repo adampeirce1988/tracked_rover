@@ -17,14 +17,12 @@ static esp_ota_handle_t ota_handle = 0;                       // Cariable fetech
 static const esp_partition_t* ota_partition = nullptr;        // Cache the partition pointer 
 static UPDATE_TYPE active_update_type = UPDATE_TYPE::NONE;    // Cache the current update type 
 
+
 //=============================================================================*
 // Update Core Function
 //=============================================================================*
 
-//bool run_update(){
 
-
-//}
 
 
 //=============================================================================*
@@ -104,7 +102,7 @@ bool update_finalise(){
         }
 
         if(!ota_set_boot_partition()){
-            
+
             // clear the current_update_type if partition change fails
             active_update_type = UPDATE_TYPE::NONE;
         
@@ -258,6 +256,24 @@ void ota_reboot(){
     ESP.restart();
 }
 
+
+//=============================================================================*
+// Update status
+//=============================================================================*
+
+bool update_in_progress(){
+
+    if(active_update_type != UPDATE_TYPE::NONE){
+        return true; 
+    }
+
+    return false; 
+}
+
+UPDATE_TYPE get_update_type(){
+
+    return active_update_type; 
+}
 
 //=============================================================================*
 // OTA Internal Functions

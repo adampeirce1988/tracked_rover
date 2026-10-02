@@ -3,7 +3,7 @@
 
     <head>
         <meta charset="UTF-8">
-        <meta name="veiwport" content="device-width" initial-scale="1.0">
+        <meta name="veiwport" content="width=device-width, initial-scale=1.0"> 
         
         <title>ESP-Nexus - firmware Update</title>
 
@@ -60,13 +60,13 @@
 
                 <h2>Firmware</h2>
 
-                <p>
-                    Select firmware file to upload to ESP-32.
-                </p>
+                <p>Select firmware file to upload to ESP-32.</p>
 
-                <input type="file" id="firmware file" accept=".bin">
-                
-                <button type="button"> 
+                <input type="file" id="firmware-file" accept=".bin">
+                <p id="firmware-info"> No firmware file selected </p> 
+
+
+                <button type="button" id="firmware-upload-button"> 
                     Upload Firmware
                 </button>
 
@@ -79,9 +79,12 @@
 
                 <p id= "progress-text">0%</p> 
 
+    
             </section>
 
         </main>
+
+        <script src="/scripts.js"> </script> 
 
     </body>
 

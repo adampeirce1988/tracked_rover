@@ -1,22 +1,36 @@
 #ifndef UPDATE_H
 #define UPDATE_H
 
+#include <stdint.h>
+#include <stddef.h>
 
-// enum for update selection
+//=============================================================================*
+// Update Type
+//=============================================================================*
+
 enum class UPDATE_TYPE : uint8_t{
     NONE,
     FIRMWARE, 
     FILESYSTEM 
 };
 
-// diagnostic / debig calls 
+//=============================================================================*
+// Update Diagnostic Functions 
+//=============================================================================*
+ 
 void ota_print_update_partition();
 void ota_print_patrition_data();
 
+//=============================================================================*
+// Update Status
+//=============================================================================*
 
-// carry out an ota update
-void run_update();
+bool update_in_progress(); 
+UPDATE_TYPE get_update_type();
 
+//=============================================================================*
+// Update Control
+//=============================================================================*
 
 bool update_begin(UPDATE_TYPE type, size_t update_size);
 bool update_write(const uint8_t* data, size_t length);

@@ -4,6 +4,7 @@
 #include <LittleFS.h>
 #include <WebServer.h>
 #include "debug.h"
+#include "update.h"
 #include "credentials.h"
 #include "network_types.h"
   
@@ -98,6 +99,9 @@ WIFI_STATUS wifi_init(){
 *-------------------------------------------------------------------------*/
 void server_init(){
 
+    //=============================================================================*
+    // Home Page
+    //=============================================================================*
      server.on("/", HTTP_GET, []() {
 
         File file = LittleFS.open("/index.html", "r"); // open index.html
@@ -114,8 +118,11 @@ void server_init(){
 
     });
 
-    server.on("/update.html", HTTP_GET, []()
-    {
+
+    //=============================================================================*
+    // Update Page
+    //=============================================================================*
+    server.on("/update.html", HTTP_GET, []() {
         File file = LittleFS.open("/update.html", "r"); 
 
         if(!file)
@@ -129,8 +136,13 @@ void server_init(){
         file.close();
     });
 
-     server.on("/style.css", HTTP_GET, []()
-    {
+
+
+    //=============================================================================*
+    // CSS file
+    //=============================================================================*
+
+    server.on("/style.css", HTTP_GET, []() {
         File file = LittleFS.open("/style.css", "r");
 
         if (!file)
@@ -144,12 +156,85 @@ void server_init(){
         file.close();
     });
 
+
+
+    //=============================================================================*
+    // Java script file
+    //=============================================================================*
+
+    server.on("/scripts.js", HTTP_GET, []() {
+
+        File file = LittleFS.open("/scripts.js", "r");
+
+        if(!file){
+            server.send(500, "text/plain", "Failed to open scripts.js");
+            return;
+        }
+
+        server.streamFile(file, "application/javascript");
+
+        file.close();
+    });   
+        
+
     // Register a GET endpoint for "/status".
     // When the web interface requests this URL, the lambda sends a JSON status response.
     // This is a place holder for furture expansion when i need to send data to the web page. 
     server.on("/status", HTTP_GET, []() {
         server.send(200, "application/json",
                     "{\"status\":\"ok\"}");
+    });
+
+
+    //=============================================================================*
+    // Firmware Update Route
+    //=============================================================================*
+
+    server.on("update/Firmware.html", HTTP_POST, [](){
+
+        
+        // This callback is called once the upload has completed.
+        // The upload callback below performs the actual data transfer.
+
+        if(update_in_progress()){
+            server.send(500, "text/plain", "Firmware update failed"); 
+            return; 
+        }
+
+        server.send(200, "text/plain", "FIrmware update sucsessfuly");
+        
+    }, 
+
+    [](){ HTTPUpload &upload = server.upload(); 
+
+        if(upload.status == UPLOAD_FILE_START){
+            if(!update_begin(UPDATE_TYPE::FIRMWARE, upload.totalSize)){
+                DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "WIFI", "Failed to begin firmware update");
+                return; 
+            } 
+
+        }
+        else if(upload.status == UPLOAD_FILE_WRITE){
+            // Pass the received chunk to the update module.
+            if(!update_write(upload.buf, upload.currentSize)){
+                DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "WIFI", "Failed to write firmware update data");
+                update_abort(); 
+            }
+        }
+        else if(upload.status == UPLOAD_FILE_END){
+
+            if(!update_finalise()){
+                DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "WIFI", "Failed to finalise firmware update");
+                update_abort();
+            }
+        }
+        else if(upload.status == UPLOAD_FILE_ABORTED){
+            // The HTTP upload itself was interrupted.
+            DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "WIFI", "Firmware upload aborted");
+            update_abort();
+        }
+        
+
     });
 
     server.begin();

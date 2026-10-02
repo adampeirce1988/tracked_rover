@@ -18,7 +18,7 @@ PlatformIO command to Load littleFS files: pio run -t uploadfs
 
 
 [FIXED]:
-   
+
 
 [TODO]: 
 - run testing on all OTA functions
