@@ -7,6 +7,7 @@
 #include "update.h"
 #include "system.h"
 #include "system_internal.h"
+#include "server.h"
 #include "network.h"
 #include "protocol.h"
 #include "debug.h"

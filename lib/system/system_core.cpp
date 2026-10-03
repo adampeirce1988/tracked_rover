@@ -1,5 +1,6 @@
 
 #include "system.h"
+#include "server.h"
 #include "system_internal.h"
 #include "network.h"
 #include "logger.h" 
@@ -90,6 +91,6 @@ void run_core_functions(){
     * web server
   *-------------------------------------------------------------------------*/
 
-  run_server();
+  server_run();
   
 }
