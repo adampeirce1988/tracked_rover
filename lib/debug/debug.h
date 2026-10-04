@@ -242,19 +242,21 @@ extern bool verbous_debug_enabled;
   else if ((file_name) & DBG_SELF_TEST)       {DEBUG_PORT.print("[TEST]");}\
   else if ((file_name) & DBG_SYSTEM)          {DEBUG_PORT.print("[SYS]");}\
   else if ((file_name) & DBG_LOGS)            {DEBUG_PORT.print("[LOGS]");}\
+  else if ((file_name) & DBG_ESP_OTA)         {DEBUG_PORT.print("[OTA]");}\
+  else if ((file_name) & DBG_WIFI)            {DEBUG_PORT.print("[WIFO]");}\
   else{DEBUG_PORT.print("[----]");}\
 } while(0)
 
 #define PRINT_LEVEL(dbg_level) do{\
-    if((dbg_level) & DEBUG_ERROR)          {DEBUG_PORT.print("[ERROR]");}\
-    else if((dbg_level) & DEBUG_WARN)      {DEBUG_PORT.print("[WARN]");}\
-    else if((dbg_level) & DEBUG_INFO)      {DEBUG_PORT.print("[INFO]");}\
-    else if((dbg_level) & DEBUG_DEBUG)     {DEBUG_PORT.print("[DEBUG]");}\
-    else if((dbg_level) & DEBUG_MSG)       {DEBUG_PORT.print("[MSG]");}\
-    else if((dbg_level) & DEBUG_STREAM)    {DEBUG_PORT.print("[STREAM]");}\
-    else if ((dbg_level) & DEBUG_NONE)     {DEBUG_PORT.print("[NONE]");}\
-    else if ((dbg_level) & DEBUG_META)     {DEBUG_PORT.print("[META]");}\
-    else if ((dbg_level) & DEBUG_TEST)     {DEBUG_PORT.print("[TEST]");}\
+    if ((dbg_level) & DEBUG_ERROR)          {DEBUG_PORT.print("[ERROR]");}\
+    else if ((dbg_level) & DEBUG_WARN)      {DEBUG_PORT.print("[WARN]");}\
+    else if ((dbg_level) & DEBUG_INFO)      {DEBUG_PORT.print("[INFO]");}\
+    else if ((dbg_level) & DEBUG_DEBUG)     {DEBUG_PORT.print("[DEBUG]");}\
+    else if ((dbg_level) & DEBUG_MSG)       {DEBUG_PORT.print("[MSG]");}\
+    else if ((dbg_level) & DEBUG_STREAM)    {DEBUG_PORT.print("[STREAM]");}\
+    else if ((dbg_level) & DEBUG_NONE)      {DEBUG_PORT.print("[NONE]");}\
+    else if ((dbg_level) & DEBUG_META)      {DEBUG_PORT.print("[META]");}\
+    else if ((dbg_level) & DEBUG_TEST)      {DEBUG_PORT.print("[TEST]");}\
     else{DEBUG_PORT.print("[----]");}\
 } while(0)
 

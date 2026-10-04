@@ -101,13 +101,16 @@ bool update_finalise(){
             return false; 
         }
 
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "UDAT", "Update finalised");
+
         if(!ota_set_boot_partition()){
 
             // clear the current_update_type if partition change fails
             active_update_type = UPDATE_TYPE::NONE;
-        
             return false; 
         }
+
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "UDAT", "Boot partintion updated");
 
         active_update_type = UPDATE_TYPE::NONE; // reset the active update on sucsess. 
         return true; 

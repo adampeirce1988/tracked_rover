@@ -40,9 +40,12 @@ document.addEventListener("DOMContentLoaded", function(){
         const formData = new FormData(); 
         formData.append("firmware", file);
 
+        // Debug verifys that the file size is stored correctly  
+        console.log("Update URL:", `/update-firmware?size=${file.size}`);
+
         // Create HTTP request
         const xhr = new XMLHttpRequest();
-        xhr.open("POST", "/update-firmware", true);
+        xhr.open("POST", `/update-firmware?size=${file.size}`, true);
 
     
         // Handle server response
