@@ -18,8 +18,7 @@ enum class UPDATE_TYPE : uint8_t{
 // Update Diagnostic Functions 
 //=============================================================================*
  
-void ota_print_update_partition();
-void ota_print_patrition_data();
+void esp_ota_print_diagnostics();
 
 //=============================================================================*
 // Update Status

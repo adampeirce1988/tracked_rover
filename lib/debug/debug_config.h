@@ -3,7 +3,7 @@
 
 
 // define the files that you would like to debug here
-#define DEBUG_FILE_MASK   (DBG_ESP_MAIN | DBG_WIFI)
+#define DEBUG_FILE_MASK   (DBG_ESP_MAIN | DBG_WIFI | DBG_ESP_OTA)
 //#define DEBUG_FILE_MASK (DBG_SYSTEM | DBG_TRANSPORT | DBG_PROTOCOL | DBG_TRANSPORT_FIFO | DBG_SELF_TEST )
 
 // define the levels of debuging required here
@@ -32,7 +32,7 @@
 #define DBG_RT_LOG               (1UL << 13)
 #define DBG_METRIC_LOG           (1UL << 14)
 #define DBG_WIFI                 (1UL << 15)
-#define DBG_UPDATE               (1UL << 16)
+
 
 //------------ debug level bitmask------------ //
 #define DEBUG_NONE               (1UL << 0)
