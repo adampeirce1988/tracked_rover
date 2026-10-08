@@ -30,4 +30,13 @@ enum class VEHICLE_STATE_RETURN_CODE : uint8_t
     CHANGE_APPROVED
 };
 
+/*=============================================================================*
+ * Vehicle State change request retuen Codes
+*=============================================================================*/
+
+enum class STATE_CHANGE_RETURN_CODE : uint8_t{
+    APPROVED, 
+    UNCHANGED,
+    DENIED
+};
 #endif

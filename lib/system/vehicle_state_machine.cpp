@@ -60,7 +60,7 @@ VEHICLE_STATE_RETURN_CODE run_vehicle_state(){
       delay(1000);
 
       // print all partition data for the ESP32 
-      esp_ota_print_diagnostics();
+      firmware_update_diagnostics_readout();
 
       // Configure the default transport and baud rate.
       transport_set_default();                                                  // set transport method default to be serial (&uart_io / &fifo_io)

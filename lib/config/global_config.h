@@ -34,11 +34,11 @@ constexpr uint8_t PENDING_ACK_QUEUE_SIZE =     2;        // size for the pending
 
 #if TARGET_PLATFORM == ESP32
 
-    constexpr char SW_VERSION[] =        "Software version 1.10.1";
+    constexpr char SW_VERSION[] =        "Software version 1.20.1";
     constexpr char HARDWARE_VERSION[] =  "ESP32 WROOM DEV board";
 
     // to be removed 
-    #define RELEASE_NOTES          "-latest version of software uses a software uart simulator \n *currently in development* OTA updating of both the Firmware and littleFS files \n OTA SUCSESSFULY UPDATED"
+    #define RELEASE_NOTES          "-latest version of software uses a software uart simulator \n *currently in development* OTA updating of both the Firmware and littleFS files \n FIRMWARE UPDATED!"
                              
 
     // Use the ESP32 dev board's UART0 USB-serial pins so output appears in the

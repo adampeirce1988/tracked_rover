@@ -6,10 +6,8 @@
 
 
 //=============================================================================*
-// OTA Internal Functions
+// remove this file no longer needed 
 //=============================================================================*
 
-bool check_esp_ota_update_file_size(const esp_partition_t* partition, size_t firmware_size);
-const esp_partition_t* get_esp_ota_update_partition();
 
 #endif 

@@ -3,7 +3,6 @@
 
 #include "system_types.h"
 
-
 /*=============================================================================*
  * System API
 *=============================================================================*/
@@ -16,6 +15,12 @@ void run_core_functions();
 
 // Return the current active vehicle state.
 VEHICLE_STATE get_active_vehicle_state();
+
+// public API to get the vehicle state as a string
+const char* get_active_state_as_string();
+
+// request a vehicle state change
+STATE_CHANGE_RETURN_CODE request_vehicle_state_change(VEHICLE_STATE requested);
 
 
 /*=============================================================================*

@@ -7,7 +7,7 @@
 //#define DEBUG_FILE_MASK (DBG_SYSTEM | DBG_TRANSPORT | DBG_PROTOCOL | DBG_TRANSPORT_FIFO | DBG_SELF_TEST )
 
 // define the levels of debuging required here
-  #define DEBUG_LEVEL_MASK  (DEBUG_META | DEBUG_ERROR | DEBUG_WARN) // use at runtime 
+  #define DEBUG_LEVEL_MASK  (DEBUG_META | DEBUG_ERROR | DEBUG_WARN | DEBUG_INFO) // use at runtime 
   
 
 // defines which messages should be printed in full form DEBUG_PRINT_DATA_FRAME()

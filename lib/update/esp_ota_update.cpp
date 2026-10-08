@@ -7,7 +7,7 @@
 #define DEBUG_FILE DBG_ESP_OTA
 
 //=============================================================================*
-// Function declerations
+// Function declarations
 //=============================================================================*
 
 static void print_flash_info();
@@ -16,12 +16,14 @@ static void print_boot_partition();
 static void print_update_partition();
 static void print_all_partitions();
 
+static bool check_esp_ota_update_file_size(const esp_partition_t* partition, size_t firmware_size);
+static const esp_partition_t* get_esp_ota_update_partition();
 
 //=============================================================================*
 // OTA Variables
 //=============================================================================*
 
-static esp_ota_handle_t ota_handle = 0;                       // variable returned by ota_begin() to carry out update. 
+static esp_ota_handle_t ota_handle = 0;                       // Handle used to carry out the OTA update. 
 static const esp_partition_t* ota_partition = nullptr;        // Cache the partition pointer 
 
 
@@ -75,13 +77,13 @@ bool esp_update_finalise(){
     esp_err_t result = esp_ota_end(ota_handle); 
 
     if(result != ESP_OK){ 
-        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "OTA", "OTA image failed to sucessfuly verrify");
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "OTA", "OTA image failed to successfully verify");
         return false; 
     }
 
     DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "OTA", "OTA write finalised");
 
-    ota_handle = 0; // rest the handle variable. 
+    ota_handle = 0; // Reset the handle variable.
 
     return true;
 
@@ -118,7 +120,9 @@ bool esp_update_set_boot_partition(){
         DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "OTA", "Failed to set OTA partition as boot partition");
         return false;
     }
-     
+    
+    ota_partition = nullptr;  // Clear the Cached pointer
+
     DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "OTA", "OTA boot partition updated sucsessfully");
     return true; 
 
@@ -138,14 +142,14 @@ void esp_update_reboot(){
 // OTA Internal Functions
 //=============================================================================*
 
-const esp_partition_t* get_esp_ota_update_partition(){
+static const esp_partition_t* get_esp_ota_update_partition(){
 
     return esp_ota_get_next_update_partition(nullptr); 
 
 } 
 
 
-bool check_esp_ota_update_file_size(const esp_partition_t* partition, size_t firmware_size){
+static bool check_esp_ota_update_file_size(const esp_partition_t* partition, size_t firmware_size){
 
    // Check that an OTA partition is available. 
    if(partition == nullptr){
@@ -182,7 +186,7 @@ void esp_ota_print_diagnostics(){
 // ESP OTA Diagnostic sub Functions NEW 
 //=============================================================================*
 
-// exposed to the externalaly via update.h 
+
 static void print_flash_info(){
     DEBUG_PORT.println();
     DEBUG_PORT.println("========================================");
@@ -315,7 +319,6 @@ static void print_all_partitions(){
             partition->size
         );
 
-        esp_partition_iterator_t current = iterator;
         iterator = esp_partition_next(iterator);
     }
 

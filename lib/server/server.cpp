@@ -2,6 +2,8 @@
 #include <LittleFS.h>
 #include <WebServer.h>
 #include "server_internal.h"
+#include "system.h"
+#include "system_types.h"
 #include "server.h"
 #include "debug.h"
 #include "update.h"
@@ -14,9 +16,27 @@
 
 
 //=============================================================================*
+// internal_functions 
+//=============================================================================*
+
+static void  register_home_route();
+static void  register_update_route(); 
+static void  register_diagnostics_route(); 
+static void  register_sensor_data_route();  
+static void  register_settings_route(); 
+
+static void  register_css_route();
+static void  register_js_route();
+
+static void  register_status_route();
+
+static void  register_firmware_upload_route();
+
+//=============================================================================*
 // variables
 //=============================================================================*
 WebServer server(80);
+
 size_t received_byte_count = 0; 
 size_t firmware_upload_size = 0;
 bool firmware_upload_failed = false;
@@ -29,7 +49,8 @@ bool firmware_upload_failed = false;
 void server_init(){
     // web pages 
     register_home_route();
-    register_diagnostics_route();
+    register_update_route(); 
+    register_diagnostics_route(); // not yet implimented 
     register_sensor_data_route(); // page no yet implimented but included in the menue 
     register_settings_route(); // page no yet implimented but included in the menue 
 
@@ -37,6 +58,8 @@ void server_init(){
     register_css_route();
     register_js_route();
 
+    // JSON file handler
+    register_status_route();
     // functions 
     register_firmware_upload_route();
 
@@ -60,8 +83,11 @@ void server_run(){
 // Web Page Routes
 //=============================================================================*
 
-// Home Route Handler  
-void register_home_route(){
+
+//--------------------------*
+// Home Route Handler
+//--------------------------*
+static void register_home_route(){
 
     server.on("/", HTTP_GET, []() {
 
@@ -79,10 +105,48 @@ void register_home_route(){
     });
 }
 
-// Diagnostic Root Handler 
-void register_diagnostics_route(){
+
+//--------------------------*
+// Diagnostics root handler
+//--------------------------*
+static void register_diagnostics_route(){
+    server.on("/diagnostics", HTTP_GET, [](){
+
+        File file = LittleFS.open("/diagnostics.html", "r");
+
+        if(!file){
+            server.send(200, "text/plain", "failed to open Diagostics.html"); 
+            return; 
+        }
+
+        server.streamFile(file, "text/html");
+
+    });
+}
+
+
+//--------------------------*
+// Update Root Handler 
+//--------------------------*
+static void register_update_route(){
 
     server.on("/update.html", HTTP_GET, []() {
+
+        STATE_CHANGE_RETURN_CODE result = request_vehicle_state_change(VEHICLE_STATE::UPDATE); 
+
+        // debug 
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "UDAT", "Update state requested");
+
+        if(result == STATE_CHANGE_RETURN_CODE::APPROVED){
+            DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "UDAT", "Update state Approved");
+        }
+        else if(result == STATE_CHANGE_RETURN_CODE::DENIED){
+            DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "UDAT", "Update state Denied");
+        }
+        else if(result == STATE_CHANGE_RETURN_CODE::UNCHANGED){
+            DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "UDAT", "Update state Unchanged");
+        }
+
         File file = LittleFS.open("/update.html", "r"); 
 
         if(!file){
@@ -96,14 +160,16 @@ void register_diagnostics_route(){
     });
 
 }
-
+//--------------------------*
 // sensor data
-void register_sensor_data_route(){
+//--------------------------*
+static void register_sensor_data_route(){
 
 }
-
+//--------------------------*
 // settings route
-void register_settings_route(){
+//--------------------------*
+static void register_settings_route(){
 
 }
 
@@ -112,8 +178,10 @@ void register_settings_route(){
 // Static File Routes
 //=============================================================================*
 
-// css file
-void register_css_route(){
+//--------------------------*
+// CSS file
+//--------------------------*
+static void register_css_route(){
 
     server.on("/style.css", HTTP_GET, []() {
         File file = LittleFS.open("/style.css", "r");
@@ -131,8 +199,10 @@ void register_css_route(){
 
 }
 
+//--------------------------*
 // javascript file
-void register_js_route(){
+//--------------------------*
+static void register_js_route(){
 
     server.on("/scripts.js", HTTP_GET, []() {
 
@@ -150,11 +220,29 @@ void register_js_route(){
     
 }
 
+
+//=============================================================================*
+// JSON file handler Route
+//=============================================================================*
+
+static void register_status_route(){
+
+    server.on("/status", HTTP_GET, [](){
+
+        const char* current_vehicle_state = get_active_state_as_string(); 
+        
+        String response = "{\"vehicle_state\":\""; response += current_vehicle_state; response += "\"}";
+
+        server.send(200, "application/json",response); 
+    });
+}
+
+
 //=============================================================================*
 // Firmware Update Route
 //=============================================================================*
 
-void register_firmware_upload_route(){
+static void register_firmware_upload_route(){
 
     server.on("/update-firmware", HTTP_POST, [](){
 
@@ -226,75 +314,3 @@ void register_firmware_upload_route(){
 
     });
 }
-
-// //=============================================================================*
-// // Firmware Upload Route - this code streams to the upload to the monitor 
-// //=============================================================================*
-
-// void register_firmware_upload_route(){
-
-//     server.on(
-//         "/update-firmware",
-//         HTTP_POST,
-
-//         [](){
-
-//             DEBUG_PRINT_MSG(
-//                 DEBUG_FILE,
-//                 DEBUG_INFO,
-//                 "SERV",
-//                 "Firmware upload request completed"
-//             );
-
-//             DEBUG_PORT.print("Total bytes received: ");
-//             DEBUG_PORT.println(firmware_upload_size);
-
-//             server.send(
-//                 200,
-//                 "text/plain",
-//                 "Firmware upload received"
-//             );
-
-//         },
-
-//         [](){
-
-//             HTTPUpload& upload = server.upload();
-
-//             if(upload.status == UPLOAD_FILE_START){
-
-//                 firmware_upload_size = 0;
-
-//                 DEBUG_PORT.println();
-//                 DEBUG_PORT.println("Firmware upload started");
-
-//                 DEBUG_PORT.print("Filename: ");
-//                 DEBUG_PORT.println(upload.filename);
-
-//             }
-
-//             else if(upload.status == UPLOAD_FILE_WRITE){
-
-//                 firmware_upload_size += upload.currentSize;
-
-//                 DEBUG_PORT.print("Received: ");
-//                 DEBUG_PORT.print(upload.currentSize);
-//                 DEBUG_PORT.print(" bytes | Total: ");
-//                 DEBUG_PORT.println(firmware_upload_size);
-
-//             }
-
-//             else if(upload.status == UPLOAD_FILE_END){
-
-//                 DEBUG_PORT.println("Firmware upload complete");
-
-//             }
-
-//             else if(upload.status == UPLOAD_FILE_ABORTED){
-
-//                 DEBUG_PORT.println("Firmware upload aborted");
-
-//             }
-//         }
-//     );
-// }

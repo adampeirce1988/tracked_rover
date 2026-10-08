@@ -11,11 +11,26 @@ document.addEventListener("DOMContentLoaded", function(){
     const firmwareFile = document.getElementById("firmware-file");
     const firmwareInfo = document.getElementById("firmware-info");
     const firmwareUploadButton = document.getElementById("firmware-upload-button"); 
+    const vehicleFSMStatus = document.getElementById("vehicle-state");
 
     // Debug: verify HTML elements are available
     console.log(firmwareFile);
     console.log(firmwareInfo);
     console.log(firmwareUploadButton);
+    console.log(vehicleFSMStatus); 
+
+    //=============================================================================*
+    // vehicel status menue
+    //=============================================================================*
+
+    function updateVehicleStatus (){
+
+        fetch("/status")
+            .then(response => response.json)
+            .then(data => {
+                vehicleFSMStatus.textContent = data.vehicle_state; 
+        })
+    }
 
     //=============================================================================*
     // Firmware upload
@@ -64,4 +79,11 @@ document.addEventListener("DOMContentLoaded", function(){
 
     });
 
+    //=============================================================================*
+    // Initial status update
+    //=============================================================================*
+
+    updateVehicleStatus();
+
 });
+

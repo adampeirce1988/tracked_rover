@@ -4,15 +4,15 @@
 #include <stdint.h>
 #include "system_types.h"
 
-/*=============================================================================*
- * State Change Return Codes
-*=============================================================================*/
+// /*=============================================================================*
+//  * State Change Return Codes
+// *=============================================================================*/
 
-enum class STATE_CHANGE_RETURN_CODE : uint8_t{
-    APPROVED, 
-    UNCHANGED,
-    DENIED
-};
+// enum class STATE_CHANGE_RETURN_CODE : uint8_t{
+//     APPROVED, 
+//     UNCHANGED,
+//     DENIED
+// };
 
 /*=============================================================================*
  * System Health
@@ -54,7 +54,7 @@ extern VEHICLE_STATE return_state;
  * Vehicle State Machine Functions
 *=============================================================================*/
 
-STATE_CHANGE_RETURN_CODE request_vehicle_state_change(VEHICLE_STATE requested);
+//STATE_CHANGE_RETURN_CODE request_vehicle_state_change(VEHICLE_STATE requested);
 
 const char* vehicle_state_to_string(VEHICLE_STATE state);
 

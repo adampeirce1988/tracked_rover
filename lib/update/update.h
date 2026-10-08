@@ -18,7 +18,8 @@ enum class UPDATE_TYPE : uint8_t{
 // Update Diagnostic Functions 
 //=============================================================================*
  
-void esp_ota_print_diagnostics();
+void firmware_update_diagnostics_readout();
+void filesystem_update_diagnostics_readout();
 
 //=============================================================================*
 // Update Status

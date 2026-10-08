@@ -1,6 +1,7 @@
 
 
 #include "system_internal.h"
+#include "system_types.h"
 
 /*=============================================================================*
  * Vehicle State Change
@@ -45,6 +46,10 @@ STATE_CHANGE_RETURN_CODE request_vehicle_state_change(VEHICLE_STATE requested){
         return_state = VEHICLE_STATE::SAFE_STATE;
         active_vehicle_state = VEHICLE_STATE::DIAGNOSTICS;
       }
+      else if(requested == VEHICLE_STATE::UPDATE){
+        return_state = VEHICLE_STATE::SAFE_STATE;
+        active_vehicle_state = VEHICLE_STATE::UPDATE;
+      } 
       else{
         result = STATE_CHANGE_RETURN_CODE::DENIED;
       }
@@ -64,6 +69,10 @@ STATE_CHANGE_RETURN_CODE request_vehicle_state_change(VEHICLE_STATE requested){
       else if(requested == VEHICLE_STATE::DIAGNOSTICS){
         return_state = VEHICLE_STATE::IDLE; 
         active_vehicle_state = VEHICLE_STATE::DIAGNOSTICS; 
+      }
+      else if(requested == VEHICLE_STATE::UPDATE){
+        return_state = VEHICLE_STATE::IDLE;
+        active_vehicle_state = VEHICLE_STATE::UPDATE; 
       }
       else{
         result = STATE_CHANGE_RETURN_CODE::DENIED;
@@ -100,6 +109,9 @@ STATE_CHANGE_RETURN_CODE request_vehicle_state_change(VEHICLE_STATE requested){
       else if(requested == VEHICLE_STATE::IDLE && return_state == VEHICLE_STATE::IDLE){
         active_vehicle_state = return_state; 
         return_state = VEHICLE_STATE::SAFE_STATE; 
+      }
+      else if(requested == VEHICLE_STATE::UPDATE){
+        active_vehicle_state = VEHICLE_STATE::UPDATE;
       }
       else{
         result = STATE_CHANGE_RETURN_CODE::DENIED;

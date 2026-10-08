@@ -38,6 +38,12 @@ VEHICLE_STATE get_active_vehicle_state(){
     return active_vehicle_state;
 }
 
+const char* get_active_state_as_string(){
+
+    return vehicle_state_to_string(get_active_vehicle_state());
+    
+}
+
 /*=============================================================================*
  * Utility Functions
 *=============================================================================*/
