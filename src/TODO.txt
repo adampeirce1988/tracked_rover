@@ -3,35 +3,21 @@ test status: code compiles with 0 errors & untested on ESP.
 PlatformIO command to Load littleFS files: pio run -t uploadfs
 
 [verified]:
-- 200 good packet test:..........ok PROGRESS: ######################### 100%
-- 200 good packet stress test:...ok PROGRESS: ######################### 100%
-- TYPE_CHANGE....................NOK PROGRESS: ######################### 100%
-- ACK_CHANGE.....................NOT_TESTED PROGRESS: ######################### 100%
-- ID_CHANGE......................NOT_TESTED PROGRESS: ######################### 100%
-- DLC_CHANGE.....................NOT_TESTED PROGRESS: ######################### 100%
-- DLC_OVER_MAX_CAPACITY..........NOT_TESTED PROGRESS: ######################### 100%
-- CRC_RAND_FLIP_BIT..............NOT_TESTED PROGRESS: ######################### 100%
-- CRC_CHANGE.....................NOT_TESTED PROGRESS: ######################### 100%
-- RAND_DATA_FLIP_BIT.............NOT_TESTED PROGRESS: ######################### 100%
-- RAND_DATA_CHANGE...............NOT_TESTED PROGRESS: ######################### 100%
-- Diagnostics WDT test:..........OK PROGRESS: ######################## 100%
+- 200 good packet test:..........ok PROGRESS:           ######################### 100%
+- 200 good packet stress test:...ok PROGRESS:           ######################### 100%
+- TYPE_CHANGE....................NOK PROGRESS:          ######################### 100%
+- ACK_CHANGE.....................NOT_TESTED PROGRESS:   ######################### 100%
+- ID_CHANGE......................NOT_TESTED PROGRESS:   ######################### 100%
+- DLC_CHANGE.....................NOT_TESTED PROGRESS:   ######################### 100%
+- DLC_OVER_MAX_CAPACITY..........NOT_TESTED PROGRESS:   ######################### 100%
+- CRC_RAND_FLIP_BIT..............NOT_TESTED PROGRESS:   ######################### 100%
+- CRC_CHANGE.....................NOT_TESTED PROGRESS:   ######################### 100%
+- RAND_DATA_FLIP_BIT.............NOT_TESTED PROGRESS:   ######################### 100%
+- RAND_DATA_CHANGE...............NOT_TESTED PROGRESS:   ######################### 100%
+- Diagnostics WDT test:..........OK PROGRESS:           ######################## 100%
 
 
 [FIXED]:
-- Fixed minnor spelling issue with error messages and comments. 
-- Confirmed tha the Firmware update process functions as expected. 
-- updated state chenge to transition to and from update. 
-- Moved vehicle_state_change part of the public API 
-- added register_diagnostics_handle()
-- correct diagnostics handle to register_update_handle() as file /update.html is called
-- Moved STATE_CHANGE_RETURN_CODE to the system_types.h
-- added veghicle status menue to the update tab only -move to all once verified
-- added JSON file handeler route to server.cpp 
-- added bassic css styling to move the statuus menue into the upper right corner of the UI
-- added a public API call to get the current vehicle state as a const char*. 
-- added Js to allow the vehicel status to be updated dynamicly on update.html page load
-
-
 
 
 [TODO]: 

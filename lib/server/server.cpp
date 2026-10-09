@@ -8,6 +8,7 @@
 #include "debug.h"
 #include "update.h"
 
+#include "web_socket_internal.h"
 
 //=============================================================================*
 // Debug Configuration
@@ -67,7 +68,9 @@ void server_init(){
     // start the server
     server.begin();
 
-    DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "SERV", "HTTP server initiataed"); // change to info after debug
+    websocket_init();  // test code
+
+    DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "SERV", "HTTP server initiataed"); // change to info after debug
 
 }
 
