@@ -127,6 +127,65 @@ body {
 
 }
 
+
+
+/*
+\\ *** NEW MENU ***
+*/
+
+.main-menu-content{ 
+
+    display: none;
+    
+}
+
+
+.main-menu-content a {
+
+    display: block;
+
+    padding: 4px 12px;
+
+    color: #f9fafb;
+
+    text-decoration: none;
+
+}
+
+.main-menu-content a:hover {
+
+    background: #374151;
+
+}
+
+
+
+/*
+.main-menu {
+    position: relative;
+    flex-shrink: 0;
+    background: #1f2937;
+    padding: 8px 0;
+}
+
+.main-menu-content {
+    display: none;
+}
+
+.main-menu-content a {
+    display: block;
+    padding: 8px 12px;
+    color: #f9fafb;
+    text-decoration: none;
+}
+
+.main-menu-content a:hover {
+    background: #374151;
+}
+
+*
+
+
 /*=============================================================================*
  * status Menu
  *=============================================================================*/

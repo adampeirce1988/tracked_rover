@@ -28,10 +28,15 @@ static void  register_settings_route();
 
 static void  register_css_route();
 static void  register_js_route();
+static void  register_main_menu_route();
+static void  register_vehicle_menu_route();
 
 static void  register_status_route();
 
 static void  register_firmware_upload_route();
+
+static void server_report_missing_rotes();
+
 
 //=============================================================================*
 // variables
@@ -48,6 +53,7 @@ bool firmware_upload_failed = false;
 //=============================================================================*
 
 void server_init(){
+
     // web pages 
     register_home_route();
     register_update_route(); 
@@ -58,12 +64,19 @@ void server_init(){
     // static files
     register_css_route();
     register_js_route();
+    register_main_menu_route();
+    register_vehicle_menu_route();
 
     // JSON file handler
     register_status_route();
-    // functions 
+
+    // Functions 
     register_firmware_upload_route();
 
+    // Diagnostics
+    server_report_missing_rotes();
+
+    Serial.println("[HTTP] Registering component routes complete"); //** REMOVE AFTER TESTING **
 
     // start the server
     server.begin();
@@ -94,11 +107,11 @@ static void register_home_route(){
 
     server.on("/", HTTP_GET, []() {
 
-    File file = LittleFS.open("/index.html", "r"); // open index.html
+    File file = LittleFS.open("/pages/controler.html", "r"); // open index.html
 
     // manage file opening failures 
     if (!file){
-        server.send(500, "text/plain", "Failed to open index.html");
+        server.send(500, "text/plain", "Failed to open controler.html");
         return;
     }
 
@@ -115,7 +128,7 @@ static void register_home_route(){
 static void register_diagnostics_route(){
     server.on("/diagnostics", HTTP_GET, [](){
 
-        File file = LittleFS.open("/diagnostics.html", "r");
+        File file = LittleFS.open("/pages/diagnostics.html", "r");
 
         if(!file){
             server.send(200, "text/plain", "failed to open Diagostics.html"); 
@@ -133,7 +146,7 @@ static void register_diagnostics_route(){
 //--------------------------*
 static void register_update_route(){
 
-    server.on("/update.html", HTTP_GET, []() {
+    server.on("/update", HTTP_GET, []() {
 
         STATE_CHANGE_RETURN_CODE result = request_vehicle_state_change(VEHICLE_STATE::UPDATE); 
 
@@ -150,7 +163,7 @@ static void register_update_route(){
             DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "UDAT", "Update state Unchanged");
         }
 
-        File file = LittleFS.open("/update.html", "r"); 
+        File file = LittleFS.open("/pages/update.html", "r"); 
 
         if(!file){
             server.send(500, "text/plain", "failed to open update.html");
@@ -166,13 +179,44 @@ static void register_update_route(){
 //--------------------------*
 // sensor data
 //--------------------------*
+
 static void register_sensor_data_route(){
 
+    server.on("/data_display", HTTP_GET, [](){
+
+        File file = LittleFS.open("/pages/data_display.html"); 
+
+        if(!file){
+            server.send(500, "text/plain", "Failed to open data_display.html"); 
+            return; 
+        }
+
+        server.streamFile(file, "text/html"); 
+
+        file.close(); 
+
+    });
 }
+
 //--------------------------*
 // settings route
 //--------------------------*
 static void register_settings_route(){
+
+    server.on("/settings", HTTP_GET, [](){
+
+        File file = LittleFS.open("/pages/settings.html"); 
+
+        if(!file){
+            server.send(500, "text/plain", "Failed to open Settings.html");
+            return; 
+        }
+
+        server.streamFile(file, "text/html");
+
+        file.close();
+
+    });
 
 }
 
@@ -223,6 +267,37 @@ static void register_js_route(){
     
 }
 
+static void register_main_menu_route(){
+
+    Serial.println("[HTTP] Registering /components/main-menu.html"); // ** REMOVE AFTER TEST **
+
+    server.on("/components/main_menu.html", HTTP_GET, []() { 
+
+        File file = LittleFS.open("/components/main_menu.html");
+        
+        if(!file){
+            server.send(500, "text/plain", "Failed to open /components/main_menu.html"); 
+            return; 
+        }
+
+        server.streamFile(file, "text/html");
+    });
+}
+
+static void register_vehicle_menu_route(){
+        server.on("/components/vehicel_menu.html", HTTP_GET, []() { 
+
+        File file = LittleFS.open("/components/vehicle_menu.html");
+        
+        if(!file){
+            server.send(500, "text/plain", "Failed to open /components/vehicle_menu.html"); 
+            return; 
+        }
+
+        server.streamFile(file, "text/html");
+    });
+
+}
 
 //=============================================================================*
 // JSON file handler Route
@@ -315,5 +390,24 @@ static void register_firmware_upload_route(){
         }
         
 
+    });
+}
+
+
+//=============================================================================*
+// Diagnostics
+//=============================================================================*
+
+// remort any missing routes
+void server_report_missing_rotes(){
+
+    server.onNotFound([]() {
+        Serial.printf(
+            "[HTTP ERROR] Unmatched request: %s, method: %d\n",
+            server.uri().c_str(),
+            static_cast<int>(server.method())
+        );  
+
+        server.send(404, "text/plain", "HTTP route not found");
     });
 }

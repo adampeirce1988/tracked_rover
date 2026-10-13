@@ -21,6 +21,9 @@ PlatformIO command to Load littleFS files: pio run -t uploadfs
 
 
 [TODO]: 
+_ FIX; menu type to hamburger 
+- add app name to the top of the page 
+- add vehicle menue 
 - reove function void esp_update_reboot(); if the rebot is handled by the FSM.
 - confirm if reboot should occour at line 112 in update.cpp 
 - run testing on all OTA functions

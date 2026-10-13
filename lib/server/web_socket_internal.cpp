@@ -5,7 +5,9 @@
 #include "debug.h" 
 
 #include "esp_http_server.h"
-// #include "websocket_internal.h"
+
+#include "system.h"
+#include <stdio.h>
 
 //=============================================================================*
 // Debug
@@ -149,19 +151,39 @@ static esp_err_t websocket_handler(httpd_req_t *request){
     //===========================*
     // Send Test Reply
     //===========================*
+    
+    // Read the current vehicle state from the system FSM.
+    const char* vehicle_state = get_active_state_as_string();
 
-    // prepare reply 
-    static const char reply[] = "Hello from ESP32";
+    // Format the vehicle status as a JSON message.
+    char reply[96] = {};
 
+    int reply_length = snprintf(
+        reply,
+        sizeof(reply),
+        "{\"type\":\"status\",\"vehicle_state\":\"%s\"}",
+        vehicle_state
+    );  
+
+     // Reject the reply if formatting failed or exceeded the buffer.
+    if (reply_length < 0 || reply_length >= sizeof(reply))
+    {
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "WSCK",
+                        "Failed to format vehicle status");
+        return ESP_FAIL;
+    }
+
+    // Prepare the WebSocket response.
     httpd_ws_frame_t response = {};
     response.type = HTTPD_WS_TYPE_TEXT;
-    response.payload = reinterpret_cast<uint8_t *>(const_cast<char *>(reply));
-    response.len = sizeof(reply) - 1;
+    response.payload = reinterpret_cast<uint8_t*>(reply);
+    response.len = reply_length;
 
-    // Send the reply to the connected browser.
+    // Send the vehicle status to the connected browser.
     if (httpd_ws_send_frame(request, &response) != ESP_OK)
     {
-        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "WSCK", "Failed to send WebSocket reply");
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "WSCK",
+                        "Failed to send vehicle status");
         return ESP_FAIL;
     }
 
