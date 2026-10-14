@@ -4,115 +4,16 @@ document.addEventListener("DOMContentLoaded", function(){
     // Debug: verify scripts.js is avaliable
     console.log("scripts.js loaded"); 
 
-    // *** NEW MOVE TO CORRECT LOCATiON ONCE TESTED ***
-
-    function loadMainMenu(){
-
-        const mainMenuContainer = document.getElementById("main-menu-container"); 
-
-        if (!mainMenuContainer) {
-            console.log("Main menu container not found on this page");
-            return;
-        }
-
-         if(mainMenuContainer){
-        fetch("/components/main_menu.html")
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Failed to load main menu: " + response.status);
-                }
-
-                return response.text();
-            })
-            .then( html => {
-                mainMenuContainer.innerHTML = html;
-                initialiseMainMenu(mainMenuContainer); 
-                console.log("Main menu loaded");
-
-            })
-            .catch(error => {
-                console.log("Main menu loading error.", error); 
-
-            })
-        }
-
-    }
-
-
-    function initialiseMainMenu(container){
-
-        const menuButton = container.querySelector(".main-menu-button");
-        const menuContent = container.querySelector(".main-menu-content");
-
-        if(!menuButton || !menuContent){
-            console.error("Unable to find menuBtton or menuContent"); 
-            return; 
-        }
-
-        menuButton.addEventListener("click", function(){
-            const isOpen = menuContent.style.display === "block";
-            menuContent.style.display = isOpen ? "none" : "block";
-            menuButton.setAttribute("aria-expanded", String(!isOpen)); 
-
-            console.log("main menue: ", isOpen ? "Open" : "Closed"); 
-        });
-
-        console.log("Main menu initialised");
-
-        menuButton.setAttribute("aria-expanded", "false");
-
-    }
-
-    loadMainMenu();  // temp solution move to page.js
-    // *** END ***
-
-
-
-    //=============================================================================*
-    // Load menu content
-    //=============================================================================*
-    // const mainMenuContainer = document.getElementById("main-menu-container"); 
-
-
-    // if (!mainMenuContainer) {
-    //     console.log("Main menu container not found on this page");
-    //     return;
-    // }
-
-
-    // if(mainMenuContainer){
-    //     fetch("/components/main_menu.html")
-    //         .then(response => {
-    //             if (!response.ok) {
-    //                 throw new Error("Failed to load main menu: " + response.status);
-    //             }
-
-    //             return response.text();
-    //         })
-    //         .then( html => {
-    //             mainMenuContainer.innerHTML = html;
-    //             initialiseMainMenu(mainMenuContainer); 
-    //             console.log("Main menu loaded");
-
-    //         })
-    //         .catch(error => {
-    //             console.log("Main menu loading error.", error); 
-
-    //         })
-    // }
+   
+    
 
     //=============================================================================*
     // Connect HTML elements
     //=============================================================================*
-    //const firmwareFile = document.getElementById("firmware-file");
-    //const firmwareInfo = document.getElementById("firmware-info");
-    //const firmwareUploadButton = document.getElementById("firmware-upload-button"); 
+
     const vehicleFSMStatus = document.getElementById("vehicle-state");
 
     // Debug: verify HTML elements are available
-    // console.log(firmwareFile);
-    // console.log(firmwareInfo);
-    // console.log(firmwareUploadButton);
     console.log(vehicleFSMStatus); 
 
     //=============================================================================*
@@ -159,36 +60,7 @@ document.addEventListener("DOMContentLoaded", function(){
     };
 
 
-    //=============================================================================*
-    // vehicel menu functionality 
-    //=============================================================================*
-
-
-    // function initialiseMainMenu(container){
-
-    //     const menuButton = container.querySelector(".main-menu-button");
-    //     const menuContent = container.querySelector(".main-menu-content");
-
-    //     if(!menuButton || !menuContent){
-    //         console.error("Unable to find menuBtton or menuContent"); 
-    //         return; 
-    //     }
-
-    //     menuButton.addEventListener("click", function(){
-    //         const isOpen = menuContent.style.display === "block";
-    //         menuContent.style.display = isOpen ? "none" : "block";
-    //         menuButton.setAttribute("aria-expanded", String(!isOpen)); 
-
-    //         console.log("main menue: ", isOpen ? "Open" : "Closed"); 
-    //     });
-
-    //     console.log("Main menu initialised");
-
-    //     menuButton.setAttribute("aria-expanded", "false");
-
-    // }
-
-
+ 
     // //=============================================================================*
     // // Firmware upload
     // //=============================================================================*
@@ -237,4 +109,95 @@ document.addEventListener("DOMContentLoaded", function(){
     // });
 
 });
+
+
+
+// function for loading the main meue into the place holder
+function loadMainMenu(){
+
+        const mainMenuContainer = document.getElementById("main-menu-container"); 
+
+        if (!mainMenuContainer) {
+            console.log("Main menu container not found on this page");
+            return;
+        }
+
+         if(mainMenuContainer){
+        fetch("/components/main_menu.html")
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Failed to load main menu: " + response.status);
+                }
+
+                return response.text();
+            })
+            .then( html => {
+                mainMenuContainer.innerHTML = html;
+                initialiseMainMenu(mainMenuContainer); 
+                console.log("Main menu loaded");
+
+            })
+            .catch(error => {
+                console.log("Main menu loading error.", error); 
+
+            })
+        }
+
+    }
+
+    // open expand and close the main menu 
+
+    function initialiseMainMenu(container){
+
+        const menuButton = container.querySelector(".main-menu-button");
+        const menuContent = container.querySelector(".main-menu-content");
+
+        if(!menuButton || !menuContent){
+            console.error("Unable to find menuBtton or menuContent"); 
+            return; 
+        }
+
+        menuButton.addEventListener("click", function(){
+            const isOpen = menuContent.style.display === "block";
+            menuContent.style.display = isOpen ? "none" : "block";
+            menuButton.setAttribute("aria-expanded", String(!isOpen)); 
+
+            console.log("main menue: ", isOpen ? "Open" : "Closed"); 
+        });
+
+        console.log("Main menu initialised");
+
+        menuButton.setAttribute("aria-expanded", "false");
+
+    }
+
+   
+   // load the vehicle status menu
+    function loadVehicleMenu(){
+        const vehicleMenuContainer = document.getElementById("vehicle-status-container");
+
+        if(!vehicleMenuContainer){
+            console.log("Vehicle menu container not found on this page");
+            return; 
+        }
+
+        fetch("/components/vehicle_menu.html")
+            .then(response => {
+                if (!response.ok){
+                    throw new Error("Failed to laod vehicle menu: " + response.status);
+                }
+
+                return response.text(); 
+            })
+            .then(html => {
+                vehicleMenuContainer.innerHTML = html;
+                console.log("vehicle menu loaded ");
+            })
+            .catch(error => {
+                console.error("Vehicle menu loading error: ", error); 
+            });
+    }
+
+
+
 

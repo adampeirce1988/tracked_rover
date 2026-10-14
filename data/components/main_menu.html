@@ -1,19 +1,66 @@
 
 <!-- Main Navigation Menu -->
 
-<nav class="main-menu" aria-label="Main Navigation"> 
-    <button class="main-menu-button" type="button" aria-label="Open navigation menu"> 
-        <span></span>
-        <span></span>
-        <span></span>
-    </button>
+<nav class="page-header" aria-label="Main Navigation"> 
+    <div class="vehicle-navigation-menu">
+        <button class="main-menu-button" type="button" aria-label="Open navigation menu" > 
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
 
-    <div class="main-menu-content"> 
-        <a href="/">Controler</a>
-        <a href="/diagnostics">Diagnostics</a>
-        <a href="/data_display">Sensor data</a>
-        <a href="/update">Update firmware</a>
-        <a href="/settings">Settings</a>
+        <h1 class="app-name">ESP-Nexus</h1>
+
+        <div class="main-menu-content"> 
+            <a href="/">Controler</a>
+            <a href="/diagnostics">Diagnostics</a>
+            <a href="/data_display">Sensor data</a>
+            <a href="/update">Update firmware</a>
+            <a href="/settings">Settings</a>
+        </div>
     </div>
 
+    <div class="vehicle-status-menu">
+        <button class="vehicle-status-button" type="button" aria-label="Open vehicle status menu" aria-expanded="false">
+            
+            <span class="vehicle-status-indicator">⚠️</span>
+
+            <div class="vehicle-status-summary"> 
+                <span class="vehicle-state-value">----</span>
+                <span class="vehicle-battery-summary">12.43v</span>
+            </div>
+
+            <span class="vehicle-status-arrow">▼</span>
+
+        </button>
+
+        <div class="vehicle-status-dropdown">
+
+            <div class="vehicle-detail-row"> 
+                <span>State</span>
+                <span class="vehicle-state-value">----</span>
+            </div>
+
+            <div class="vehicle-detail-row">
+                <span>Battery</span>
+                <span class="vehicle-battery-value">13.12v</span>
+            </div>
+
+            <div class="vehicle-detail-row">
+                <span>Current</span>
+                <span class="vehicle-current-value">0.3a</span>
+            </div>
+                    
+            <div class="vehicle-detail-row">
+                <span>odometer</span>
+                <span class="vehicle-odometer-value">0.76km</span>
+            </div>
+
+            <div class="vehicle-detail-row">
+                <span>Hours</span>
+                <span class="vehicle-runtime-value">0.3h</span>
+            </div>
+
+        </div>
+    </div>
 </nav>
