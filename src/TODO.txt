@@ -21,13 +21,10 @@ PlatformIO command to Load littleFS files: pio run -t uploadfs
 
 
 [TODO]: 
-- impliment js for the status header dropdown and style widget 
-- refactor all js code and clean files
 - add basic controler display ready to send the values via json 
 - style the update tab and confirm that the firmware update functions 
 - impliment a file system uploader 
 - impliment a diagnostic tab and allow test to be completed and accessed
-- add vehicle menue 
 - remove function void esp_update_reboot(); if the rebot is handled by the FSM.
 - confirm if reboot should occour at line 112 in update.cpp 
 - run testing on all OTA functions

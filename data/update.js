@@ -77,3 +77,6 @@ firmwareUploadButton.addEventListener("click", function(){
     xhr.send(formData);
 
 });
+
+
+

@@ -116,32 +116,54 @@ body {
     align-items: center;
     gap: 8px; 
 
-    padding: 6px 0 6px 8px;
+    padding: 6px 8px;
+
     background: transparent;
-    border: none;
+    border: 1px solid transparent;
+    border-radius: 6px;
+
     color: #f9fafb;
     cursor: pointer;
+
+    transition: background 0.2s ease, border-color 0.2s ease; 
 }
 
-.vehicel-status-indicator{
+.vehicle-status-button:hover{
+    background: #374151;
+    border-color: #4b5563;
+}
+
+/* vehicle Health Indicator */ 
+.vehicle-status-indicator{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     font-size: 1.1rem;
+    line-height: 1;
 }
 
+/* Vehicle Status Summary */
 .vehicle-status-summary{
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 2px;
+    gap: 3px;
 
     color: #f9fafb; 
     font-size: 0.85rem;
+    line-height: 1.2;
 }
 
+/* VehicleBattery Summary */
 .vehicle-battery-value{
     color: #9ca3af; 
     font-size: 0.75rem; 
+    line-height: 1.2;
+
 }
 
+/* Vehicle Status Dropdown Arrow */
 .vehicle-status-arrow{
     margin-left: 2px; 
     color: #6b7280;
@@ -157,10 +179,18 @@ body {
     left: 0;
     z-index: 110;
 
-    min-width: 160px;
-    padding: 4px 0;
+    min-width: 180px;
+    min-height: 44px;
+    padding: 6px 0;
+ 
+
     background: #1f2937;
-    box-shadow: 0 4px 8px rbga(0, 0, 0, 0.3);
+    border: 1px solid #374151;
+    border-radius: 10px;
+
+    box-shadow: 0 8px 20px rbga(0, 0, 0, 0.3);
+
+    overflow: hidden;
 }
 
 .main-menu-content a {
@@ -178,30 +208,34 @@ body {
 .vehicle-status-dropdown{
     display: none;
     position: absolute;
-    top: 100%; 
+    top: (100% + 6px); 
     right: 0; 
     z-index: 110; 
     
-    min-width: 190px;
+    min-width: 180px;
     padding: 8px 12px;
+
     background: #1f2937;
     border: 1px solid #374151; 
     border-radius: 6px;
+
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 
 }
 
 .vehicle-detail-row{
     display: flex;
+    align-items: center;
     justify-content: space-between;
     gap: 16px;
-    padding: 6px 0;
+
+    min-height: 36px; 
+    padding: 8px 2px;
+    box-sizing: border-box;
+
     font-size: 0.85rem;
 }
 
-.vehicel-detail-row span {
-    color: #9ca3af;
-}
 
 .vehicle-detail-row span{
     color: #f9fafb;
@@ -286,4 +320,31 @@ main {
     text-align: centre; 
     color: #9ca3af; 
     
+}
+
+
+/*=============================================================================*
+ * SGV Icons CSS 
+ *=============================================================================*/
+
+/* Dashboard warning indicator */
+.vehicle-status-indicator {
+    color: #4b5563;
+}
+
+/* Triangle icon */
+.health-icon {
+    display: block;
+    width: 22px;
+    height: 22px;
+}
+
+/* Warning: yellow */
+.vehicle-status-indicator[data-health="warning"] {
+    color: #facc15;
+}
+
+/* Critical: red */
+.vehicle-status-indicator[data-health="critical"] {
+    color: #f87171;
 }
