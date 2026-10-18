@@ -3,98 +3,61 @@
 
     <head>
         <meta charset="UTF-8">
-        <meta name="veiwport" content="width=device-width, initial-scale=1.0"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
         
-        <title>ESP-Nexus - firmware Update</title>
-
         <link rel="stylesheet" href="style.css"> 
 
     </head>
 
     <body>
 
-         <!--=========================================================================*
-        * Header
+        <!--=========================================================================*
+        * Menu
         *=========================================================================-->
+        <div id="main-menu-container"></div>
+        <div id="vehicle-status-container"></div>
+
+        <span class="page-name" hidden>Update</span>
 
         <!--=========================================================================*
-        * Menu place holder
-        *=========================================================================-->
-        <div id="main-menu-container"> </div>
-
-        <header class="header">
-
-            <button class="menu-button" type="button" aria-label="Open menu">
-
-                <span></span>
-                <span></span>
-                <span></span>
-
-            </button>
-
-            <h1> Firmware Update</h1>
-
-        </header>
-        
-
-        <!--=========================================================================*
-        * vehicle status menue
-        *=========================================================================-->
-        <div class="vehicle-status-menue">
-
-            <button class="vehicle-menu-button" type="button" aria-label="Vehicle-status"> 
-                🚜
-            </button> 
-
-            <div class="vehicle-menue-content">
-
-                <div class="vehicle-menu-item"> 
-                    <span> State </span>
-                    <span id="vehicle-state">--</span>
-                </div>
-
-                <div class="vehicle-menu-item"> 
-                    <span> Battery</span>
-                    <span id="battery-voltage">--.--V</span>
-
-                </div>
-            </div>
-        </div>
-       
-        <!--=========================================================================*
-        * Main Content
+        * page content 
         *=========================================================================-->
         
         <main class="container">
 
-            <p class="subtitle">
-            ESP-Nexus Firmware Update
-            </p>
+            <section class="card">
 
-            <section class="card"> 
+                <h2>ESP32 Firmware</h2>
 
-                <h2>Firmware</h2>
+                <div class="firmware-file-selection">
+                    <label for="firmware-file" class="firmware-file-button">
+                        Choose File
+                    </label>
 
-                <p>Select firmware file to upload to ESP-32.</p>
+                    <input
+                        type="file"
+                        id="firmware-file"
+                        accept=".bin"
+                        hidden
+                    >
 
-                <input type="file" id="firmware-file" accept=".bin">
-                <p id="firmware-info"> No firmware file selected </p> 
+                    <span id="firmware-file-name">No file selected</span>
+                </div>
 
+                <div class="firmware-progress-selection">
 
-                <button type="button" id="firmware-upload-button"> 
-                    Upload Firmware
-                </button>
+                    <button type="button" id="firmware-upload-button">
+                        Upload Firmware
+                    </button>
 
-                <!-- Firmware update progress bar -->
-                <div class="progress-container">
-
-                    <div class="progress-bar" id="progress-bar"> </div>
+                    <!-- Firmware update progress bar -->
+                    <div class="progress-container">
+                        <div class="progress-bar" id="progress-bar"></div>
+                        <span id="progress-text">0%</span>
+                    </div>
 
                 </div>
 
-                <p id= "progress-text">0%</p> 
-
-    
             </section>
 
         </main>

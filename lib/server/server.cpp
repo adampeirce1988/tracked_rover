@@ -28,9 +28,12 @@ static void register_settings_route();
 
 static void register_css_route();
 static void register_js_route();
+static void register_controler_js_route();
+static void register_data_display_js_route();
+static void register_update_js_route();
 static void register_setting_js_route();
+static void register_diagnostics_js_route();
 static void register_main_menu_route();
-static void register_vehicle_menu_route();
 
 static void register_status_route();
 
@@ -64,10 +67,14 @@ void server_init(){
 
     // static files
     register_css_route();
+
     register_js_route();
     register_setting_js_route();
+    register_controler_js_route();
+    register_data_display_js_route();
+    register_update_js_route();
+    register_diagnostics_js_route();
     register_main_menu_route();
-    register_vehicle_menu_route();
 
     // JSON file handler
     register_status_route();
@@ -269,6 +276,41 @@ static void register_js_route(){
     
 }
 
+static void register_controler_js_route(){
+    server.on("/controler.js", HTTP_GET, [](){
+
+        File file = LittleFS.open("/controler.js", "r"); 
+
+        if(!file){
+            server.send(500, "text/plain", "Failed to open controler.js");
+            return; 
+        }
+
+        server.streamFile(file, "application/javascript"); 
+
+        file.close();
+
+    });
+}
+
+static void register_data_display_js_route(){
+    server.on("/data_display.js", HTTP_GET, [](){
+
+        File file = LittleFS.open("/data_display.js", "r");
+
+        if(!file){
+            server.send(500, "text/plain", "Failed to load data_display.js");
+            DEBUG_PORT.println("/data_display.js failed to load");
+            return;
+        }
+
+        server.streamFile(file, "application/javascript"); 
+
+        file.close();
+
+    });
+}
+
 static void register_setting_js_route(){
     server.on("/settings.js",HTTP_GET, [](){
 
@@ -285,10 +327,39 @@ static void register_setting_js_route(){
     });
 }
 
+static void register_update_js_route(){
+    server.on("/update.js",HTTP_GET, [](){
+
+        File file = LittleFS.open("/update.js", "r");
+
+        if(!file){
+            server.send(500, "text/plain", "Failed to open update.js");
+            return; 
+        }
+
+        server.streamFile(file, "application/javascript");
+        
+        file.close();
+    });
+}
+
+static void register_diagnostics_js_route(){
+    server.on("/diagnostics.js",HTTP_GET, [](){
+
+        File file = LittleFS.open("/diagnostics.js", "r");
+
+        if(!file){
+            server.send(500, "text/plain", "Failed to open diagnostics.js");
+            return; 
+        }
+
+        server.streamFile(file, "application/javascript");
+        
+        file.close();
+    });
+}
+
 static void register_main_menu_route(){
-
-    Serial.println("[HTTP] Registering /components/main-menu.html"); // ** REMOVE AFTER TEST **
-
     server.on("/components/main_menu.html", HTTP_GET, []() { 
 
         File file = LittleFS.open("/components/main_menu.html");
@@ -302,20 +373,6 @@ static void register_main_menu_route(){
     });
 }
 
-static void register_vehicle_menu_route(){
-        server.on("/components/vehicle_menu.html", HTTP_GET, []() { 
-
-        File file = LittleFS.open("/components/vehicle_menu.html");
-        
-        if(!file){
-            server.send(500, "text/plain", "Failed to open /components/vehicle_menu.html"); 
-            return; 
-        }
-
-        server.streamFile(file, "text/html");
-    });
-
-}
 
 //=============================================================================*
 // JSON file handler Route

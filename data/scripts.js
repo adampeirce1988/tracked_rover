@@ -11,7 +11,6 @@ document.addEventListener("DOMContentLoaded", function() {
     // Verify scripts.js is available.
     console.log("scripts.js loaded");
 
-
     //=============================================================================*
     // Connect HTML Elements
     //=============================================================================*
@@ -150,6 +149,34 @@ function initStatussMenu(container) {
 }
 
 
+
+function updatePageTitle() {
+
+    // Find the page name in the current HTML document.
+    const pageName = document.querySelector(".page-name");
+
+    // Validate the page name.
+    if (!pageName) {
+        console.warn("Page name not found");
+        return;
+    }
+
+    const title = `ESP-Nexus - ${pageName.textContent.trim()}`;
+    // Update the browser tab title.
+    
+    document.title = title;
+
+    const appName = document.querySelector(".app-name");
+
+    if(!appName){
+        console.log("appName not found");
+        return; 
+    }
+
+    appName.textContent = title; 
+
+}
+
 /*=============================================================================*
  * Main Menu Loader
  *=============================================================================*/
@@ -186,6 +213,7 @@ function loadMainMenu() {
 
                 initMainMenu(mainMenuContainer);
                 initStatussMenu(mainMenuContainer);
+                updatePageTitle(); 
 
                 console.log("Main menu loaded");
             })
@@ -197,44 +225,3 @@ function loadMainMenu() {
 }
 
 
-/*=============================================================================*
- * Vehicle Menu Loader
- *=============================================================================*/
-
-// Load the vehicle menu into its placeholder.
-function loadVehicleMenu() {
-
-    const vehicleMenuContainer = document.getElementById("vehicle-status-container");
-
-
-    // Validate the vehicle menu placeholder.
-    if (!vehicleMenuContainer) {
-
-        console.log("Vehicle menu container not found on this page");
-        return;
-    }
-
-
-    // Retrieve and initialise the vehicle menu.
-    fetch("/components/vehicle_menu.html")
-        .then(response => {
-
-            if (!response.ok) {
-                throw new Error("Failed to laod vehicle menu: " + response.status);
-            }
-
-            return response.text();
-        })
-        .then(html => {
-
-            vehicleMenuContainer.innerHTML = html;
-
-            initStatussMenu(mainMenuContainer);
-
-            console.log("vehicle menu loaded ");
-        })
-        .catch(error => {
-
-            console.error("Vehicle menu loading error: ", error);
-        });
-}

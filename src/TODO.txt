@@ -21,6 +21,7 @@ PlatformIO command to Load littleFS files: pio run -t uploadfs
 
 
 [TODO]: 
+- FIX progress bar percentage & styling of Update 
 - add basic controler display ready to send the values via json 
 - style the update tab and confirm that the firmware update functions 
 - impliment a file system uploader 
