@@ -42,6 +42,7 @@ void websocket_init()
 {
     // Create the WebSocket server using the ESP-IDF default configuration.
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
+    
 
     // Run the WebSocket server on port 81.
     // The existing Arduino WebServer remains on port 80.
@@ -94,6 +95,10 @@ static esp_err_t websocket_handler(httpd_req_t *request){
     //===========================*
     // WebSocket Handshake
     //===========================*
+
+    // debug to confirm that the handler is initaited
+    DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "WSCK", "WebSocket handler invoked");
+
     // The HTTP GET request is used to establish the WebSocket connection.
     if(request->method == HTTP_GET){
 
@@ -158,18 +163,12 @@ static esp_err_t websocket_handler(httpd_req_t *request){
     // Format the vehicle status as a JSON message.
     char reply[96] = {};
 
-    int reply_length = snprintf(
-        reply,
-        sizeof(reply),
-        "{\"type\":\"status\",\"vehicle_state\":\"%s\"}",
-        vehicle_state
-    );  
+    int reply_length = snprintf(reply, sizeof(reply), "{\"type\":\"status\",\"vehicle_state\":\"%s\"}", vehicle_state);  
 
      // Reject the reply if formatting failed or exceeded the buffer.
-    if (reply_length < 0 || reply_length >= sizeof(reply))
-    {
-        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "WSCK",
-                        "Failed to format vehicle status");
+    if (reply_length < 0 || reply_length >= sizeof(reply)){
+
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "WSCK", "Failed to format vehicle status");
         return ESP_FAIL;
     }
 

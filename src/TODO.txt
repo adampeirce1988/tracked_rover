@@ -1,4 +1,4 @@
-test status: code compiles with 0 errors & untested on ESP.  
+intermidate commit to save changes while intergrating a dedicated webSocket module.  
 
 PlatformIO command to Load littleFS files: pio run -t uploadfs
 
@@ -24,11 +24,23 @@ PlatformIO command to Load littleFS files: pio run -t uploadfs
 - Added second update container to the update the file system 
 - Added place hoder and styled to allow the arduin firmwar uodate
 - migrated the CSS sytles to be generic for container syles allowing elements to be collected via ID.
+- Added a folder for Java script files
+- Added websock.js 
+- Added dedicate function to crate a webSocket
+- Added dedicated reconnect if the socket times out 
+
+
 
 -add functionalily to disable the update buttons if the vehicle is not in update. 
 
 
 [TODO]: 
+- Reconnect testing
+- Receive and phrase telematey data 
+- Store telematey values 
+- Explose telematry updates
+- Add and update scheduler at defined intevals 
+- Intergrate with the exsisting UI inc some dummy test values. 
 
 - add basic controler display ready to send the values via json 
 - impliment a file system uploader 

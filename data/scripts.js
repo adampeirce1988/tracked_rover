@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const vehicleFSMStatus = document.getElementById("vehicle-state");
 
     // Verify HTML elements are available.
-    console.log(vehicleFSMStatus);
+    console.log("vehicleFSMStatus:", vehicleFSMStatus);
 
 
     //=============================================================================*
@@ -44,21 +44,26 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Handle incoming status messages.
     vehicleSocket.onmessage = function(event) {
-
-        console.log("WebSocket message:", event.data);
+console.log("WebSocket message:", event.data);
 
         try {
 
             const data = JSON.parse(event.data);
 
             if (data.type === "status") {
-                vehicleFSMStatus.textContent = data.vehicle_state;
-            }
+               
+                const vehicleStateElements = document.querySelectorAll(".vehicle-state-value");
 
-        } catch (error) {
+                vehicleStateElements.forEach(function(element) { element.textContent = data.vehicle_state; });
+             }
+        } 
+        catch (error) {
 
             console.error("Invalid WebSocket JSON:", error);
         }
+        
+        console.log("WebSocket message:", event.data);
+
     };
 
 

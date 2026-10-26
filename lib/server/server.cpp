@@ -35,6 +35,9 @@ static void register_setting_js_route();
 static void register_diagnostics_js_route();
 static void register_main_menu_route();
 
+// js specific files
+static void register_websocket_js_route();
+
 static void register_status_route();
 
 static void register_firmware_upload_route();
@@ -75,6 +78,9 @@ void server_init(){
     register_update_js_route();
     register_diagnostics_js_route();
     register_main_menu_route();
+
+    // JS specsific files
+    register_websocket_js_route();
 
     // JSON file handler
     register_status_route();
@@ -274,6 +280,24 @@ static void register_js_route(){
         file.close();
     });   
     
+}
+
+static void register_websocket_js_route(){
+
+    server.on("/javascript/websocket.js", HTTP_GET, [](){
+
+        File file = LittleFS.open("/javascript/websocket.js", "r"); 
+
+        if(!file){
+            DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "SEVR", "Failed to connecto to load websocket.js");
+            server.send(500, "text/plain", "Failed to open websocket.js"); 
+            return;
+        }
+
+        server.streamFile(file, "application/javascript");
+
+        file.close();
+    });
 }
 
 static void register_controler_js_route(){
