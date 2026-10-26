@@ -265,13 +265,9 @@ body {
  *=============================================================================*/
 
 main {
-
     flex: 1;
-
     min-height: 0;
-
     position: relative;
-
 }
 
 
@@ -319,14 +315,16 @@ main {
  /* Firmware Update Card */
  .container{
     width: 100%; 
-    max-width: 560px;
-    margin: 0 auto;
+    max-width: 600px;
+    margin: 16px 0 auto;
     padding: 0 16px 24px; 
     box-sizing: border-box;
  }
 
  .card{
     padding: 20px; 
+    max-width: 650px;
+    margin-top: 10px;
     background: #1f2937;
     border: 1px solid #374151; 
     border-radius: 12px;
@@ -345,7 +343,6 @@ main {
  }
 
  /* Firmware File Selection */
-
 .firmware-file-selection {
     display: flex;
     align-items: center;
@@ -391,15 +388,14 @@ main {
     transform: translateY(-1px);
 }
 
-/* Selected Filename */
+/* Selected Filename 
 #firmware-file-name {
     min-width: 0;
     color: #9ca3af;
     font-size: 0.85rem;
     overflow-wrap: anywhere;
 }
-
- /**/
+*/
 
  #firmware-file {
     flex-shrink: 0;
@@ -407,27 +403,15 @@ main {
     margin: 16px 0 8px;
     color: #ffffff;
     font-size: 0.9rem;
+    display: none;
  }
-
- #firmware-file:hover{
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.35);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    transform: translateY(-1px);
- }
-
- .firmware-file-selection{ 
-    display: flex;
-    align-items: center;
-    gap: 12px; 
- }
-
+ 
  #firmware-info{
     margin: 0;
     color: #9ca3af;
     font-size: 0.9rem;
  }
-
+/*
 .firmware-progress-selection {
     display: flex;
     align-items: center;
@@ -436,9 +420,9 @@ main {
     margin: 0;
     padding: 0;
 }
-
+*/
  
-/* Upload Button */
+/* Upload Button 
 #firmware-upload-button{
     flex: 0 0 auto;
     width: auto;
@@ -463,7 +447,7 @@ main {
                 box-shadow 0.2s ease,
                 transform 0.2s ease;
 }
-
+*/
 
 #firmware-upload-button:hover{
     background: rgba(255, 255, 255, 0.12);
@@ -482,7 +466,201 @@ main {
 
 
 /* Progress Bar Style */
-.progress-container {
+.firmware-progress-container {
+    position: relative; 
+    flex: 1 1 auto;
+    width: 260px;
+    min-width: 100px;
+    height: 24px;
+    background: #374151;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.Firmware-progress-bar {
+    flex: 0 0 auto;
+    width: 0%;
+    height: 100%;
+    background: #4ade80;
+    border-radius: 6px;
+    transition: width 0.2s ease;
+}
+
+/* Progress Percentage */
+#progress-text {
+    display: block; 
+    position: static; 
+    margin-right: 5px;
+    flex: 0 0 40px; 
+    min-width: 40px;
+    color: #f9fafb;
+    font-size: 0.85rem;
+    line-height: 24px;
+    text-align: left;
+    white-space: nowrap;
+    visibility: visible;
+    opacity: 1;
+}
+
+.LittleFS-file-selection {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 16px 0 8px;
+}
+
+/* Little Fs Upload Button 
+#LittleFS-upload-button{
+    flex: 0 0 auto;
+    width: auto;
+    min-height: 30px;
+    margin: 0;
+    padding: 5px 10px;
+    box-sizing: border-box;
+
+    background: #374151;
+    color: #f9fafb;
+    border: 1px solid #4b5563;
+    border-radius: 8px;
+
+    font-family: Arial, sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 18px;
+
+    cursor: pointer;
+    transition: background 0.2s ease,
+                border-color 0.2s ease,
+                box-shadow 0.2s ease,
+                transform 0.2s ease;
+}
+                */
+
+
+.LittleFS-file-selection {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 16px 0 8px;
+}
+
+/* Hide the native input; the label opens the file picker */
+#LittleFS-file {
+    display: none;
+}
+
+/* Choose File Button */
+.LittleFS-file-button {
+    display: inline-block;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 5px 10px;
+
+    background: #374151;
+    color: #f9fafb;
+    border: 1px solid #4b5563;
+    border-radius: 8px;
+
+    font-family: Arial, sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 18px;
+
+    cursor: pointer;
+    transition: background 0.2s ease,
+                border-color 0.2s ease,
+                box-shadow 0.2s ease,
+                transform 0.2s ease;
+}
+
+.LittleFS-file-button:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.35);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
+}
+
+
+
+
+/* NEW Button type */
+
+/* File Selection Button */ 
+.file-selection-button {
+    display: inline-block;
+    flex: 0 0 auto; 
+    box-sizing: border-box;
+    height: 30px;
+    width: 145px;
+    padding: 5px 10px;
+    background: #374151;
+    color: #f9fafb;
+    border: 1px solid #4b5563;
+    border-radius: 8px;
+    font-family: Arial, sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 18px;
+    cursor: pointer;
+    transition: background 0.2s ease,
+                border-color 0.2s ease,
+                box-shadow 0.2s ease,
+                transform 0.2s ease;
+}
+
+
+.file-selection-button:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.35);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
+}
+
+.update-file-name {
+    display: inline-block;
+    min-width: 0;
+    color: #9ca3af;
+    font-family: Arial, sans-serif;
+    font-size: 0.85rem;
+    font-weight: 400;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+/* Selected Filename */
+.selected-file-name {
+    min-width: 0;
+    color: #9ca3af;
+    font-size: 0.85rem;
+    overflow-wrap: anywhere;
+}
+
+.upload-button{
+    display: inline-block;
+    box-sizing: border-box;
+
+    height: 30px;
+    width:145px;
+    margin: 0; 
+    padding: 5px 10px;
+
+    background: #374151; 
+    color: #f9fafb;
+    border: 1px solid #4b5563;
+    border-radius: 8px;
+
+    font-size: 0.85rem; 
+    font-weight: 600;
+    line-height: 18px;
+
+    cursor: pointer; 
+}
+
+
+.update-progress-container {
     position: relative; 
     flex: 1 1 auto;
     width: 260px;
@@ -502,15 +680,12 @@ main {
     transition: width 0.2s ease;
 }
 
-/* Progress Percentage */
-#progress-text {
-    flex: 0 0 36px; 
-    top: 50%;
-    right: 8px;
-    transform: translateY(-50%);
 
+.update-progress-selection {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
     margin: 0;
-    color: #f9fafb;
-    font-size: 0.85rem;
-    line-height: 1;
+    padding: 0;
 }

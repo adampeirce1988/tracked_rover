@@ -18,12 +18,19 @@ PlatformIO command to Load littleFS files: pio run -t uploadfs
 
 
 [FIXED]:
+- Added preogress percentage reporting for the upload of the file 
+- Added percetage reporting of the upload 
+- Added moving progress bar in green based on upload. 
+- Added second update container to the update the file system 
+- Added place hoder and styled to allow the arduin firmwar uodate
+- migrated the CSS sytles to be generic for container syles allowing elements to be collected via ID.
+
+-add functionalily to disable the update buttons if the vehicle is not in update. 
 
 
 [TODO]: 
-- FIX progress bar percentage & styling of Update 
+
 - add basic controler display ready to send the values via json 
-- style the update tab and confirm that the firmware update functions 
 - impliment a file system uploader 
 - impliment a diagnostic tab and allow test to be completed and accessed
 - remove function void esp_update_reboot(); if the rebot is handled by the FSM.

@@ -15,6 +15,12 @@ bool esp_update_abort();
 bool esp_update_set_boot_partition();
 void esp_update_reboot();    // remove later if this is handled by the FSM. 
 
+//=============================================================================*
+// Progress Tracking
+//=============================================================================*
+
+uint8_t ota_get_update_progress(); // retuens current progress as 0 - 100%
+
 
 //=============================================================================*
 // ESP OTA Diagnostics

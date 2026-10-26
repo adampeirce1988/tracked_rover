@@ -21,23 +21,38 @@ document.addEventListener("DOMContentLoaded", function() {
 function initialiseFirmwareUpload(){
 
     const firmwareFile = document.getElementById("firmware-file");
-    const firmwareInfo = document.getElementById("firmware-info");
+    const firmwareFileName = document.getElementById("firmware-file-name")
     const firmwareUploadButton = document.getElementById("firmware-upload-button");
 
     // Debug: verify HTML elements are available
-    console.log(firmwareFile);
-    console.log(firmwareInfo);
-    console.log(firmwareUploadButton);
+    console.log("Firmware file input:", firmwareFile);
+    console.log("Filename display:", firmwareFileName);
+    console.log("Upload button:", firmwareUploadButton);
 
-        // Ensure this page contains the required elements
-    if (!firmwareFile || !firmwareInfo || !firmwareUploadButton) {
+    // Ensure this page contains the required elements
+    if (!firmwareFile || !firmwareFileName || !firmwareUploadButton) {
         console.error("Firmware upload elements not found");
         return;
     }
 
+    // Update displayed filename when a file is selected
+    firmwareFile.addEventListener("change", function(){
+
+        const file = firmwareFile.files[0];
+
+        if(file){
+            firmwareFileName.textContent = file.name;
+        } else {
+            firmwareFileName.textContent = "No file selected";
+        }
+
+    });
+
     firmwareUploadButton.addEventListener("click", function(){
 
         const file = firmwareFile.files[0];
+
+        console.log("[OTA] Upload button clicked");
 
         // check a file exsists 
         if(!file){
@@ -61,6 +76,19 @@ function initialiseFirmwareUpload(){
         // Create HTTP request
         const xhr = new XMLHttpRequest();
         xhr.open("POST", `/update-firmware?size=${file.size}`, true);
+
+        // Report firmware upload progress
+        xhr.upload.onprogress = function(event){
+            const percentage = Math.round((event.loaded / event.total) * 100); 
+            
+            const progressBar = document.getElementById("firmware-progress-bar");
+            const progressText = document.getElementById("firmware-progress-text");
+
+            progressBar.style.width = percentage + "%"; 
+            progressText.textContent = percentage + "%"
+
+            console.log("[OTA] Upload progress: ", percentage + "%"); 
+        }
 
         // Handle server response
         xhr.onload = function(){

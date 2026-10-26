@@ -24,7 +24,11 @@ static const esp_partition_t* get_esp_ota_update_partition();
 //=============================================================================*
 
 static esp_ota_handle_t ota_handle = 0;                       // Handle used to carry out the OTA update. 
-static const esp_partition_t* ota_partition = nullptr;        // Cache the partition pointer 
+static const esp_partition_t* ota_partition = nullptr;        // Cache the partition pointer
+
+// progress tracking for both the upload and write progress. 
+static size_t ota_file_size = 0;
+static size_t ota_bytes_writen = 0; 
 
 
 //=============================================================================*
@@ -45,6 +49,10 @@ bool esp_update_begin(size_t firmware_size){
     if(!check_esp_ota_update_file_size(ota_partition, firmware_size)){
         return false;
     }
+
+    // Rest trackin variables before starting a new update.
+    ota_file_size = firmware_size; 
+    ota_bytes_writen = 0; 
 
     // Start the OTA update on the selected partition.
     esp_err_t result = esp_ota_begin(ota_partition, firmware_size, &ota_handle);
@@ -67,6 +75,8 @@ bool esp_update_write(const uint8_t* data, size_t length){
         DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "OTA", "OTA update failed to write to partition");
         return false; 
     }
+
+    ota_bytes_writen += length; 
 
     return true; 
 }
@@ -165,6 +175,20 @@ static bool check_esp_ota_update_file_size(const esp_partition_t* partition, siz
    DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "OTA", "OTA passed file size size check");
    return true; 
 
+}
+
+//=============================================================================*
+// ESP OTA Progress Tracking
+//=============================================================================*
+
+uint8_t ota_get_update_progress(){
+    if(ota_file_size == 0){ 
+        // log an error here. 
+        return 0; 
+    }
+    uint16_t percentage = 0; // calculation gos here. ** INCOMPLETE **
+    
+    return percentage; 
 }
 
 

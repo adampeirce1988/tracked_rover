@@ -20,17 +20,19 @@
         <span class="page-name" hidden>Update</span>
 
         <!--=========================================================================*
-        * page content 
+        * Page Content 
         *=========================================================================-->
-        
         <main class="container">
 
+            <!--=================================================================*
+            * Firmware update
+            *=================================================================-->
             <section class="card">
 
                 <h2>ESP32 Firmware</h2>
 
-                <div class="firmware-file-selection">
-                    <label for="firmware-file" class="firmware-file-button">
+                <div class="file-selection">
+                    <label for="firmware-file" class="file-selection-button">
                         Choose File
                     </label>
 
@@ -41,27 +43,100 @@
                         hidden
                     >
 
-                    <span id="firmware-file-name">No file selected</span>
+                    <span id="firmware-file-name" class="selected-file-name">No file selected</span>
                 </div>
 
-                <div class="firmware-progress-selection">
+                <div class="update-progress-selection">
 
-                    <button type="button" id="firmware-upload-button">
+                    <button type="button" class="upload-button" id="firmware-upload-button">
                         Upload Firmware
                     </button>
 
                     <!-- Firmware update progress bar -->
-                    <div class="progress-container">
-                        <div class="progress-bar" id="progress-bar"></div>
-                        <span id="progress-text">0%</span>
+                    <div class="firmware-progress-container">
+                        <div class="firmware-progress-bar" id="firmeare0progress-bar"></div>
                     </div>
 
+                    <span id="firmware-progress-text">0%</span>
+
+                </div>
+
+            </section>
+
+            <!--=================================================================*
+            * LittleFS filesystem update
+            *=================================================================-->
+            
+            <section class="card update-card" id="littlefs-update-card">
+
+                <h2>LittleFS Filesystem</h2>
+
+                <div class="file-selection">
+                    <label for="littlefs-file" class="file-selection-button">
+                        Choose File
+                    </label>
+
+                    <input
+                        type="file"
+                        id="littlefs-file"
+                        accept=".bin"
+                        hidden
+                    >
+
+                    <span class="selected-file-name" id="littlefs-file-name">
+                        No file selected
+                    </span>
+                </div>
+
+                <div class="update-progress-selection"> 
+                    <button type="button" class="upload-button" id="littlefs-upload-button">
+                        Upload Filesystem
+                    </button>
+
+                    <div class="update-progress-container">
+                        <div class="progress-bar" id="littlefs-progress-bar"></div>
+                    </div>
+
+                    <span id="littlefs-progress-text">0%</span>
+                </div>
+
+            </section>
+
+            <!--=================================================================*
+            * Arduino SDK update — future feature
+            *=================================================================-->
+            <section class="card update-card" id="arduino-update-card">
+            
+                <h2>Arduino Firmware - under development</h2>
+
+                <div class="file-selection">
+                    <label for="arduino-file-" class="file-selection-button">
+                    </label>
+
+                    <span class="selected-file-name" id="arduino-fike-name">
+                        No file selected
+                    </span>
+                </div>
+
+                <div class="update-progress-selection">
+                    <button type="button" class="upload-button" id="arduino-upload-button">
+                        Upload Firmware
+                    </button>
+
+                    <div class="update-progress-container">
+                        <div class="progress-bar" id="arduino-progress-bar"></div>
+                    </div>
+
+                    <span id="arduino-progress-test">0%</span>
                 </div>
 
             </section>
 
         </main>
 
+        <!--=====================================================================*
+        * Shared and page-specific JavaScript
+        *=====================================================================-->
         <script src="/scripts.js"> </script> 
         <script src="/update.js"></script>
 
