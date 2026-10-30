@@ -18,38 +18,13 @@ PlatformIO command to Load littleFS files: pio run -t uploadfs
 
 
 [FIXED]:
-- Added preogress percentage reporting for the upload of the file 
-- Added percetage reporting of the upload 
-- Added moving progress bar in green based on upload. 
-- Added second update container to the update the file system 
-- Added place hoder and styled to allow the arduin firmwar uodate
-- migrated the CSS sytles to be generic for container syles allowing elements to be collected via ID.
-- Added a folder for Java script files
-- Added websock.js 
-- Added dedicate function to crate a webSocket
-- Added dedicated reconnect if the socket times out 
-- Added Test functinon to test auto reconnect of the web socket.
-- Added a websocket subscriber and unsubscriber
-- Refractoed websocket.js and commented code for maitainability
-- Tested all websocket functions in chrome browser. 
-- Added web socket. time stamp to for socket/ transmission health. 
-- Added stale data detection flage to js script
-- Added a browser self test that can be run from the console to test the module. 
-- Added Scheduler.js 
-- Added route handler for Scheduler.js 
-- Fix file system dunmp to now display all folders inside directorys.
-- intergrate the new scheduler into the scripts.js 
-
--add functionalily to disable the update buttons if the vehicle is not in update. 
 
 
 [TODO]: 
-
-
-- Explose telematry updates
-- Add and update scheduler at defined intevals 
-- Intergrate with the exsisting UI inc some dummy test values. 
-
+- Remove test functions from from vehicle_state_machine.cpp
+- Remove test code once battery mornitoring capabillitys are created 
+- Add functionalily to disable the update buttons if the vehicle is not in update. 
+- Intergrate scheduler with the exsisting UI inc some dummy test values. 
 - add basic controler display ready to send the values via json 
 - impliment a file system uploader 
 - impliment a diagnostic tab and allow test to be completed and accessed

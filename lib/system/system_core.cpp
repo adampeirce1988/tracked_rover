@@ -10,6 +10,9 @@
 
 #include "debug.h"
 
+// test
+#include "test.h"
+
 
 /*=============================================================================*
  * Debug Configuration
@@ -25,6 +28,7 @@
 RX_RETURN_CODES rx_transport_status         = RX_RETURN_CODES::UNINITIALIZED; 
 TX_RETURN_CODES tx_transport_status         = TX_RETURN_CODES::UNINITIALIZED;
 PROTOCOL_RX_RETURN_CODE rx_protocol_status  = PROTOCOL_RX_RETURN_CODE::PROTO_IDLE;
+
 
 
 /*=============================================================================*
@@ -90,7 +94,14 @@ void run_core_functions(){
   /*-------------------------------------------------------------------------*
     * web server
   *-------------------------------------------------------------------------*/
-
-  server_run();
   
+  server_run();
+
+  /*-------------------------------------------------------------------------*
+    ** Test code only **
+  *-------------------------------------------------------------------------*/
+
+  update_test_battery_voltage(); 
+  // json_test(); 
+
 }

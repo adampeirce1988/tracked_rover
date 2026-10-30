@@ -16,6 +16,9 @@
 #include "simulation.h"
 #include "file_system.h"
 
+#include "json.h" //test
+#include "test.h" //test
+#include "telemetry.h" //test
 
 /*=============================================================================*
  * Configuration
@@ -79,6 +82,7 @@ VEHICLE_STATE_RETURN_CODE run_vehicle_state(){
 
       // leave booting always transition to SAFE_STATE
       request_vehicle_state_change(VEHICLE_STATE::SAFE_STATE);
+
     break;
 
       /*-------------------------------------------------------------------------*
