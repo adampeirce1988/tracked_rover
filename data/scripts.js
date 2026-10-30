@@ -12,74 +12,64 @@ document.addEventListener("DOMContentLoaded", function() {
     console.log("scripts.js loaded");
 
     //=============================================================================*
-    // Connect HTML Elements
-    //=============================================================================*
-
-    const vehicleFSMStatus = document.getElementById("vehicle-state");
-
-    // Verify HTML elements are available.
-    console.log("vehicleFSMStatus:", vehicleFSMStatus);
-
-
-    //=============================================================================*
     // Establish WebSocket Connection
     //=============================================================================*
+    
+    // check the the scheduler module is avaliable 
+    if(!window.UIScheduler){
+        console.error("UIScheduler moduler is not avaliable"); 
+        return; 
+    }
 
-    const vehicleSocket = new WebSocket(
-        "ws://" + window.location.hostname + ":81/ws"
-    );
+    console.log("UIScheduler module avaliable")
 
-    window.testSocket = vehicleSocket;
+    // Check that the shared Telemetry module is avaliable 
+    if(!window.VehicleTelemetry){
+        console.error("VehicleTelemetry module is no avaiable");
+        return;
+    }
 
+    console.log("vehicleTelemetry module avaliable"); 
 
-    // Handle a successful connection.
-    vehicleSocket.onopen = function() {
+    // Conect to the telemetrey module 
+    window.VehicleTelemetry.connect();
 
-        console.log("WebSocket connected");
+    // Register vehicle status updates with the UI scheduler.
+    window.UIScheduler.subscribe(function() {
 
-        // Request the current vehicle status.
-        vehicleSocket.send("get_status");
-    };
+        const telemetrey = window.VehicleTelemetry.getAllValues();
 
-
-    // Handle incoming status messages.
-    vehicleSocket.onmessage = function(event) {
-console.log("WebSocket message:", event.data);
-
-        try {
-
-            const data = JSON.parse(event.data);
-
-            if (data.type === "status") {
-               
-                const vehicleStateElements = document.querySelectorAll(".vehicle-state-value");
-
-                vehicleStateElements.forEach(function(element) { element.textContent = data.vehicle_state; });
-             }
-        } 
-        catch (error) {
-
-            console.error("Invalid WebSocket JSON:", error);
+        if(telemetrey.type !== "status") {
+            console.error("Telemetry.type missatched:", error); 
+            return; 
         }
-        
-        console.log("WebSocket message:", event.data);
 
-    };
+        document.querySelectorAll("vehicle-state-value").forEach(function(element){
+            element.textContent = telemetrey.vehicle_state; 
+        })
 
+    });
+    
+    // Start the shared UI Scheduler 
+    window.UIScheduler.start(); 
 
-    // Report connection errors.
-    vehicleSocket.onerror = function(error) {
+    // subscribe to the incomming telemetry updates. 
+    window.VehicleTelemetry.subscribe(function(data){
 
-        console.error("WebSocket error:", error);
-    };
+        // only update the vehicle stste  when a status message arrived 
+        if(data.type !== "status"){
+            return; 
+        }
 
+        const vehicleStateElement = document.querySelectorAll(".vehicle-state-value");
 
-    // Report a closed connection.
-    vehicleSocket.onclose = function() {
+        vehicleStateElement.forEach(function(element) {
+            element.textContent = data.vehicle_state;
+        });
+    
+    });
 
-        console.log("WebSocket disconnected");
-    };
-});
+ });
 
 
 /*=============================================================================*

@@ -1,4 +1,4 @@
-intermidate commit to save changes while intergrating a dedicated webSocket module.  
+test status: code compiles with 0 errors & untested on ESP.  
 
 PlatformIO command to Load littleFS files: pio run -t uploadfs
 
@@ -28,16 +28,24 @@ PlatformIO command to Load littleFS files: pio run -t uploadfs
 - Added websock.js 
 - Added dedicate function to crate a webSocket
 - Added dedicated reconnect if the socket times out 
-
-
+- Added Test functinon to test auto reconnect of the web socket.
+- Added a websocket subscriber and unsubscriber
+- Refractoed websocket.js and commented code for maitainability
+- Tested all websocket functions in chrome browser. 
+- Added web socket. time stamp to for socket/ transmission health. 
+- Added stale data detection flage to js script
+- Added a browser self test that can be run from the console to test the module. 
+- Added Scheduler.js 
+- Added route handler for Scheduler.js 
+- Fix file system dunmp to now display all folders inside directorys.
+- intergrate the new scheduler into the scripts.js 
 
 -add functionalily to disable the update buttons if the vehicle is not in update. 
 
 
 [TODO]: 
-- Reconnect testing
-- Receive and phrase telematey data 
-- Store telematey values 
+
+
 - Explose telematry updates
 - Add and update scheduler at defined intevals 
 - Intergrate with the exsisting UI inc some dummy test values. 

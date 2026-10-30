@@ -37,6 +37,7 @@ static void register_main_menu_route();
 
 // js specific files
 static void register_websocket_js_route();
+static void register_scheduler_js_route();
 
 static void register_status_route();
 
@@ -81,6 +82,7 @@ void server_init(){
 
     // JS specsific files
     register_websocket_js_route();
+    register_scheduler_js_route();
 
     // JSON file handler
     register_status_route();
@@ -91,14 +93,14 @@ void server_init(){
     // Diagnostics
     server_report_missing_rotes();
 
-    Serial.println("[HTTP] Registering component routes complete"); //** REMOVE AFTER TESTING **
+    DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "SERV", "Registering component routes complete"); 
 
     // start the server
     server.begin();
 
     websocket_init();  // test code
 
-    DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "SERV", "HTTP server initiataed"); // change to info after debug
+    DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "SERV", "HTTP server initiataed");
 
 }
 
@@ -271,6 +273,7 @@ static void register_js_route(){
         File file = LittleFS.open("/scripts.js", "r");
 
         if(!file){
+            DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "SEVR", "Failed to connecto to load scripts.js");
             server.send(500, "text/plain", "Failed to open scripts.js");
             return;
         }
@@ -297,6 +300,25 @@ static void register_websocket_js_route(){
         server.streamFile(file, "application/javascript");
 
         file.close();
+    });
+}
+
+
+static void register_scheduler_js_route(){
+    server.on("/javascript/scheduler.js", HTTP_GET, [](){
+
+        File file = LittleFS.open("/javascript/scheduler.js", "r");
+
+        if(!file){
+            DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "SEVR", "Failed to connect to load scheduler.js");
+            server.send(500, "text/plain", "Failed to open scheduler.js"); 
+            return; 
+        }
+
+        server.streamFile(file, "application/javascript"); 
+
+        file.close(); 
+
     });
 }
 
