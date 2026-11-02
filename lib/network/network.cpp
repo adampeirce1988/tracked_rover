@@ -24,6 +24,7 @@
 constexpr uint8_t max_connection_attemps = 10;   // max connection atempts 
 
 
+
 /*-------------------------------------------------------------------------*  
   * Setup wifi 
 *-------------------------------------------------------------------------*/
@@ -89,3 +90,30 @@ WIFI_STATUS wifi_init(){
     return wifi_status; 
 }
 
+
+/*-------------------------------------------------------------------------*  
+  * Wifi signal strength
+*-------------------------------------------------------------------------*/
+int8_t wifi_signal_strength(){
+
+    return WiFi.RSSI(); // return the current connection strenght
+}
+
+/*-------------------------------------------------------------------------*  
+  * Wifi Connection Cype
+*-------------------------------------------------------------------------*/
+const char* wifi_current_mode(){
+
+   wifi_mode_t current_wifi_mode = WiFi.getMode(); 
+
+   if(current_wifi_mode == WIFI_MODE_AP){
+    return "AP";
+   }
+   else if(current_wifi_mode == WIFI_MODE_STA){
+    return "STA"; 
+   }
+   else{
+    return "---"; 
+   }
+
+}

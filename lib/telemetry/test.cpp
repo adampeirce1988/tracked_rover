@@ -2,8 +2,9 @@
 #include <stdint.h>
 #include <Arduino.h>
 #include "debug.h"
-#include "telemetry_types.h"
 #include "telemetry.h"
+#include "telemetry_types.h"
+#include "telemetry_internal.h"
 #include "json.h"
 
 
@@ -50,7 +51,7 @@ extern float get_test_battery_voltage(){
 
 void  json_test(){
 
-    telemetry_fetch_data();
+    low_speed_telemetry_fetch_data();
 
     const telemetry_data_t& data = telemetry_get_data();
 

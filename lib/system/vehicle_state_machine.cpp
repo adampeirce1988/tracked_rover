@@ -15,6 +15,7 @@
 #include "transport.h"
 #include "simulation.h"
 #include "file_system.h"
+#include "telemetry.h"
 
 #include "json.h" //test
 #include "test.h" //test
@@ -79,6 +80,9 @@ VEHICLE_STATE_RETURN_CODE run_vehicle_state(){
       // Configure WiFi/AP fallback
       wifi_init();
       server_init();
+
+      // initilize the telemetry
+      telemetey_init();
 
       // leave booting always transition to SAFE_STATE
       request_vehicle_state_change(VEHICLE_STATE::SAFE_STATE);

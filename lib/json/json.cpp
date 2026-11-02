@@ -13,6 +13,8 @@ String generate_telemetry_json_string(const telemetry_data_t& data){
     doc["type"] = "telemetry";
     doc["vehicle_status"] = data.vehicle_state; 
     doc["battery_voltage"] = data.battery_voltage; 
+    doc["wifi_mode"] = data.wifi_mode;
+    doc["wifi_signal"] = data.wifi_signal;
 
     String json_output; 
 

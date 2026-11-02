@@ -1,11 +1,9 @@
-#ifndef TELEMETRY_H
-#define TELEMETRY_H 
+#ifndef TELEMETRY_SCHEDULER_H
+#define TELEMETRY_SCHEDULER_H
 
-#include <stdint.h>
 #include "telemetry_types.h"
 
-void telemetry_init();                          // initilise the telemetry 
-void telemetry_fetch_data();                    // update the telemetry 
-const telemetry_data_t& telemetry_get_data();    // retruns a constant copy of the current telemetry data
-
+void telemetey_init();           // initiate all values and fetch avaliable data 
+void run_telemetry_scheduler();  //runs the scheduler and action any telemetry updates 
+     
 #endif

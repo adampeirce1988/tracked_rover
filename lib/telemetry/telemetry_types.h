@@ -7,6 +7,8 @@
 struct telemetry_data_t {
     const char* vehicle_state = "UNKNOWN";
     float battery_voltage = 0.00f; 
+    int8_t wifi_signal = 0; 
+    const char* wifi_mode = "---";  
 };
 
 

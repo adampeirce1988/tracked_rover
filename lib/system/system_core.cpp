@@ -7,6 +7,7 @@
 #include "transport.h" 
 #include "protocol.h" 
 #include "simulation.h"
+#include "telemetry.h"
 
 #include "debug.h"
 
@@ -102,6 +103,7 @@ void run_core_functions(){
   *-------------------------------------------------------------------------*/
 
   update_test_battery_voltage(); 
-  // json_test(); 
+  //json_test(); 
+  run_telemetry_scheduler();
 
 }
