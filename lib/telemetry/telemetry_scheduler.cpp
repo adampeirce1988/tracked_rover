@@ -31,7 +31,7 @@ void run_telemetry_scheduler(){
         high_speed_timer = cache_millis;
 
         // temp solution before linking the json to the websocket
-        DEBUG_PORT.println(high_speed_data); 
+        //DEBUG_PORT.println(high_speed_data); 
     }
 
     // run low speed telemetry

@@ -103,7 +103,8 @@ void run_core_functions(){
   *-------------------------------------------------------------------------*/
 
   update_test_battery_voltage(); 
-  //json_test(); 
   run_telemetry_scheduler();
+  // websocket broadcaster test
+  web_socket_broadcast_text("{\"type\":\"test\",\"message\":\"Broadcast working\"}");
 
 }

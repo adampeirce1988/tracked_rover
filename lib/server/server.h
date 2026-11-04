@@ -10,4 +10,7 @@
 void server_init();
 void server_run(); 
 
+void web_socket_broadcast_text(const char* message); 
+
+
 #endif 

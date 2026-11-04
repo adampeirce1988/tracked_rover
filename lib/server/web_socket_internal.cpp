@@ -1,7 +1,6 @@
 
-#include <Arduino.h>
 #include <stdint.h>
-
+#include <string.h>
 #include "debug.h" 
 
 #include "esp_http_server.h"
@@ -27,6 +26,7 @@ static esp_err_t websocket_handler(httpd_req_t *request);
 
 constexpr uint16_t web_socket_port_number =  81;      // Defines the port no of the web socket. 
 constexpr size_t max_message_size =          256;     // Max lengh of websocket payload 
+constexpr uint8_t max_conected_clients =     2;       // Max no of clients
 
 //=============================================================================*
 // Variables
@@ -42,11 +42,10 @@ void websocket_init()
 {
     // Create the WebSocket server using the ESP-IDF default configuration.
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
-    
 
-    // Run the WebSocket server on port 81.
-    // The existing Arduino WebServer remains on port 80.
-    config.server_port = web_socket_port_number;
+    // configure the websocket
+    config.server_port = web_socket_port_number;      // Run the WebSocket server on port (default 81)
+    config.max_open_sockets = max_conected_clients;   // configure maximum allowed clients (default 2)
 
     // Start the ESP-IDF HTTP server.
     if (httpd_start(&websocket_server, &config) != ESP_OK)
@@ -181,11 +180,56 @@ static esp_err_t websocket_handler(httpd_req_t *request){
     // Send the vehicle status to the connected browser.
     if (httpd_ws_send_frame(request, &response) != ESP_OK)
     {
-        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "WSCK",
-                        "Failed to send vehicle status");
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "WSCK","Failed to send vehicle status");
         return ESP_FAIL;
     }
 
     return ESP_OK;
   
+}
+
+void web_socket_broadcast_text(const char* message){
+
+    // checc that the server is running. 
+    if(websocket_server == NULL || message == nullptr){
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "WSCK", "Failed to boradcast telemety");
+        return;
+    }
+
+    // get conected client descriptors
+    int client_feild_descriptors [max_conected_clients]  = {};
+    size_t client_count = max_conected_clients; 
+
+
+    // populate client_feild descriptors with connected clients
+    if(httpd_get_client_list(websocket_server, &client_count, client_feild_descriptors) != ESP_OK){
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "WSCK", "Failed to retrieve WebSocket clients");
+        return; 
+    }
+
+    DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "WSCK", "Connected clients: ", client_count);
+
+    // prepare the outgoing websocket frame
+    httpd_ws_frame_t frame = {}; 
+    frame.type = HTTPD_WS_TYPE_TEXT;
+    frame.payload = reinterpret_cast<uint8_t*>(const_cast<char*>(message)); 
+    frame.len = strlen(message);  
+
+    // send the messages to all conected websocket clients
+    for(size_t i = 0; i < client_count; i++){
+
+        // ignore clients that are not websockets
+        if(httpd_ws_get_fd_info(websocket_server, client_feild_descriptors[i]) != HTTPD_WS_CLIENT_WEBSOCKET){
+            continue; 
+        }
+
+        // broadcast frame and manage failures
+        if(httpd_ws_send_frame_async(websocket_server, client_feild_descriptors[i], &frame) != ESP_OK){
+            DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_WARN, "WSCK", "Failed to queue websocket broadcast"); 
+        }
+        else{
+            DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "WSCK", "websocket broadcast queued");
+        }
+        
+    }
 }

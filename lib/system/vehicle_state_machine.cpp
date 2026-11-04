@@ -82,7 +82,8 @@ VEHICLE_STATE_RETURN_CODE run_vehicle_state(){
       server_init();
 
       // initilize the telemetry
-      telemetey_init();
+      telemetry_init();
+      
 
       // leave booting always transition to SAFE_STATE
       request_vehicle_state_change(VEHICLE_STATE::SAFE_STATE);

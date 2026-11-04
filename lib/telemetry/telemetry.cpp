@@ -2,6 +2,7 @@
 
 #include <stdint.h> 
 #include "telemetry_types.h"
+#include "telemetry_internal.h"
 #include "network.h"
 #include "test.h"
 

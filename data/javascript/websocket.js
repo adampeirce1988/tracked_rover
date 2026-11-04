@@ -94,7 +94,7 @@ function connectWebSocket(){
         notifyTelemetryListeners();
 
         // Log the updated telemetry store. 
-        console.log("ESP-Nexus telemetry reveived:" ,latestValues);
+        //console.log("ESP-Nexus telemetry reveived:" ,latestValues);  // uncommet for visable logs 
     };
 
     // Log socket errors (reconnect is handled onclose). 
