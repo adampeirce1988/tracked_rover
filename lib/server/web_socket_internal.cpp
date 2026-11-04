@@ -1,12 +1,13 @@
-
 #include <stdint.h>
 #include <string.h>
-#include "debug.h" 
+#include <stdio.h>
+#include <atomic>
 
 #include "esp_http_server.h"
 
+#include "debug.h"
 #include "system.h"
-#include <stdio.h>
+
 
 //=============================================================================*
 // Debug
@@ -21,22 +22,64 @@
 static esp_err_t websocket_handler(httpd_req_t *request);
 
 //=============================================================================*
-// const expressions (CONFIG) 
+// Websocket Configuration (CONFIG) 
 //=============================================================================*
 
 constexpr uint16_t web_socket_port_number =  81;      // Defines the port no of the web socket. 
 constexpr size_t max_message_size =          256;     // Max lengh of websocket payload 
 constexpr uint8_t max_conected_clients =     2;       // Max no of clients
 
-//=============================================================================*
-// Variables
-//=============================================================================*
+// web socket ring buffer
+constexpr size_t max_telemetry_packet_size =   512; // Max packet size refine later once telemetry is full assembled
+constexpr uint8_t broadcast_queue_capacatiy =  4;   // max capacity of telemetry queue (reduce ince the max queue size is recorded)
+constexpr uint8_t max_queue_attempts =         5;   // max amount of attemps to queue a message      
 
+/*=============================================================================*
+ * WebSocket Runtime State
+*=============================================================================*/
+
+// WebSocket server handle.
 static httpd_handle_t websocket_server = NULL;
 
-//=============================================================================*
-// WebSocket Initialisation
-//=============================================================================*
+// Broadcast message structure.
+struct websocket_broadcast_t {
+    char message[max_telemetry_packet_size];
+    size_t length;
+};
+
+// Broadcast queue.
+static websocket_broadcast_t broadcast_queue[broadcast_queue_capacatiy];
+static uint8_t broadcast_queue_head = 0;
+static uint8_t broadcast_queue_tail = 0;
+static uint8_t broadcast_queue_count = 0;
+
+// Atomic flags for queue access and worker scheduling.
+static std::atomic<bool> broadcast_queue_locked{false};
+static std::atomic<bool> broadcast_pending{false};
+
+
+/*=============================================================================*
+ * Internal Function Declarations
+*=============================================================================*/
+
+// WebSocket handler.
+static esp_err_t websocket_handler(httpd_req_t *request);
+
+// Broadcast queue management.
+static bool websocket_queue_lock();
+static void websocket_queue_unlock();
+static bool websocket_queue_message(const char* message);
+static bool websocket_queue_pop(websocket_broadcast_t& message);
+
+// Broadcast processing.
+static void websocket_broadcast_worker(void* args);
+static void websocket_schedule_broadcast();
+static void websocket_send_message(const websocket_broadcast_t& message);
+
+
+/*=============================================================================*
+ * WebSocket Initialisation
+*=============================================================================*/
 
 void websocket_init()
 {
@@ -75,9 +118,9 @@ void websocket_init()
     DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "WSCK", "WebSocket endpoint registered");
 }
 
-//=============================================================================*
-// WebSocket Runtime
-//=============================================================================*
+/*=============================================================================*
+ * WebSocket Runtime
+*=============================================================================*/
 
 void websocket_run()
 {
@@ -86,9 +129,10 @@ void websocket_run()
 }
 
 
-//=============================================================================*
-// WebSocket handler
-//=============================================================================*
+/*=============================================================================*
+ * WebSocket Handler
+*=============================================================================*/
+
 static esp_err_t websocket_handler(httpd_req_t *request){
 
     //===========================*
@@ -108,6 +152,7 @@ static esp_err_t websocket_handler(httpd_req_t *request){
     //===========================*
     // Receive Frame Information
     //===========================*
+
     httpd_ws_frame_t frame = {};
         
     // Read the frame metadata before allocating memory for its payload.
@@ -188,48 +233,230 @@ static esp_err_t websocket_handler(httpd_req_t *request){
   
 }
 
+
+/*=============================================================================*
+ * Broadcast Queue
+*=============================================================================*/
+
+// Add a message to the broadcast queue for transmission by the HTTP server task.
 void web_socket_broadcast_text(const char* message){
 
-    // checc that the server is running. 
+    // check that the server is running. 
     if(websocket_server == NULL || message == nullptr){
         DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "WSCK", "Failed to boradcast telemety");
         return;
     }
 
-    // get conected client descriptors
-    int client_feild_descriptors [max_conected_clients]  = {};
-    size_t client_count = max_conected_clients; 
+    //attemp to queue the message up to max_attemps
+    for(uint8_t attempts = 0; attempts < max_queue_attempts; attempts++ ){
+        // add the message to the broadcast queue 
+        if(websocket_queue_message(message)){
+
+            websocket_schedule_broadcast();
+
+            DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "WSCK", "WebSocket broadcast message queued");
+            return; 
+        }
+
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "WSCK", "Retry attempt failed"); 
+    }
+
+    // all attempts failed
+    DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_WARN, "WSCK", "Failed to add message to broadcast queue"); 
+}
 
 
-    // populate client_feild descriptors with connected clients
-    if(httpd_get_client_list(websocket_server, &client_count, client_feild_descriptors) != ESP_OK){
-        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "WSCK", "Failed to retrieve WebSocket clients");
+// Copy a message into the next available queue slot.
+// Returns false if the queue is locked, full or the message is invalid.
+static bool websocket_queue_message(const char* message){
+
+    // check if the queue is locked
+    if(!websocket_queue_lock()){
+        return false; 
+        // return if the queue is locked
+    }
+
+    // protect against blank messages
+    if(message == nullptr){
+
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_WARN, "WSCK", "Rejected message: nullptr");
+        websocket_queue_unlock();
+        return false; 
+    }
+
+    size_t message_length = strlen(message);
+
+    if(message_length == 0 || message_length >= max_telemetry_packet_size){
+
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_WARN, "WSCK", "Rejected invalid broadcast message size");
+        websocket_queue_unlock();
+        return false; 
+    }
+
+    // drop the incomming message if the queue is full 
+    if(broadcast_queue_count == broadcast_queue_capacatiy){
+
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "WSCK", "Websocket broadcast queue full: incoming message droped");
+        websocket_queue_unlock();
+        return false; 
+    }
+
+
+    // copy new message into the next avaliable slot
+    websocket_broadcast_t& slot = broadcast_queue[broadcast_queue_head];
+
+    memcpy(slot.message, message, message_length);
+    slot.message[message_length] = '\0'; 
+    slot.length = message_length; 
+
+    // advance the write possition
+    broadcast_queue_head = (broadcast_queue_head + 1) % broadcast_queue_capacatiy;
+    broadcast_queue_count ++; 
+
+    websocket_queue_unlock();
+
+    return true; 
+}
+
+
+// Retrieve the oldest pending message from the queue.
+// Returns false if the queue is empty or currently locked.
+static bool websocket_queue_pop(websocket_broadcast_t& message){
+
+    if(!websocket_queue_lock()){
+        // return if the queue is locked
+        return false;
+    }
+
+
+    // check to see if the queue contains a message 
+    if(broadcast_queue_count == 0){
+        websocket_queue_unlock(); 
+        return false; 
+    }
+
+    // coppy the oldest message out of the queue
+    message = broadcast_queue[broadcast_queue_tail]; 
+
+    broadcast_queue_tail = (broadcast_queue_tail+ 1) % broadcast_queue_capacatiy;
+    broadcast_queue_count --; 
+
+    // release exclusive access to the queue 
+    websocket_queue_unlock();
+
+    return true; 
+}
+
+
+// Attempt to acquire exclusive access to the broadcast queue.
+// Returns true if the lock was acquired, or false if another task holds it.
+static bool websocket_queue_lock(){
+    bool expected = false; 
+
+    return broadcast_queue_locked.compare_exchange_strong(expected, true);
+}
+
+// Release exclusive access to the broadcast queue so another task can use it.
+static void websocket_queue_unlock()
+{
+    broadcast_queue_locked.store(false);
+}
+
+
+/*=============================================================================*
+ * Broadcast Worker
+*=============================================================================*/
+
+static void websocket_broadcast_worker(void* args){
+
+    websocket_broadcast_t message; 
+
+    while(true){
+        // process all pending messages
+        while(websocket_queue_pop(message)){
+            websocket_send_message(message);
+        }
+
+        // release the pending flag 
+        broadcast_pending.store(false); 
+
+        // check if any massages arrived during the release of the pending flag
+        if(!websocket_queue_pop(message)){
+            return; 
+        }
+        
+        bool expected = false; 
+
+        // If another worker has been scheduled, let it handle subsequent messages.
+        if(broadcast_pending.compare_exchange_strong(expected, true)){
+            websocket_send_message(message); 
+            return; 
+        }
+
+        // We reclaimed responsibility for the queue. Send the retrieved message and continue draining.
+        websocket_send_message(message);
+    
+    }
+
+    // No messages currently remain. release the pending flag 
+    broadcast_pending.store(false);
+}
+
+
+/*=============================================================================*
+ * Broadcast Scheduling
+*=============================================================================*/
+
+static void websocket_schedule_broadcast(){
+
+    bool expected = false; 
+
+    // Check whether the worker is already pending
+    if(!broadcast_pending.compare_exchange_strong(expected, true)){
         return; 
     }
 
-    DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_INFO, "WSCK", "Connected clients: ", client_count);
 
-    // prepare the outgoing websocket frame
-    httpd_ws_frame_t frame = {}; 
-    frame.type = HTTPD_WS_TYPE_TEXT;
-    frame.payload = reinterpret_cast<uint8_t*>(const_cast<char*>(message)); 
-    frame.len = strlen(message);  
+    // Queue the worker in the HTTP server task 
+    if(httpd_queue_work(websocket_server, websocket_broadcast_worker, nullptr) != ESP_OK){
+        
+        // Clear the pending flag if scheduling fails.
+        broadcast_pending.store(false); 
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "WSCK", "Failed to schedule broadcast worker");
+    }
+}
 
-    // send the messages to all conected websocket clients
+
+/*=============================================================================*
+ * WebSocket Transmission
+*=============================================================================*/
+
+static void websocket_send_message(const websocket_broadcast_t& message){
+    
+    //preare the websocket frame
+    httpd_ws_frame_t frame = {};
+    frame.type = HTTPD_WS_TYPE_TEXT; 
+    frame.payload = reinterpret_cast<uint8_t*>(const_cast<char*>(message.message)); 
+    
+    frame.len = message.length;
+
+    // retreive the connected client_file_description
+    int client_fds[max_conected_clients] ={};
+    size_t client_count = max_conected_clients;
+
+    if(httpd_get_client_list(websocket_server, &client_count, client_fds) != ESP_OK){
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "WSCK", "Failed to retreive client websocket clients");
+        return; 
+    }
+    
+    //send messages to all connected Websocket clients
     for(size_t i = 0; i < client_count; i++){
-
-        // ignore clients that are not websockets
-        if(httpd_ws_get_fd_info(websocket_server, client_feild_descriptors[i]) != HTTPD_WS_CLIENT_WEBSOCKET){
+        if(httpd_ws_get_fd_info(websocket_server, client_fds[i]) != HTTPD_WS_CLIENT_WEBSOCKET){
             continue; 
         }
-
-        // broadcast frame and manage failures
-        if(httpd_ws_send_frame_async(websocket_server, client_feild_descriptors[i], &frame) != ESP_OK){
-            DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_WARN, "WSCK", "Failed to queue websocket broadcast"); 
-        }
-        else{
-            DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "WSCK", "websocket broadcast queued");
-        }
         
+        if(httpd_ws_send_frame_async(websocket_server, client_fds[i], &frame) != ESP_OK){
+                DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_WARN, "WSCK", "Failed to broadcast WebSocket message");
+        }
     }
 }
