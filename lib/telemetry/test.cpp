@@ -49,14 +49,14 @@ extern float get_test_battery_voltage(){
 }
 
 
-void  json_test(){
+// void  json_test(){
 
-    low_speed_telemetry_fetch_data();
+//     low_speed_telemetry_fetch_data();
 
-    const telemetry_data_t& data = telemetry_get_data();
+//     const telemetry_data_t& data = telemetry_get_data();
 
-    String json_test = generate_telemetry_json_string(data); 
+//     String json_test = generate_telemetry_json_string(data); 
 
-    DEBUG_PORT.println(json_test); 
+//     DEBUG_PORT.println(json_test); 
 
-}
+// }

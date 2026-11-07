@@ -91,8 +91,10 @@ void websocket_init()
     config.max_open_sockets = max_conected_clients;   // configure maximum allowed clients (default 2)
 
     // Start the ESP-IDF HTTP server.
-    if (httpd_start(&websocket_server, &config) != ESP_OK)
-    {
+    if (httpd_start(&websocket_server, &config) != ESP_OK){
+
+        websocket_server = NULL;
+
         DEBUG_PRINT_MSG_VAL(DEBUG_FILE, DEBUG_ERROR, "WSCK","Failed to start WebSocket server. Port: ", web_socket_port_number);
         return;
     }
@@ -112,6 +114,11 @@ void websocket_init()
     // Register the WebSocket endpoint with the server.
     if(httpd_register_uri_handler(websocket_server, &websocket_uri) != ESP_OK){
         DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "WSCK", "Failed to register WebSocket endpoint");
+
+        // Stop the server if endpoint registration fails.
+        httpd_stop(websocket_server);
+        websocket_server = NULL;
+
         return; 
     }
 
@@ -239,7 +246,7 @@ static esp_err_t websocket_handler(httpd_req_t *request){
 *=============================================================================*/
 
 // Add a message to the broadcast queue for transmission by the HTTP server task.
-void web_socket_broadcast_text(const char* message){
+void web_socket_broadcast_text(const String message){
 
     // check that the server is running. 
     if(websocket_server == NULL || message == nullptr){
@@ -249,16 +256,16 @@ void web_socket_broadcast_text(const char* message){
 
     //attemp to queue the message up to max_attemps
     for(uint8_t attempts = 0; attempts < max_queue_attempts; attempts++ ){
-        // add the message to the broadcast queue 
-        if(websocket_queue_message(message)){
+        // add the message to the broadcast queue using c_str() to converto to char*. 
+        if(websocket_queue_message(message.c_str())){
 
             websocket_schedule_broadcast();
 
-            DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_INFO, "WSCK", "WebSocket broadcast message queued");
+            DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_DEBUG, "WSCK", "WebSocket broadcast message queued"); // change to debug_info 
             return; 
         }
 
-        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "WSCK", "Retry attempt failed"); 
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_DEBUG, "WSCK", "Broadcast queue attempt failed"); 
     }
 
     // all attempts failed
@@ -353,13 +360,13 @@ static bool websocket_queue_pop(websocket_broadcast_t& message){
 static bool websocket_queue_lock(){
     bool expected = false; 
 
-    return broadcast_queue_locked.compare_exchange_strong(expected, true);
+    return broadcast_queue_locked.compare_exchange_strong(expected, true, std::memory_order_acquire);
 }
 
 // Release exclusive access to the broadcast queue so another task can use it.
 static void websocket_queue_unlock()
 {
-    broadcast_queue_locked.store(false);
+    broadcast_queue_locked.store(false, std::memory_order_relaxed);
 }
 
 
@@ -371,7 +378,9 @@ static void websocket_broadcast_worker(void* args){
 
     websocket_broadcast_t message; 
 
+
     while(true){
+
         // process all pending messages
         while(websocket_queue_pop(message)){
             websocket_send_message(message);
@@ -385,15 +394,7 @@ static void websocket_broadcast_worker(void* args){
             return; 
         }
         
-        bool expected = false; 
-
-        // If another worker has been scheduled, let it handle subsequent messages.
-        if(broadcast_pending.compare_exchange_strong(expected, true)){
-            websocket_send_message(message); 
-            return; 
-        }
-
-        // We reclaimed responsibility for the queue. Send the retrieved message and continue draining.
+        // a message has arrive - continue processing the queue
         websocket_send_message(message);
     
     }
@@ -409,6 +410,12 @@ static void websocket_broadcast_worker(void* args){
 
 static void websocket_schedule_broadcast(){
 
+    // Check that the server is running.
+    if(websocket_server == NULL){
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "WSCK", "WebSocket server unavailable");
+        return;
+    }
+
     bool expected = false; 
 
     // Check whether the worker is already pending
@@ -422,6 +429,7 @@ static void websocket_schedule_broadcast(){
         
         // Clear the pending flag if scheduling fails.
         broadcast_pending.store(false); 
+
         DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "WSCK", "Failed to schedule broadcast worker");
     }
 }
@@ -432,12 +440,19 @@ static void websocket_schedule_broadcast(){
 *=============================================================================*/
 
 static void websocket_send_message(const websocket_broadcast_t& message){
-    
+
+
+    // Check that the server is running.
+    if(websocket_server == NULL){
+        DEBUG_PRINT_MSG(DEBUG_FILE, DEBUG_ERROR, "WSCK", "WebSocket server unavailable");
+        return;
+    }
+
     //preare the websocket frame
     httpd_ws_frame_t frame = {};
+    frame.final = true; 
     frame.type = HTTPD_WS_TYPE_TEXT; 
     frame.payload = reinterpret_cast<uint8_t*>(const_cast<char*>(message.message)); 
-    
     frame.len = message.length;
 
     // retreive the connected client_file_description

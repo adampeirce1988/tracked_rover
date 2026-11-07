@@ -20,17 +20,7 @@ PlatformIO command to Load littleFS files: pio run -t uploadfs
 [FIXED]:
 
 
-
 - [ ] Confirm the broadcast function handles disconnected clients cleanly.
-2. Connect low-speed telemetry
-- [ ] Call low_speed_telemetry_fetch_data() on the 250 ms schedule.
-- [ ] Generate the low-speed JSON payload.
-- [ ] Broadcast using web_socket_broadcast_text().
-- [ ] Confirm battery, vehicle state and Wi-Fi data arrive in Chrome.
-3. Connect high-speed telemetry
-- [ ] Create the high-speed JSON generator.
-- [ ] Connect the 100 ms scheduler.
-- [ ] Test the separate message channel.
 4. Browser integration
 - [ ] Update websocket.js to recognise both telemetry message types.
 - [ ] Merge incoming values into VehicleTelemetry.

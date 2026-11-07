@@ -22,7 +22,8 @@ const WS_CONFIG = {
 
 let vehicleSocket = null;               // Stores the websocket used for telemetry.
 let connectionState = "disconnected";   // Tracks the connection state. connecting, connected or disconnected.
-let lastMessageTime = null;             // stores a. timestamp for the last packet received.
+let lastHighSpeedTimestamp = null;      // stores a timestamp for the last high speed packet received.
+let lastLowSpeedTimestamp = null;       // stores a timestamp for the last low speed packet received.
 const latestValues = {};                // store the latest values sent over JSON from the ESP32.
 const telemetryListeners = new Set();   // Stores callbacks that are notified when telemetry changes.
 
@@ -75,17 +76,29 @@ function connectWebSocket(){
             data = JSON.parse(event.data); 
         } 
         catch (error) {
-            console.error("Invalid WebSocket JASON:", error);
+            console.error("Invalid WebSocket JSON:", error);
             return; 
         }
 
         // Reject null arrays and non-object values before updating the telemetry 
         if(data === null || typeof data !== "object" || Array.isArray(data)){
-            consle.error("invalid telemetry format: expecte a JSON object"); 
+            consle.error("Invalid telemetry format: expecte a JSON object"); 
             return; 
         }
 
-        lastMessageTime = Date.now();
+        // store the last updated telemetry packet time
+        const messageTime = Date.now();
+
+        if(data.type === "hs_telemetry"){
+            lastHighSpeedTimestamp = messageTime;
+        }
+        else if(data.type === "ls_telemetry"){
+            lastLowSpeedTimestamp = messageTime;
+        }
+        else{
+            console.warn("Unknown telemetry message type", data.type);
+        }
+        
 
         // Merge new fields without removing values from previous messages.
         Object.assign(latestValues, data);
@@ -164,36 +177,44 @@ function subscribeTelemetry(callback) {
     return function(){
         telemetryListeners.delete(callback); 
     }; 
- }
+}
 
 
- function unsubscribeTelemetry(callback){
+function unsubscribeTelemetry(callback){
     // remove the subscriber.
     telemetryListeners.delete(callback);
- }
+}
 
 
- function getTelemetryValue(name){
+function getTelemetryValue(name){
     return latestValues[name];
- }
+}
 
 
- function getAllTelemetryValues(){
+function getAllTelemetryValues(){
     return { ...latestValues }
- }
+}
 
- function getTelemetryHealth(){
 
-    const lastMessageAgeMs = lastMessageTime === null ? null : Date.now() - lastMessageTime; 
+function getHighSpeedTelemetryHealth(){
+    return lastHighSpeedMessageTime !== null && Date.now() - lastHighSpeedMessageTime <= WS_CONFIG.telemetryStaleAfterMs;
+}
+
+function getLowSpeedTelemetryHealth(){
+    return lastHighSpeedMessageTime !== null && Date.now() - lastHighSpeedMessageTime <= WS_CONFIG.telemetryStaleAfterMs;
+}
+
+function getTelemetryHealth(){
 
     return{
         connectionState: connectionState,
-        hasReceivedTelemetry: lastMessageTime !== null, 
-        lastMessageAgeMs: lastMessageAgeMs,
-        telemetryStale: lastMessageAgeMs === null || lastMessageAgeMs > WS_CONFIG.telemetryStaleAfterMs
+        highSpeed: check_hs(),
+        lowSpeed: check_ls()
     };
 
- }
+}
+
+
 
 //=============================================================================*
 // Public Interface
@@ -210,6 +231,9 @@ const VehicleTelemetry = {
     getValue: getTelemetryValue,
     getAllValues: getAllTelemetryValues,
     getHealth: getTelemetryHealth,
+    getTelemetryHShealth: getHighSpeedTelemetryHealth, 
+    getTelemetryLSHealth: getLowSpeedTelemetryHealth,
+    
 
     // rundiagnostic test suite 
     runTest: runVehicleTelemetryTests
