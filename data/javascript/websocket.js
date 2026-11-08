@@ -13,7 +13,8 @@ console.log("websocket.js loaded");
 const WS_CONFIG = {
     url: "ws://" + window.location.hostname + ":81/ws",
     reconnectDelayMs: 1000,
-    telemetryStaleAfterMs: 500
+    lowSpeedTelemetryStaleAfterMs: 550,  // double packe speed pluss 10%
+    highSpeedTelemetryStaleAfterMs: 220  // double packe speed pluss 10%
 };
 
 //=============================================================================*
@@ -47,11 +48,7 @@ function connectWebSocket(){
     // update the connectiom state once the websocket opens.
     vehicleSocket.onopen = function(){
         connectionState = "connected"; 
-        console.log("ESP-Nexus webSocket connected"); 
-
-        // Request the current vehicle state  
-        requestTelemetryStatus();
-        
+        console.log("ESP-Nexus webSocket connected");   
     };
 
     // Clear the closed socket and schedule an automatic reconnect.
@@ -82,7 +79,7 @@ function connectWebSocket(){
 
         // Reject null arrays and non-object values before updating the telemetry 
         if(data === null || typeof data !== "object" || Array.isArray(data)){
-            consle.error("Invalid telemetry format: expecte a JSON object"); 
+            consle.error("Invalid telemetry format: expected a JSON object"); 
             return; 
         }
 
@@ -96,7 +93,8 @@ function connectWebSocket(){
             lastLowSpeedTimestamp = messageTime;
         }
         else{
-            console.warn("Unknown telemetry message type", data.type);
+            console.warn("Ingoring unknown telemetry message type: ", data.type);
+            return; 
         }
         
 
@@ -113,6 +111,7 @@ function connectWebSocket(){
     // Log socket errors (reconnect is handled onclose). 
     vehicleSocket.onerror = function(error){
         console.error("ESP-Nexus websocket error: ",error); 
+        return; 
     };
 
 }
@@ -130,18 +129,6 @@ function testWebSocketReconnect(){
     if(vehicleSocket !== null){
             vehicleSocket.close()
     }
-}
-
-
-function requestTelemetryStatus(){
-
-    // Request the current vehicle status if the socket is open.
-    if(vehicleSocket !== null && vehicleSocket.readyState === WebSocket.OPEN){
-            vehicleSocket.send("get_status");
-        }
-        else{
-            console.warn("Cannot request ststus: WebSocket is not conected"); 
-        }
 }
 
 
@@ -197,19 +184,19 @@ function getAllTelemetryValues(){
 
 
 function getHighSpeedTelemetryHealth(){
-    return lastHighSpeedMessageTime !== null && Date.now() - lastHighSpeedMessageTime <= WS_CONFIG.telemetryStaleAfterMs;
+    return lastHighSpeedTimestamp !== null && Date.now() - lastHighSpeedTimestamp <= WS_CONFIG.highSpeedTelemetryStaleAfterMs;
 }
 
 function getLowSpeedTelemetryHealth(){
-    return lastHighSpeedMessageTime !== null && Date.now() - lastHighSpeedMessageTime <= WS_CONFIG.telemetryStaleAfterMs;
+    return lastLowSpeedTimestamp !== null && Date.now() - lastLowSpeedTimestamp <= WS_CONFIG.lowSpeedTelemetryStaleAfterMs;
 }
 
 function getTelemetryHealth(){
 
     return{
         connectionState: connectionState,
-        highSpeed: check_hs(),
-        lowSpeed: check_ls()
+        highSpeed: getHighSpeedTelemetryHealth(),
+        lowSpeed: getLowSpeedTelemetryHealth()
     };
 
 }
@@ -224,7 +211,6 @@ const VehicleTelemetry = {
 
     connect: connectWebSocket, 
     testReconnect: testWebSocketReconnect,
-    requestStatus: requestTelemetryStatus, 
     subscribe: subscribeTelemetry,
     unsubscribe:unsubscribeTelemetry,
     getConnectionState: getConectionStateInternal,
@@ -243,30 +229,37 @@ window.VehicleTelemetry = VehicleTelemetry;
 
 
 
+
 /*=============================================================================*
  * Browser Diagnostics
  *
  * Run the WebSocket test suite from the browser console:
  *     VehicleTelemetry.runTest();
  *
- * The suite checks the public API, connection handling, telemetry reception,
- * data storage, subscribers, automatic reconnection and telemetry freshness.
+ * Tests the public API, connection handling, high-speed and low-speed
+ * telemetry, cache merging, subscribers, channel freshness and reconnection.
  *
  * Results are logged to the console and returned as a summary object.
  *=============================================================================*/
-
 
 async function runVehicleTelemetryTests() {
 
     const results = [];
     const timeoutMs = 4000;
-    const staleWaitMs = WS_CONFIG.telemetryStaleAfterMs + 150;
+
+    // Allow enough time for both channels to exceed their stale thresholds.
+    const staleWaitMs = Math.max(
+        WS_CONFIG.highSpeedTelemetryStaleAfterMs,
+        WS_CONFIG.lowSpeedTelemetryStaleAfterMs
+    ) + 150;
 
     // Wait until a condition becomes true or the timeout expires.
     async function waitFor(condition, timeout = timeoutMs) {
+
         const start = Date.now();
 
         while (Date.now() - start < timeout) {
+
             if (condition()) {
                 return true;
             }
@@ -279,12 +272,19 @@ async function runVehicleTelemetryTests() {
 
     // Run one test and record its result without stopping the suite.
     async function runTest(name, testFunction) {
+
         try {
             await testFunction();
-            results.push({ Test: name, Result: "PASS" });
+
+            results.push({
+                Test: name,
+                Result: "PASS"
+            });
+
             console.log("PASS:", name);
         }
         catch (error) {
+
             results.push({
                 Test: name,
                 Result: "FAIL",
@@ -295,39 +295,57 @@ async function runVehicleTelemetryTests() {
         }
     }
 
-    // Request status and wait for the next telemetry update.
-    async function requestAndWaitForMessage() {
+    // Wait for a particular telemetry channel to send an update.
+    async function waitForTelemetryType(type, timeout = timeoutMs) {
+
         let unsubscribe;
 
         const messageReceived = new Promise((resolve, reject) => {
-            const timeout = setTimeout(() => {
+
+            const timer = setTimeout(() => {
+
                 if (unsubscribe) {
                     unsubscribe();
                 }
 
-                reject(new Error("No telemetry message received"));
-            }, timeoutMs);
+                reject(new Error("Timed out waiting for " + type));
+            }, timeout);
 
-            unsubscribe = VehicleTelemetry.subscribe(() => {
-                clearTimeout(timeout);
-                unsubscribe();
-                resolve();
+            unsubscribe = VehicleTelemetry.subscribe(data => {
+
+                if (data.type === type) {
+
+                    clearTimeout(timer);
+                    unsubscribe();
+                    resolve(data);
+                }
             });
         });
 
-        VehicleTelemetry.requestStatus();
+        return await messageReceived;
+    }
 
-        await messageReceived;
+    // Check that an object contains all the expected telemetry fields.
+    function checkFields(values, fields, channelName) {
+
+        fields.forEach(field => {
+
+            if (!Object.prototype.hasOwnProperty.call(values, field)) {
+                throw new Error(
+                    channelName + " telemetry is missing field: " + field
+                );
+            }
+        });
     }
 
     console.log("Starting VehicleTelemetry browser tests...");
 
     // 1. Check the public API.
     await runTest("Public API methods exist", async () => {
+
         const methods = [
             "connect",
             "testReconnect",
-            "requestStatus",
             "subscribe",
             "unsubscribe",
             "getConnectionState",
@@ -338,6 +356,7 @@ async function runVehicleTelemetryTests() {
         ];
 
         methods.forEach(method => {
+
             if (typeof VehicleTelemetry[method] !== "function") {
                 throw new Error("Missing method: " + method);
             }
@@ -346,6 +365,7 @@ async function runVehicleTelemetryTests() {
 
     // 2. Establish the WebSocket connection.
     await runTest("WebSocket connects", async () => {
+
         VehicleTelemetry.connect();
 
         await waitFor(() =>
@@ -355,6 +375,7 @@ async function runVehicleTelemetryTests() {
 
     // 3. Calling connect again must be safe.
     await runTest("Repeated connect is safe", async () => {
+
         VehicleTelemetry.connect();
         VehicleTelemetry.connect();
 
@@ -363,55 +384,102 @@ async function runVehicleTelemetryTests() {
         }
     });
 
-    // 4. Confirm valid telemetry has arrived.
-    await runTest("Telemetry is received", async () => {
-        await waitFor(() =>
-            VehicleTelemetry.getHealth().hasReceivedTelemetry
-        );
-    });
+    // 4. Confirm high-speed telemetry is received.
+    await runTest("High-speed telemetry is received", async () => {
 
-    // 5. Check telemetry is stored and readable.
-    await runTest("Telemetry is stored", async () => {
-        const values = VehicleTelemetry.getAllValues();
+        await waitForTelemetryType("hs_telemetry");
 
-        if (
-            values === null ||
-            typeof values !== "object" ||
-            Object.keys(values).length === 0
-        ) {
-            throw new Error("Telemetry store is empty");
+        if (!VehicleTelemetry.getHealth().highSpeed) {
+            throw new Error("High-speed telemetry is not healthy");
         }
     });
 
-    // 6. Check the health result while telemetry is fresh.
-    await runTest("Health reports fresh telemetry", async () => {
-        await requestAndWaitForMessage();
+    // 5. Confirm low-speed telemetry is received.
+    await runTest("Low-speed telemetry is received", async () => {
+
+        await waitForTelemetryType("ls_telemetry");
+
+        if (!VehicleTelemetry.getHealth().lowSpeed) {
+            throw new Error("Low-speed telemetry is not healthy");
+        }
+    });
+
+    // 6. Check that high-speed telemetry is stored.
+    await runTest("High-speed telemetry is stored", async () => {
+
+        const values = VehicleTelemetry.getAllValues();
+
+        checkFields(values, [
+            "acc_x",
+            "acc_y",
+            "acc_z",
+            "gyro_x",
+            "gyro_y",
+            "gyro_z"
+        ], "High-speed");
+    });
+
+    // 7. Check that low-speed telemetry is stored.
+    await runTest("Low-speed telemetry is stored", async () => {
+
+        const values = VehicleTelemetry.getAllValues();
+
+        checkFields(values, [
+            "vehicle_status",
+            "battery_voltage",
+            "wifi_mode",
+            "wifi_signal"
+        ], "Low-speed");
+    });
+
+    // 8. Check that the two channels share the cache without overwriting
+    //    each other's values.
+    await runTest("Telemetry channels merge correctly", async () => {
+
+        await waitForTelemetryType("hs_telemetry");
+
+        const afterHighSpeed = VehicleTelemetry.getAllValues();
+
+        checkFields(afterHighSpeed, [
+            "acc_x",
+            "gyro_x",
+            "vehicle_status",
+            "battery_voltage"
+        ], "Merged");
+
+        await waitForTelemetryType("ls_telemetry");
+
+        const afterLowSpeed = VehicleTelemetry.getAllValues();
+
+        checkFields(afterLowSpeed, [
+            "acc_x",
+            "gyro_x",
+            "vehicle_status",
+            "battery_voltage"
+        ], "Merged");
+    });
+
+    // 9. Check that both channels report healthy while connected.
+    await runTest("Both telemetry channels report healthy", async () => {
+
+        await waitFor(() => {
+            const health = VehicleTelemetry.getHealth();
+
+            return health.connectionState === "connected" &&
+                health.highSpeed === true &&
+                health.lowSpeed === true;
+        });
 
         const health = VehicleTelemetry.getHealth();
 
-        if (health.connectionState !== "connected") {
-            throw new Error("Connection is not reported as connected");
-        }
-
-        if (!health.hasReceivedTelemetry) {
-            throw new Error("Telemetry has not been recorded");
-        }
-
-        if (health.lastMessageAgeMs === null) {
-            throw new Error("Message age is missing");
-        }
-
-        if (health.telemetryStale) {
-            throw new Error("Telemetry was reported as stale");
-        }
-
-        if (health.lastMessageAgeMs < 0) {
-            throw new Error("Invalid message age");
+        if (health.highSpeed !== true || health.lowSpeed !== true) {
+            throw new Error("One or both telemetry channels are unhealthy");
         }
     });
 
-    // 7. A subscriber must receive telemetry updates.
+    // 10. A subscriber must receive telemetry updates.
     await runTest("Subscriber receives updates", async () => {
+
         let received = false;
 
         const unsubscribe = VehicleTelemetry.subscribe(() => {
@@ -419,7 +487,6 @@ async function runVehicleTelemetryTests() {
         });
 
         try {
-            VehicleTelemetry.requestStatus();
             await waitFor(() => received);
         }
         finally {
@@ -427,8 +494,9 @@ async function runVehicleTelemetryTests() {
         }
     });
 
-    // 8. Unsubscribed listeners must stop receiving updates.
+    // 11. Unsubscribed listeners must stop receiving updates.
     await runTest("Unsubscribe stops notifications", async () => {
+
         let count = 0;
 
         const unsubscribe = VehicleTelemetry.subscribe(() => {
@@ -439,16 +507,16 @@ async function runVehicleTelemetryTests() {
 
         const countAfterUnsubscribe = count;
 
-        await requestAndWaitForMessage();
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await waitForTelemetryType("hs_telemetry");
 
         if (count !== countAfterUnsubscribe) {
             throw new Error("Subscriber received an update after unsubscribe");
         }
     });
 
-    // 9. An invalid subscriber must not be registered.
+    // 12. An invalid subscriber must not be registered.
     await runTest("Invalid subscriber is handled", async () => {
+
         const unsubscribe = VehicleTelemetry.subscribe(null);
 
         if (typeof unsubscribe !== "function") {
@@ -458,8 +526,9 @@ async function runVehicleTelemetryTests() {
         unsubscribe();
     });
 
-    // 10. Closing the socket should update connection state.
+    // 13. Closing the socket should update connection state.
     await runTest("Socket closes correctly", async () => {
+
         VehicleTelemetry.testReconnect();
 
         await waitFor(() =>
@@ -467,8 +536,9 @@ async function runVehicleTelemetryTests() {
         );
     });
 
-    // 11. With the socket closed, telemetry should become stale.
-    await runTest("Telemetry becomes stale", async () => {
+    // 14. With the socket closed, both channels should become stale.
+    await runTest("Both telemetry channels become stale", async () => {
+
         await new Promise(resolve => setTimeout(resolve, staleWaitMs));
 
         const health = VehicleTelemetry.getHealth();
@@ -477,60 +547,51 @@ async function runVehicleTelemetryTests() {
             throw new Error("Socket reconnected before stale check");
         }
 
-        if (!health.hasReceivedTelemetry) {
-            throw new Error("Previous telemetry state was lost");
+        if (health.highSpeed !== false) {
+            throw new Error("High-speed telemetry was not marked stale");
         }
 
-        if (!health.telemetryStale) {
-            throw new Error("Telemetry was not marked stale");
-        }
-
-        if (health.lastMessageAgeMs <= WS_CONFIG.telemetryStaleAfterMs) {
-            throw new Error("Message age did not exceed the stale threshold");
+        if (health.lowSpeed !== false) {
+            throw new Error("Low-speed telemetry was not marked stale");
         }
     });
 
-    // 12. The socket should reconnect automatically.
+    // 15. The socket should reconnect automatically.
     await runTest("Automatic reconnection works", async () => {
-        await waitFor(() =>
-            VehicleTelemetry.getConnectionState() === "connected",
+
+        await waitFor(
+            () => VehicleTelemetry.getConnectionState() === "connected",
             timeoutMs + WS_CONFIG.reconnectDelayMs + 2000
         );
     });
 
-    // 13. A new message should restore fresh telemetry.
+    // 16. Both channels should recover after reconnection.
     await runTest("Telemetry recovers after reconnection", async () => {
-        await requestAndWaitForMessage();
 
-        const health = VehicleTelemetry.getHealth();
+        await waitFor(() => {
+            const health = VehicleTelemetry.getHealth();
 
-        if (health.connectionState !== "connected") {
-            throw new Error("Connection is not healthy after reconnection");
-        }
-
-        if (!health.hasReceivedTelemetry) {
-            throw new Error("Telemetry was not recorded after reconnection");
-        }
-
-        if (health.telemetryStale) {
-            throw new Error("Telemetry remained stale after a new message");
-        }
-
-        if (health.lastMessageAgeMs > WS_CONFIG.telemetryStaleAfterMs) {
-            throw new Error("New telemetry exceeded the stale threshold");
-        }
+            return health.connectionState === "connected" &&
+                health.highSpeed === true &&
+                health.lowSpeed === true;
+        });
     });
 
     // Display the final results.
-    const passed = results.filter(result => result.Result === "PASS").length;
+    const passed = results.filter(
+        result => result.Result === "PASS"
+    ).length;
+
     const failed = results.length - passed;
 
     console.log(`RESULT: ${passed}/${results.length} passed`);
 
     if (failed > 0) {
-        console.error("Failed tests:", results.filter(
-            result => result.Result === "FAIL"
-        ));
+
+        console.error(
+            "Failed tests:",
+            results.filter(result => result.Result === "FAIL")
+        );
     }
 
     console.table(results);

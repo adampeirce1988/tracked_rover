@@ -36,10 +36,7 @@ extern void update_test_battery_voltage(){
             test_battery_volatge+= 0.02;
         }
         
-        // print to the console for testing only 
-        //DEBUG_PORT.print("test_battery_voltage: "); 
-        //DEBUG_PORT.print(test_battery_volatge);
-        //DEBUG_PORT.println(" v");
+
     }
 }
 
@@ -48,15 +45,3 @@ extern float get_test_battery_voltage(){
     return test_battery_volatge; 
 }
 
-
-// void  json_test(){
-
-//     low_speed_telemetry_fetch_data();
-
-//     const telemetry_data_t& data = telemetry_get_data();
-
-//     String json_test = generate_telemetry_json_string(data); 
-
-//     DEBUG_PORT.println(json_test); 
-
-// }

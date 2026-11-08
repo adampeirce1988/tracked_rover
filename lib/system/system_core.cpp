@@ -99,12 +99,9 @@ void run_core_functions(){
   server_run();
 
   /*-------------------------------------------------------------------------*
-    ** Test code only **
+    Telemetry
   *-------------------------------------------------------------------------*/
-
-  update_test_battery_voltage(); 
+ 
   run_telemetry_scheduler();
-  // websocket broadcaster test
-  //web_socket_broadcast_text("{\"type\":\"test\",\"message\":\"Broadcast working\"}");
 
 }

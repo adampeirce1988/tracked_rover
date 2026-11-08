@@ -20,21 +20,10 @@ PlatformIO command to Load littleFS files: pio run -t uploadfs
 [FIXED]:
 
 
-- [ ] Confirm the broadcast function handles disconnected clients cleanly.
-4. Browser integration
-- [ ] Update websocket.js to recognise both telemetry message types.
-- [ ] Merge incoming values into VehicleTelemetry.
-- [ ] Verify existing UI subscriptions continue working.
-5. Final checks
-- [ ] Test reconnect behaviour.
-- [ ] Check update frequencies.
-- [ ] Check telemetry while changing vehicle FSM states.
-
 [TODO]: 
-- Remove test functions from from vehicle_state_machine.cpp
+- run browser testing via console VehicleTelemetry.runTest() to the diagnostic tab. 
 - Remove test code once battery mornitoring capabillitys are created 
 - Add functionalily to disable the update buttons if the vehicle is not in update. 
-- Intergrate scheduler with the exsisting UI inc some dummy test values. 
 - add basic controler display ready to send the values via json 
 - impliment a file system uploader 
 - impliment a diagnostic tab and allow test to be completed and accessed

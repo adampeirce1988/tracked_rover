@@ -21,53 +21,43 @@ document.addEventListener("DOMContentLoaded", function() {
         return; 
     }
 
-    console.log("UIScheduler module avaliable")
-
     // Check that the shared Telemetry module is avaliable 
     if(!window.VehicleTelemetry){
-        console.error("VehicleTelemetry module is no avaiable");
+        console.error("VehicleTelemetry module is not avaiable");
         return;
     }
 
-    console.log("vehicleTelemetry module avaliable"); 
+    console.log("UIScheduler module available");
+    console.log("VehicleTelemetry module available");
+
+    // Subscribe to incoming telemetry updates.
+    // Identify the channel from the message type and pass the data
+    // to the corresponding display updater.
+    window.VehicleTelemetry.subscribe(function(data) {
+
+        switch(data.type) {
+
+            case "ls_telemetry":
+                updateLowSpeedTelemetry(data);
+                break;
+
+            case "hs_telemetry":
+                updateHighSpeedTelemetry(data);
+                break;
+
+            default:
+                console.warn("Unknown telemetry message type:", data.type);
+                break;
+        }
+    });
+
+
+    // Start the shared UI Scheduler 
+    window.UIScheduler.start(); 
 
     // Conect to the telemetrey module 
     window.VehicleTelemetry.connect();
 
-    // Register vehicle status updates with the UI scheduler.
-    window.UIScheduler.subscribe(function() {
-
-        const telemetrey = window.VehicleTelemetry.getAllValues();
-
-        if(telemetrey.type !== "status") {
-            console.error("Telemetry.type missatched:", error); 
-            return; 
-        }
-
-        document.querySelectorAll("vehicle-state-value").forEach(function(element){
-            element.textContent = telemetrey.vehicle_state; 
-        })
-
-    });
-    
-    // Start the shared UI Scheduler 
-    window.UIScheduler.start(); 
-
-    // subscribe to the incomming telemetry updates. 
-    window.VehicleTelemetry.subscribe(function(data){
-
-        // only update the vehicle stste  when a status message arrived 
-        if(data.type !== "status"){
-            return; 
-        }
-
-        const vehicleStateElement = document.querySelectorAll(".vehicle-state-value");
-
-        vehicleStateElement.forEach(function(element) {
-            element.textContent = data.vehicle_state;
-        });
-    
-    });
 
  });
 
@@ -100,7 +90,8 @@ function initMainMenu(container) {
         menuContent.style.display = isOpen ? "none" : "block";
         menuButton.setAttribute("aria-expanded", String(!isOpen));
 
-        console.log("main menue: ", isOpen ? "Open" : "Closed");
+        console.log("main menue: ", isOpen ? "Closed" : "Open");
+
     });
 
 
@@ -116,7 +107,7 @@ function initMainMenu(container) {
  *=============================================================================*/
 
 // Initialise the vehicle status menu.
-function initStatussMenu(container) {
+function initStatusMenu(container) {
 
     // Connect HTML elements.
     const statusButton = container.querySelector(".vehicle-status-button");
@@ -126,7 +117,7 @@ function initStatussMenu(container) {
     // Validate required HTML elements.
     if (!statusButton || !statusDropdown) {
 
-        console.log("Unable to fund statusButton or statusDropdown");
+        console.log("Unable to find statusButton or statusDropdown");
         return;
     }
 
@@ -139,7 +130,7 @@ function initStatussMenu(container) {
         statusDropdown.style.display = isOpen ? "none" : "block";
         statusButton.setAttribute("aria-expanded", String(!isOpen));
 
-        console.log("vehiceStatus menu: ", isOpen ? "closed" : "Open");
+        console.log("vehice Status menu: ", isOpen ? "closed" : "Open");
     });
 }
 
@@ -207,7 +198,7 @@ function loadMainMenu() {
                 mainMenuContainer.innerHTML = html;
 
                 initMainMenu(mainMenuContainer);
-                initStatussMenu(mainMenuContainer);
+                initStatusMenu(mainMenuContainer);
                 updatePageTitle(); 
 
                 console.log("Main menu loaded");
@@ -220,3 +211,69 @@ function loadMainMenu() {
 }
 
 
+/*=============================================================================*
+ * Telemetry Display Updates
+ *=============================================================================*/
+
+// Update values received through the low-speed telemetry channel.
+// This channel contains data that changes relatively slowly, such as
+// vehicle status, battery voltage and Wi-Fi information.
+function updateLowSpeedTelemetry(data) {
+
+    // Update vehicle status.
+    document.querySelectorAll(".vehicle-state-value").forEach(function(element) {
+        element.textContent = data.vehicle_status ?? "--";
+    });
+
+    // Update battery voltage
+    document.querySelectorAll(".vehicle-battery-value").forEach(function(element){
+        element.textContent = data.battery_voltage != null        
+        ? `${data.battery_voltage.toFixed(2)} v`: "--";
+    }); 
+
+    // Update WiFi opperation mode
+    document.querySelectorAll(".wifi-mode-value").forEach(function(element) {
+        element.textContent = data.wifi_mode ?? "--"; 
+    });
+
+    // Update wifi strength
+    document.querySelectorAll(".wifi-signal-strength").forEach(function(element){
+        element.textContent = data.wifi_signal != null
+        ? `${data.wifi_signal} dBm` : "--";
+    });
+
+
+}
+
+
+// Update values received through the high-speed telemetry channel.
+// This channel contains rapidly changing sensor data, such as
+// accelerometer and gyroscope readings.
+function updateHighSpeedTelemetry(data) {
+
+    // Update accelerometer readings.
+    document.querySelectorAll(".acc-x-value").forEach(function(element) {
+        element.textContent = data.acc_x ?? "--";
+    });
+
+    document.querySelectorAll(".acc-y-value").forEach(function(element) {
+        element.textContent = data.acc_y ?? "--";
+    });
+
+    document.querySelectorAll(".acc-z-value").forEach(function(element) {
+        element.textContent = data.acc_z ?? "--";
+    });
+
+    // Update gyroscope readings.
+    document.querySelectorAll(".gyro-x-value").forEach(function(element) {
+        element.textContent = data.gyro_x ?? "--";
+    });
+
+    document.querySelectorAll(".gyro-y-value").forEach(function(element) {
+        element.textContent = data.gyro_y ?? "--";
+    });
+
+    document.querySelectorAll(".gyro-z-value").forEach(function(element) {
+        element.textContent = data.gyro_z ?? "--";
+    });
+}
