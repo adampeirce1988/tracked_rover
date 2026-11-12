@@ -9,6 +9,7 @@
     <title>ESP-Nexus</title>
 
     <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/css/data_display.css">
 
 </head>
 
@@ -22,18 +23,131 @@
     
     <span class="page-name" hidden>Sensors data</span>
     
-    <P>Data-display under construction!</P>
-
-
-
-
+  
     <!--=========================================================================*
-     * page content 
+     * Parameter List 
      *=========================================================================-->
     
+    <main class="data-display-container">
+        <section class="parameter-panle">
 
+            <div class="panle-header"> 
+                <h2>Vehicle Parameter</h2>
+                <span class="parameter-count"> 0/10 selected</span>
+            </div>
+
+            <!-- IMU -->
+            <div class="paramer-group"> 
+                <h3>Accelorometer</h3>
+
+                <div class="parameter-row">
+                    <label>
+                        <input type="checkbox">
+                        <span>Acceleration X</span> 
+                    </label>
+                    <span class="parameter-value">0.12 m/s²</span>
+                </div>
+
+                <div class="parameter-row"> 
+                    <label> 
+                        <input type="checkbox" >
+                        <span>Acceleration Y</span>  
+                    </label>
+                    <span class="parameter-value">-0.48 m/s²</span> 
+                </div>
+
+                <div class="parameter-row"> 
+                    
+                    <label>
+                        <input type="checkbox" >
+                        <span> Acceleration Z</span>
+                    </label>
+                    <span class="parameter-value">9.72 m/s²</span>
+                </div>
+
+            </div>
+
+            <div class="paramer-group"> 
+                <h3>Gyroscope</h3>
+
+                <div class="parameter-row"> 
+                    <label> 
+                        <input type="checkbox" > 
+                        <span>Angular velocity X</span>
+                    </label>
+                    <span class="parameter-value">12.5 °/s</span>
+                </div>
+
+                <div class="parameter-row"> 
+                    <label> 
+                        <input type="checkbox" > 
+                        <span>Angular velocity Y</span>
+                    </label>
+                    <sapn class="parameter-value">-8.3 °/s</sapn>
+                </div>
+
+                <div class="parameter-row"> 
+                    <label> 
+                        <input type="checkbox" > 
+                        <span>Angular velocity Z</span>
+                    </label>
+                    <sapn class="parameter-value">3.27 °/s</sapn>
+                </div>
+
+            </div>
+
+            <!-- Vehicle-->
+            <div class="paramer-group"> 
+                <h3>Vehicle</h3>
+
+                <div class="parameter-row"> 
+                    <label> 
+                        <input type="checkbox" > 
+                        <span>Battery voltage</span>
+                    </label>
+                    <span class="parameter-value">21.16v</span>
+                </div>
+
+                <div class="parameter-row"> 
+                    <label> 
+                        <input type="checkbox" > 
+                        <span>Vehicle state</span>
+                    </label>
+                    <span class="parameter-value">DIAGNOSTICS</span>
+                </div>
+
+            </div>
+
+            <!-- Network -->
+            <div class="paramer-group">
+                <h3>Network</h3>
+
+                <div class="parameter-row"> 
+                    <label>
+                        <input type="checkbox" > 
+                        <span>Wi-Fi signal</span>
+                    </label>
+                    <span class="parameter-value"> -56 dBm </span>
+                </div>
+
+                <div class="parameter-row" > 
+                    <label>
+                        <input type="checkbox" > 
+                        <span>Wi-Fi mode</span>
+                    </label>
+                    <span class="parameter-value">STA</span>
+                </div>
+
+            </div>
+            
+        </section>
+
+    </main>
+
+    
     <script src="/scripts.js"></script>
     <script src="/javascript/websocket.js"></script>
     <script src="/javascript/scheduler.js"></script>
-    <script src="/data_display.js"></script>
+    <script src="/javascript/data_display.js"></script>
+  
 </body>

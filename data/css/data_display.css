@@ -1,0 +1,185 @@
+
+/*=============================================================================*
+ * Data Display
+ *=============================================================================*/
+
+/* Main Layout */
+
+.data-display-container {
+    width: min(100% - 2rem, 900px);
+    margin: 1.5rem auto;
+}
+
+/* Parameter Panel */
+
+.parameter-panel {
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* Panel Header */
+
+.parameter-panel .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #111827;
+    border-bottom: 1px solid #374151;
+}
+
+.parameter-panel .panel-header h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #f9fafb;
+}
+
+.parameter-count {
+    font-size: 0.8rem;
+    color: #9ca3af;
+    white-space: nowrap;
+}
+
+/* Parameter Groups */
+
+.parameter-group {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #374151;
+}
+
+.parameter-group:last-child {
+    border-bottom: none;
+}
+
+.parameter-group h3 {
+    margin: 0 0 0.5rem;
+    padding-bottom: 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #4ade80;
+}
+
+/* Parameter Rows */
+
+.parameter-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    min-height: 42px;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid #374151;
+}
+
+.parameter-row:last-child {
+    border-bottom: none;
+}
+
+.parameter-row label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+    color: #f9fafb;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+/* Parameter Checkboxes */
+
+.parameter-row input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+    margin: 0;
+    accent-color: #4ade80;
+    flex-shrink: 0;
+}
+
+/* Parameter Values */
+
+.parameter-value {
+    color: #d1d5db;
+    font-family: monospace;
+    font-size: 0.9rem;
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* Mobile Layout */
+
+@media (max-width: 480px) {
+
+    .data-display-container {
+        width: calc(100% - 1rem);
+        margin: 1rem auto;
+    }
+
+    .parameter-panel .panel-header {
+        padding: 0.85rem;
+    }
+
+    .parameter-group {
+        padding: 0.65rem 0.85rem;
+    }
+
+    .parameter-row label,
+    .parameter-value {
+        font-size: 0.82rem;
+    }
+
+}
+
+/* Parameter Checkboxes */
+
+.parameter-row input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+
+    width: 20px;
+    height: 20px;
+    margin: 0;
+
+    background: #000000;
+    border: 1px solid #6b7280;
+    border-radius: 5px;
+
+    display: grid;
+    place-content: center;
+
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+/* Checked State */
+
+.parameter-row input[type="checkbox"]:checked {
+    background: #000000;
+    border-color: #ffffff;
+}
+
+/* Tick */
+
+.parameter-row input[type="checkbox"]:checked::before {
+    content: "✓";
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: bold;
+    line-height: 1;
+}
+
+/* Hover State */
+
+.parameter-row input[type="checkbox"]:hover {
+    border-color: #ffffff;
+}
+
+/* Keyboard Focus */
+
+.parameter-row input[type="checkbox"]:focus-visible {
+    outline: 2px solid #4ade80;
+    outline-offset: 2px;
+}

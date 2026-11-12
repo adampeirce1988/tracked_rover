@@ -35,6 +35,9 @@ static void register_setting_js_route();
 static void register_diagnostics_js_route();
 static void register_main_menu_route();
 
+// css specefic files
+static void register_data_display_css_route();
+
 // js specific files
 static void register_websocket_js_route();
 static void register_scheduler_js_route();
@@ -71,6 +74,7 @@ void server_init(){
 
     // static files
     register_css_route();
+    register_data_display_css_route();
 
     register_js_route();
     register_setting_js_route();
@@ -263,6 +267,22 @@ static void register_css_route(){
 
 }
 
+static void register_data_display_css_route(){
+
+    server.on("/css/data_display.css", HTTP_GET, [](){
+        File file = LittleFS.open("/css/data_display.css", "r");
+
+        if(!file){
+            server.send(500, "text/plain", "failed to open data_display.css"); 
+            return; 
+        }
+
+        server.streamFile(file, "text/css");
+        
+        file.close();
+    });
+}
+
 //--------------------------*
 // javascript file
 //--------------------------*
@@ -340,13 +360,13 @@ static void register_controler_js_route(){
 }
 
 static void register_data_display_js_route(){
-    server.on("/data_display.js", HTTP_GET, [](){
+    server.on("/javascript/data_display.js", HTTP_GET, [](){
 
-        File file = LittleFS.open("/data_display.js", "r");
+        File file = LittleFS.open("/javascript/data_display.js", "r");
 
         if(!file){
             server.send(500, "text/plain", "Failed to load data_display.js");
-            DEBUG_PORT.println("/data_display.js failed to load");
+            DEBUG_PORT.println("/javascript/data_display.js failed to load");
             return;
         }
 
